@@ -72,6 +72,11 @@ a camada de instrução — o que o modelo lê para executar a skill.
 - ~~**Descrição nunca otimizada para triggering.**~~ Deixou de ser pendência
   solta: virou o Grupo 20, com dependência declarada no Grupo 18 (que é quem
   fixa a fronteira de escopo a ser medida).
+- **A `description` do frontmatter anuncia lockfile como gerado**, e o Grupo
+  16 o moveu para remediação. Não foi corrigido no 18 de propósito: mexer na
+  description muda o disparo, e o Grupo 20 é quem mede isso. Corrigir lá,
+  antes de rodar o otimizador — senão ele otimiza um texto que já se sabe
+  errado.
 - **O nível D não exercita o ramo mais complexo da regra de honestidade**:
   os subagentes recebem instrução de RECUSAR remediações que instalem deps,
   então "usuário aceita sensores → DoD deixa de ser vazia → enforcement é

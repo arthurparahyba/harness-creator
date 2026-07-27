@@ -722,6 +722,65 @@ def test_criacao_de_branch_funciona_em_repo_sem_remoto() -> None:
     assert "git remote" in texto, "git pull sem guarda para repo sem remoto"
 
 
+def test_triagem_de_escopo_nao_e_contradita_pelo_resto_do_corpo() -> None:
+    """O passo 0 decide entre fluxo completo e edição pontual. Uma segunda
+    instrução mandando começar pela FASE 1 sem condição sobrescreve essa
+    decisão para quem lê de cima para baixo — e o pedido de uma linha volta a
+    receber seis fases."""
+    corpo = SKILL.joinpath("SKILL.md").read_text().split("---", 2)[-1]
+    incondicionais = [
+        ln
+        for ln in corpo.splitlines()
+        if re.search(r"comece (imediatamente|pela FASE 1)", ln, re.I)
+    ]
+    assert incondicionais == [], f"ordem incondicional de iniciar a FASE 1: {incondicionais}"
+    assert "passo 0" in corpo.lower(), "triagem de escopo deixou de ser passo do fluxo"
+
+
+def test_roteiro_das_fases_aparece_uma_vez_so() -> None:
+    """O roteiro estava em três lugares (EXECUÇÃO IMEDIATA, regras e Roteiro),
+    e "leia só a fase atual" em dois. Cada cópia é uma que pode divergir, e
+    todas disputam o contexto da mesma invocação."""
+    corpo = SKILL.joinpath("SKILL.md").read_text().split("---", 2)[-1]
+    # Entrada de roteiro é uma linha numerada que abre com o link da fase. Uma
+    # regra que aponta para a fase no meio da frase é ponteiro, não roteiro.
+    entradas = re.findall(r"^\d+\. \[FASE (\d)", corpo, re.M)
+    assert entradas == list("123456"), f"roteiro das fases duplicado ou incompleto: {entradas}"
+
+
+def test_toda_regra_inviolavel_traz_o_modo_de_falhar() -> None:
+    """Uma regra sem o porquê não é aplicável fora do caso que a gerou: o
+    modelo não tem como julgar a situação que ela não previu, e o resultado é
+    obediência literal onde era preciso critério."""
+    corpo = SKILL.joinpath("SKILL.md").read_text().split("---", 2)[-1]
+    bloco = corpo.split("## Regras invioláveis")[1].split("\n## ")[0]
+    regras = re.split(r"\n(?=\d+\. )", bloco.strip())[1:]
+    curtas = [r.split("\n")[0][:50] for r in regras if len(r.split()) < 20]
+    assert curtas == [], f"regra sem modo de falhar declarado: {curtas}"
+
+
+def test_skill_md_nao_contradiz_o_que_as_fases_dizem() -> None:
+    """A SKILL.md resume o que as fases detalham, e resumo desatualizado é uma
+    segunda fonte: o modelo lê o corpo em toda invocação e a fase só na hora.
+    Estes dois divergiram assim que o Grupo 16 corrigiu a FASE 5."""
+    corpo = SKILL.joinpath("SKILL.md").read_text().split("---", 2)[-1]
+    assert "DoD identica" not in corpo, (
+        "SKILL.md ainda promete DoD idêntica; a FASE 5 cobra equivalência"
+    )
+    camada = corpo.split("**Enforcement**")[1].split("\n\n")[0]
+    assert "lockfile" not in camada.lower(), (
+        "lockfile de volta na camada de enforcement; ele é remediação do grupo B"
+    )
+
+
+def test_fronteira_de_escopo_tem_exemplos() -> None:
+    """Critério em prosa é onde a skill mais erra de tamanho. Exemplos de
+    pedido→ação resolvem o caso ambíguo que a regra não alcança."""
+    corpo = SKILL.joinpath("SKILL.md").read_text().split("---", 2)[-1]
+    assert corpo.count("Pedido:") >= 2, "exemplos da fronteira de escopo sumiram"
+    assert "Acao:" in corpo
+
+
 def test_plano_de_remediacao_nao_fala_em_pontuacao() -> None:
     """O placar é de uma ferramenta externa que o usuário não roda. A FASE 4 é
     onde o plano é redigido, então é lá que a proibição do catálogo precisa

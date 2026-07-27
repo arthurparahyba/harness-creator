@@ -201,27 +201,28 @@ Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
      já foi destravada no 11.2, e a `description` já é o ponto mais forte do
      arquivo — só nunca foi medida, que é o Grupo 20. -->
 
-## Grupo 18 - Contradições e redundância na SKILL.md (depende: Grupo 16)
+## Grupo 18 - Contradições e redundância na SKILL.md ✅
 <!-- O 11.1 criou a fronteira "fluxo completo × edição pontual" mas não
      revisou as duas seções que mandam começar pela FASE 1 sem condição
      nenhuma. Para quem lê de cima para baixo, elas sobrescrevem a fronteira:
      a instrução mais específica vem primeiro e a mais genérica vem depois. -->
-- [ ] 18.1 A triagem de escopo vira passo 0 explícito do fluxo. "EXECUÇÃO
-      IMEDIATA" e a regra 1 deixam de mandar começar pela FASE 1 sem condição
-      e passam a mandar não perguntar QUAL DOS DOIS caminhos seguir — com
-      teste que impede a contradição de voltar
-- [ ] 18.2 O roteiro de 6 fases aparece três vezes (EXECUÇÃO IMEDIATA, regras
-      1/2/5, Roteiro das fases) e "leia só a fase atual" duas vezes com a
-      mesma justificativa: ~25 das 169 linhas repetindo dois fatos. Uma seção
-      só, com os links
-- [ ] 18.3 "Regras invioláveis" promete que cada regra existe porque a falha
-      aconteceu, mas 1, 2, 6, 7 e 10 não dizem qual foi. Cada uma ganha o modo
-      de falhar em uma linha ou sai; 6 e 8 duplicam FASE 2 e FASE 1 e passam a
-      apontar para a fase, em vez de serem a segunda fonte que diverge
-- [ ] 18.4 Par de exemplos pedido-a → ação na fronteira de escopo. É o ponto
-      onde a skill mais erra de tamanho, e dois exemplos de duas linhas
-      resolvem melhor que um critério em prosa
-Verificação: `pytest -q && ruff check . && mypy`
+- [x] 18.1 "EXECUÇÃO IMEDIATA" e "Escopo" viraram uma seção só, com a triagem
+      como passo 0 explícito. A ordem incondicional de começar pela FASE 1
+      sumiu; a regra 1 agora manda não perguntar QUAL caminho seguir
+- [x] 18.2 O roteiro de 6 fases estava em três lugares e "leia só a fase
+      atual" em dois. Sobrou uma cópia de cada. A seção "Arquivos gerados"
+      também duplicava a de Referências e foi absorvida por ela
+- [x] 18.3 As 10 regras (eram 12) trazem cada uma o modo de falhar; as que
+      duplicavam FASE 1/FASE 2 (credencial, remediação) passam a apontar para
+      a fase, com teste que reprova regra curta demais para explicar o porquê
+- [x] 18.4 Três exemplos pedido → ação na fronteira de escopo, incluindo o
+      caso de diagnóstico, que não é nem fluxo nem edição de conteúdo
+- [x] 18.5 (não planejado) A SKILL.md contradizia a FASE 5 recém-corrigida em
+      dois pontos — prometia "DoD idêntica" e listava lockfile como
+      enforcement gerado. Teste novo trava os dois
+Verificação: `pytest -q && ruff check . && mypy` — 269 testes (+5).
+SKILL.md: 169 → 181 linhas. Cresceu de propósito: saíram ~30 linhas de
+repetição e entraram modos de falhar e exemplos, que é conteúdo novo.
 
 ## Grupo 19 - FASE 5 executável em vez de checklist (depende: Grupo 16)
 <!-- Achado nº1 desta análise. Os 19 itens da FASE 5 são quase todos
