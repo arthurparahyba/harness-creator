@@ -56,7 +56,6 @@ onde vive, o plano segue este formato:
   pendência, NÃO conserte agora.
 - MUST NOT: <restrição 1 — derivada de convenção real do repo>
 - MUST NOT: <restrição 2>
-- MUST NOT: alterar migrations já aplicadas — criar nova
 - MUST NOT: tocar em arquivos fora do escopo do grupo atual
 
 ## Definition of Done

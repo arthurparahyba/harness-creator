@@ -1,0 +1,61 @@
+{
+  "skill_name": "harness-creator",
+  "nota": "Nivel D da avaliacao: mede a skill EXECUTADA por um modelo. Os niveis A/B/C estao em eval/README.md e medem o repositorio alvo. Ver evals/README.md.",
+  "evals": [
+    {
+      "id": "node",
+      "fixture": "tests/fixtures/node",
+      "prompt": "acabei de entrar nesse projeto e vamos usar o Claude Code nele pra valer. dá uma olhada e deixa o repo preparado pra isso",
+      "expected_output": "Harness completo para ecossistema Node/TS: DoD com os scripts reais do package.json, ponte CLAUDE.md nos dois niveis, hooks nos tres agentes, pre-commit e CI gerados (o repo tem sensores).",
+      "assertions": ["universais", "node"]
+    },
+    {
+      "id": "dotnet",
+      "fixture": "tests/fixtures/dotnet",
+      "prompt": "preciso configurar esse repo aqui pra trabalhar com agente de IA. é um serviço .NET que a gente vai começar a mexer bastante agora",
+      "expected_output": "Harness para ecossistema .NET: DoD com comandos dotnet apontando para Catalogo.sln, e NENHUM artefato estranho a stack (regra inviolavel 10).",
+      "assertions": ["universais", "dotnet"]
+    },
+    {
+      "id": "sem-sensores",
+      "fixture": "tests/fixtures/sem-sensores",
+      "prompt": "quero deixar esse projeto pronto pra uma IA trabalhar nele com segurança",
+      "expected_output": "Regra de honestidade: repo Python sem test runner nem linter. A DoD fica vazia, o pre-commit e o workflow de CI NAO sao gerados, e o Plano de Remediacao propoe sensores citando as funcoes puras pelo nome e o stub para as deps de sistema do entrypoint.",
+      "assertions": ["universais", "sem-sensores"]
+    }
+  ],
+  "assertions": {
+    "universais": [
+      "U1: AGENTS.md existe na raiz",
+      "U2: CLAUDE.md na raiz importa @AGENTS.md fora de bloco de codigo",
+      "U3: existe AGENTS.md com escopo fora da raiz, com CLAUDE.md irmao",
+      "U4: .claude/hooks/gate-destructive.sh existe, executavel e sem CRLF",
+      "U5: gate devolve exit 2 para comando destrutivo",
+      "U6: gate devolve exit 0 para comando seguro",
+      "U7: .claude/settings.json parseia e tem wrapper hooks na raiz",
+      "U8: .devin/hooks.v1.json e .cursor/hooks.json parseiam",
+      "U9: .claude/harness.json parseia e todo caminho listado existe no disco",
+      "U10: nenhum marcador preenchivel sobrou em arquivo gerado",
+      "U11: .claude/commands/dod.md existe",
+      "U12: init.sh existe e e executavel",
+      "U13: SESSION_STATE.md existe"
+    ],
+    "node": [
+      "N1: a DoD usa os scripts reais do package.json",
+      "N2: o format-on-edit gerado nao usa glob com brace expansion",
+      "N3: .pre-commit-config.yaml foi gerado (o repo tem sensores)"
+    ],
+    "dotnet": [
+      "D1: NAO gerou package.json em repo .NET (regra inviolavel 10)",
+      "D2: o .sln real aparece nos comandos, sem marcador sobrando",
+      "D3: a DoD usa comandos dotnet"
+    ],
+    "sem-sensores": [
+      "S1: NAO gerou .pre-commit-config.yaml (DoD vazia, regra de honestidade)",
+      "S2: NAO gerou workflow de CI",
+      "S3: nao inventou comando de teste — a DoD declara a lacuna",
+      "S4: o Plano de Remediacao cita funcao pura do repo pelo nome",
+      "S5: o Plano de Remediacao trata a dep de sistema do entrypoint (stub/conftest)"
+    ]
+  }
+}

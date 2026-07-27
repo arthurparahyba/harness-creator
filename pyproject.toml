@@ -15,12 +15,16 @@ norecursedirs = ["tests/fixtures"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+# Fixtures são repositórios de entrada, não código deste projeto: a de
+# `sem-sensores` existe justamente para representar um repo sem linter.
+# pytest (`norecursedirs`) e mypy (`exclude`) já as ignoram.
+exclude = ["tests/fixtures"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 
 [tool.mypy]
-files = ["tests"]
+files = ["tests", "evals"]
 strict = true
 mypy_path = "tests"
 exclude = "tests/fixtures/"

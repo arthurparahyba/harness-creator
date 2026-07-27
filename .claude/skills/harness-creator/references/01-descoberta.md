@@ -11,7 +11,19 @@ Toda informação deve vir de evidência em arquivos do repo — cite o
 arquivo-fonte de cada item. Se não encontrar evidência, escreva
 "NÃO ENCONTRADO". Nunca presuma nem preencha de memória.
 
-## Passo 0 — O que esta fase produz
+## Passo 0 — Existe `.claude/harness.json`?
+
+Antes de investigar qualquer outra coisa, verifique se o repositório já
+recebeu um harness desta skill. Se `.claude/harness.json` existir, a
+descoberta é **reduzida** e a apresentação da FASE 4 muda: siga
+[atualizacao.md](atualizacao.md) e volte para cá apenas para os itens que
+ela mandar reinvestigar.
+
+Descobrir isso no fim, e não no começo, é o que faz a skill reinvestigar do
+zero um repositório que já respondeu tudo — e reapresentar para aprovação
+vinte arquivos dos quais dezoito não mudaram.
+
+## Passo 0.1 — O que esta fase produz
 
 Dois artefatos, e os dois saem **exclusivamente** do que você ler nos
 arquivos do repositório: o Relatório de Descoberta e o Plano de

@@ -12,20 +12,24 @@
 #   Cursor       .cursor/hooks.json         afterFileEdit
 # O Cursor manda `file_path` no topo do JSON, os outros dois em `tool_input`.
 #
-# PLACEHOLDER: <formatter_command> deve ser substituido pela skill com o
-# comando de formatacao da linguagem detectada, ex:
-#   Python:  black --quiet
+# Os marcadores a preencher estao SO no corpo do script, abaixo — este
+# cabecalho nao contem nenhum, de proposito: um mesmo marcador aparecendo em
+# comentario e em corpo faz a substituicao corromper o arquivo, e ainda faz
+# o item 6 da FASE 5 acusar marcador sobrevivente numa geracao correta.
+# Instrucoes de preenchimento: references/02-preenchimento-templates.md.
+#
+# Comando de formatacao por linguagem:
+#   Python:  ruff format          (ver references/ecossistemas.md)
 #   JS/TS:   prettier --write
 #   Go:      gofmt -w
 #   Rust:    rustfmt
 #   Ruby:    rubocop -A
-#   .NET:    dotnet format <sln> --include
+#   .NET:    dotnet format SOLUCAO.sln --include
 #   Java:    google-java-format -i
 #
-# PLACEHOLDER: <file_glob> deve ser substituido pelo padrao de arquivos
-# da linguagem. ATENCAO: isto vira um padrao de `case`, que NAO faz brace
-# expansion — `*.{js,ts}` nunca casa com nada e o hook deixa de formatar em
-# silencio. Para varias extensoes, use alternancia com `|`:
+# Padrao de arquivos por linguagem. ATENCAO: isto vira um padrao de `case`,
+# que NAO faz brace expansion — `*.{js,ts}` nunca casa com nada e o hook
+# deixa de formatar em silencio. Para varias extensoes, use alternancia `|`:
 #   Python:  *.py
 #   JS/TS:   *.js|*.ts|*.jsx|*.tsx|*.mjs|*.cjs
 #   Angular: *.ts|*.html|*.scss
@@ -114,6 +118,12 @@ if [ -z "$FILE_PATH" ]; then
 fi
 
 # So formata arquivos que casam com o padrao da linguagem do projeto.
+#
+# Sem formatter detectado, a skill preenche o binario e o comando com um nome
+# inexistente (`formatter-nao-definido`): o `command -v` falha e o hook vira
+# um no-op. NUNCA preencher com `# TODO`, porque o `#` comenta o resto da
+# linha do `if` — inclusive o `then` — e o script inteiro morre com erro de
+# sintaxe a cada edicao de arquivo, sem que nada acuse.
 case "$FILE_PATH" in
   <file_glob>)
     if command -v <formatter_bin> >/dev/null 2>&1 && [ -f "$FILE_PATH" ]; then

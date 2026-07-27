@@ -353,6 +353,28 @@ def test_frontmatter_nao_tem_campo_inerte() -> None:
     assert not presentes, f"campo inerte de volta no frontmatter: {sorted(presentes)}"
 
 
+def test_corpo_nao_repete_a_lista_de_gatilhos_da_description() -> None:
+    """Triggering se decide pela `description`; o corpo so carrega DEPOIS.
+
+    A secao "Quando ativar esta skill" repetia a description quase palavra
+    por palavra — nove linhas que nao influenciam disparo nenhum e que
+    disputam contexto com o roteiro das fases, que e o que o agente
+    realmente precisa ter em maos depois que a skill ja disparou.
+    """
+    corpo = SKILL.joinpath("SKILL.md").read_text().split("---", 2)[-1]
+    assert "## Quando ativar" not in corpo, (
+        "lista de gatilhos de volta no corpo: ela pertence a `description`"
+    )
+
+
+def test_skill_distingue_fluxo_completo_de_edicao_pontual() -> None:
+    """Sem essa fronteira, "acrescente uma linha no AGENTS.md" recebe seis
+    fases e uma pausa de aprovacao — um ritual que o usuario nao pediu e que
+    gasta a sessao dele."""
+    corpo = SKILL.joinpath("SKILL.md").read_text().split("---", 2)[-1]
+    assert "edicao pontual" in corpo, "fronteira de escopo perdida na SKILL.md"
+
+
 def test_regras_inviolaveis_estao_no_corpo() -> None:
     """As regras saíram do frontmatter para o corpo — não podem ter sumido."""
     corpo = SKILL.joinpath("SKILL.md").read_text().split("---", 2)[-1]
@@ -485,6 +507,131 @@ def test_existe_exatamente_uma_pausa_no_fluxo() -> None:
     faz o agente parar quatro vezes a mais do que o projeto pretende."""
     com_pausa = sorted(p.name for p in REFERENCES.glob("*.md") if "PAUSA" in p.read_text())
     assert com_pausa == ["04-saida-aprovacao.md"], f"pausas em: {com_pausa}"
+
+
+def test_marcador_preenchivel_nunca_aparece_em_comentario_de_template() -> None:
+    """Marcador em comentário E em corpo é uma contradição sem saída.
+
+    A regra 3 manda transcrever VERBATIM, e o item 6 da FASE 5 proíbe o
+    marcador de sobrar. Com o marcador dentro do cabeçalho didático, cumprir
+    uma quebra a outra — e a substituição ainda grava a instrução falsa
+    "PLACEHOLDER: prettier --write deve ser substituido pela skill" no repo
+    do usuário. Na iteração 1 do nível D, seis agentes bateram nisso e
+    metade apagou o cabeçalho, metade o preservou: a geração passou a
+    depender de qual saída o modelo escolheu.
+
+    O `ci-workflow.yml` já se defendia disso; a defesa não tinha sido
+    aplicada aos demais templates.
+    """
+    culpados = []
+    for p in RESOURCES.rglob("*"):
+        if not p.is_file() or b"\0" in p.read_bytes()[:8192]:
+            continue
+        # Em Markdown `#` é título, não comentário: o marcador ali é conteúdo
+        # a substituir, não documentação. Só `<!-- -->` comenta em .md.
+        prefixos = ("<!--",) if p.suffix == ".md" else ("#", "<!--")
+        for n, linha in enumerate(p.read_text().splitlines(), 1):
+            if not linha.lstrip().startswith(prefixos):
+                continue
+            for marcador in PREENCHIVEIS:
+                if marcador in linha:
+                    culpados.append(f"{p.relative_to(RESOURCES)}:{n} {marcador}")
+    assert culpados == [], f"marcador preenchivel em comentario: {culpados}"
+
+
+def test_format_hook_sobrevive_a_ausencia_de_formatter(tmp_path: Path) -> None:
+    """Sem formatter, o hook tem de virar no-op — não morrer.
+
+    `# TODO: definir formatter` era a instrução da FASE 2, e o marcador do
+    binário fica dentro de `if command -v ... ; then`: o `#` comenta o resto
+    da linha, inclusive o `then`. O script passa a falhar com erro de
+    sintaxe a cada edição de arquivo, e nenhum item da FASE 5 acusa.
+    """
+    script, env = _preparar_format_hook(tmp_path, "*.py")
+    texto = script.read_text().replace(str(tmp_path / "formatador-falso"), "formatter-nao-definido")
+    script.write_text(texto.replace("formatador-falso", "formatter-nao-definido"))
+    alvo = tmp_path / "modulo.py"
+    alvo.write_text("x = 1\n")
+    r = subprocess.run(
+        ["bash", str(script)],
+        input=json.dumps({"tool_name": "Edit", "tool_input": {"file_path": str(alvo)}}),
+        capture_output=True,
+        text=True,
+        env=env,
+        check=False,
+    )
+    assert r.returncode == 0, f"hook sem formatter quebrou: {r.stderr.strip()[:200]}"
+    assert "syntax error" not in r.stderr, r.stderr
+    assert alvo.read_text() == "x = 1\n", "no-op deveria deixar o arquivo intacto"
+
+
+def test_fase2_proibe_todo_dentro_do_hook_de_formatacao() -> None:
+    """A instrução que causava o bug não pode voltar por descuido."""
+    fase2 = (REFERENCES / "02-preenchimento-templates.md").read_text()
+    assert "formatter-nao-definido" in fase2, "FASE 2 sem o preenchimento seguro"
+
+
+def test_template_agents_nao_traz_restricao_sem_evidencia() -> None:
+    """`MUST NOT` fora de `<restrição N>` é regra inventada em todo repo.
+
+    A de migrations vinha fixa e chegava em repositório sem banco nenhum.
+    Regra sem evidência ensina o leitor a ignorar a lista inteira.
+    """
+    # As fixas permitidas são as do PROTOCOLO, que valem em qualquer
+    # repositório porque falam do próprio jeito de trabalhar — não do domínio.
+    # A allowlist é explícita de propósito: acrescentar uma exige justificar
+    # por que ela vale para todo repo do mundo, que é a pergunta certa.
+    do_protocolo = ("fonte de trabalho ativa", "escopo do grupo atual")
+    # Bullets quebram em várias linhas, e a continuação costuma carregar
+    # justamente o trecho que identifica a regra: avaliar linha a linha
+    # acusaria a primeira metade de uma regra legítima.
+    bullets: list[str] = []
+    for ln in (RESOURCES / "AGENTS.md").read_text().splitlines():
+        if ln.strip().startswith("- "):
+            bullets.append(ln.strip())
+        elif bullets and ln.startswith("  ") and ln.strip():
+            bullets[-1] += " " + ln.strip()
+    inventadas = [
+        b
+        for b in bullets
+        if b.startswith("- MUST NOT:") and "<" not in b and not any(p in b for p in do_protocolo)
+    ]
+    assert inventadas == [], f"restrição sem evidência fixa no template: {inventadas}"
+
+
+def test_fase4_exige_conteudo_integral_no_que_destroi_trabalho_do_usuario() -> None:
+    """A FASE 4 mostra resumo do que é novo e diff do que altera arquivo do
+    usuário — a regra não pode degenerar em "resuma tudo".
+
+    Aprovar sem ler é o risco dos dois lados: o despejo de vinte arquivos
+    faz o usuário aprovar no atacado, e o resumo de um `.gitignore` sendo
+    reescrito esconde o único caso em que o erro custa trabalho dele.
+    """
+    texto = (REFERENCES / "04-saida-aprovacao.md").read_text()
+    assert "diff completo, sempre" in texto, "FASE 4 sem garantia de diff no destrutivo"
+    for destrutivo in (".gitignore", ".mcp.json", "AGENTS.md"):
+        assert destrutivo in texto, f"{destrutivo} fora da regra de apresentação"
+
+
+def test_modo_de_atualizacao_e_alcancavel_das_fases_que_o_usam() -> None:
+    """O manifesto existe desde a v2.3 e nenhuma fase o usava para atualizar.
+
+    O caminho só vale se a FASE 1 souber encurtar a descoberta e a FASE 3
+    souber que a regra de não sobrescrever não se aplica ao que a própria
+    skill gerou. Citado só na SKILL.md, o catálogo nunca é aberto na hora
+    em que decide alguma coisa.
+    """
+    for fase in ("01-descoberta.md", "03-resolucao-conflitos.md"):
+        assert "atualizacao.md" in (REFERENCES / fase).read_text(), (
+            f"{fase} não alcança o modo de atualização"
+        )
+
+
+def test_atualizacao_preserva_as_recusas_anteriores() -> None:
+    """Repropor um item recusado é a skill ignorando decisão já tomada — e
+    uma recusa não expira porque a skill mudou de versão."""
+    texto = (REFERENCES / "atualizacao.md").read_text()
+    assert "recusados" in texto and "repropor" in texto
 
 
 def test_agents_scoped_nao_carrega_o_protocolo() -> None:

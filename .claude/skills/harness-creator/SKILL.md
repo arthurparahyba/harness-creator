@@ -14,7 +14,7 @@ description: >
 license: MIT
 metadata:
   author: squad-harness
-  version: "2.3"
+  version: "2.4"
 ---
 
 # Harness Creator
@@ -27,15 +27,20 @@ por repo: stack, comandos, convencoes) com **templates de protocolo fixo**
 Resultado: duas camadas (instrucao + enforcement) gravadas no repo alvo,
 validadas e prontas para uso por agentes de IA.
 
-## Quando ativar esta skill
+## Escopo: fluxo completo ou edicao pontual
 
-Ativar **sempre** que o usuario:
-- Pedir para configurar um harness ou preparar um repo para agentes de IA
-- Pedir para criar ou melhorar um AGENTS.md
-- Mencionar harness engineering, checkpoints por grupos, WIP=1,
-  continuidade entre sessoes
-- Pedir para configurar OpenSpec com regras de execucao
-- Pedir para criar init.sh ou protocolo de sessao
+O fluxo de 6 fases existe para **gerar ou atualizar o harness**. Nem todo
+pedido que menciona `AGENTS.md` pede isso: "acrescente no AGENTS.md que
+usamos pnpm" e "prepare este repo para agentes" sao pedidos de tamanhos
+diferentes, e responder ao primeiro com seis fases e uma pausa de
+aprovacao gasta a sessao do usuario num ritual que ele nao pediu.
+
+O criterio e objetivo, para nao virar julgamento a cada invocacao: se o
+pedido **nomeia a edicao** e o arquivo alvo ja existe, faca so a edicao e
+diga em uma linha que o fluxo completo esta disponivel. Em qualquer outro
+caso — inclusive pedido vago sobre o repo estar pronto para agentes — rode
+o fluxo completo. O default e o fluxo: quem invoca esta skill sem apontar
+uma linha especifica esta pedindo o harness.
 
 ## EXECUCAO IMEDIATA (ler primeiro)
 
@@ -110,7 +115,11 @@ correspondente ja aconteceu:
 3. Templates em `resources/` sao transcritos VERBATIM: so os trechos `<>`
    mudam. Parafrasear protocolo faz cada repo receber uma regra diferente.
 4. Toda informacao da descoberta cita o arquivo-fonte. Nunca presuma.
-5. Leia SOMENTE o arquivo da fase que esta executando.
+5. Leia SOMENTE o arquivo da fase que esta executando, mais os catalogos
+   que essa fase citar por link (`ecossistemas.md`, `remediacoes.md`,
+   `atualizacao.md`). Carregar as seis fases de uma vez gasta o contexto
+   que a separacao existe para poupar; recusar o catalogo que a fase pede
+   deixa voce sem a tabela de que ela depende.
 6. Nunca copie credencial literal de config MCP — converta para `${VAR}`.
 7. Nao gere enforcement vazio: proponha os sensores que faltam e espere o sim.
 8. Toda lacuna da descoberta vira item do Plano de Remediacao, inclusive a
@@ -137,28 +146,24 @@ a separacao existe para poupar.
 
 ## 📚 Referencias
 
+- [Atualizacao de harness existente (quando ha `.claude/harness.json`)](references/atualizacao.md)
 - [Ecossistemas (comandos, lockfiles e globs por stack)](references/ecossistemas.md)
 - [Catalogo de remediacoes (o que recomendar e a quem cabe decidir)](references/remediacoes.md)
 - [Arquivos gerados (templates e destinos)](references/arquivos-gerados.md)
 - [Conceitos do protocolo (glossario)](references/conceitos-protocolo.md)
 
-## Troubleshooting Rapido
+## Diagnostico de harness ja instalado
 
-| Problema | Solucao |
-|----------|---------|
-| Skill nao comeca automaticamente | Verificar secao "EXECUCAO IMEDIATA" acima |
-| Templates preenchidos divergem da DoD | Usar OS MESMOS comandos em AGENTS.md, config.yaml, init.sh e dod.md |
-| Hooks nao detectados por scanners | Validar que `.claude/settings.json` tem wrapper `"hooks"` no nivel raiz |
-| Workflow de CI falha silenciosamente | Inspecionar `runs-on:` — nunca assumir `ubuntu-latest` em repos corporativos |
-| Formatter nao detectado | Usar `# TODO: definir formatter` e registrar como pendencia |
-| OpenSpec legado (`project.md`) | Nao gerar config.yaml por cima — avisar sobre `openspec update` |
-| Lockfile gerado nao e reconhecido | Usar nome convencional do ecossistema (`uv.lock`, `requirements.txt`, …) — nome inventado nao e instalado por ninguem |
-| Todo o contexto na raiz | Gerar `AGENTS.md` com escopo no diretorio de codigo; protocolo fica so na raiz |
-| Harness gravado mas o agente ignora o protocolo | Falta a ponte: Claude Code carrega `CLAUDE.md`, nao `AGENTS.md`. Gerar `CLAUDE.md` com `@AGENTS.md` ao lado de cada `AGENTS.md` |
-| Gate bloqueia ate `npm test` | Repo sem Python e gate que exigia Python. Os scripts atuais caem no fallback em awk — conferir se sao os desta versao |
-| Gate nao bloqueia nada no Cursor | O Cursor manda `command` no topo do JSON; ler so `tool_input` devolve vazio. Registrar em `.cursor/hooks.json` com `failClosed` |
-| Agente nunca usa `/dod` nem `executar-grupo` | O AGENTS.md nao aponta para eles: preencher `<ferramentas-do-harness>` |
-| DoD longa demais para rodar a cada grupo | Cronometrar (FASE 5) e propor a divisao rapida/completa na FASE 4 — nunca decidir sozinho |
-| Repo sem test runner/linter | Nao gerar pre-commit nem CI vazios — propor os sensores no Plano de Remediacao e aguardar o sim |
-| Harness gerado mas DoD vazia | O repo nao tem sensores — a remediacao e instala-los, nao gerar mais arquivos de harness |
-| Credencial literal em `.mcp.json` | Converter para `${VAR}` antes de copiar para a raiz e avisar para rotacionar |
+Problemas **da geracao** sao respondidos pelo arquivo da fase que os
+produz, com o motivo por extenso — nao ha atalho util para eles aqui. A
+tabela abaixo cobre o caso que nenhuma fase alcanca: alguem chega com um
+harness ja gravado que nao esta funcionando. Todos falham em silencio,
+que e o que os torna dificeis de achar sem uma lista.
+
+| Sintoma | Causa provavel |
+|---|---|
+| O agente ignora o protocolo, e o AGENTS.md esta la | Falta a ponte: o Claude Code carrega `CLAUDE.md` e nao `AGENTS.md`. Precisa de um `CLAUDE.md` com `@AGENTS.md` ao lado de CADA `AGENTS.md` |
+| O gate bloqueia ate `npm test` | Hook de versao antiga, que exigia Python para ler o JSON, em repo sem Python. Os scripts atuais caem no fallback em awk |
+| No Cursor o gate nao bloqueia nada | O Cursor manda `command` no topo do JSON; hook que le so `tool_input` recebe string vazia. Precisa de `.cursor/hooks.json` com `failClosed` |
+| O agente nunca usa `/dod` nem `executar-grupo` | `<ferramentas-do-harness>` ficou vazio: o AGENTS.md e o unico arquivo lido sempre, e sem o ponteiro nada mais e alcancavel |
+| Nenhum scanner enxerga os hooks | `.claude/settings.json` sem o wrapper `"hooks"` no nivel raiz |

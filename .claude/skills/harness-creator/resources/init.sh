@@ -7,7 +7,7 @@ set -e
 echo "=== [1/4] Dependências ==="
 # npm ci                      # Node
 # pip install -r requirements.txt --quiet   # Python
-# dotnet restore <sln>        # .NET
+# dotnet restore SOLUCAO.sln        # .NET
 # mvn install -DskipTests     # Java/Maven
 # ./gradlew build -x test     # Java/Gradle
 # go mod download             # Go
@@ -26,7 +26,7 @@ echo "=== [3/4] Baseline de testes (estado REAL antes de trabalhar) ==="
 # Não pare no primeiro teste falho: o baseline precisa ser completo.
 # npm test                    # Node
 # pytest                      # Python
-# dotnet test <sln>           # .NET
+# dotnet test SOLUCAO.sln           # .NET
 # mvn test                     # Java/Maven
 # ./gradlew test               # Java/Gradle
 # go test ./...               # Go

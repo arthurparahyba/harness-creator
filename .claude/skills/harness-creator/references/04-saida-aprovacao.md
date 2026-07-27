@@ -9,11 +9,34 @@ aguardar aprovação explícita antes de gravar.
 ## Ordem de apresentação
 
 1. O Relatório de Descoberta (com fontes)
-2. Os arquivos propostos (conteúdo completo), agrupados por camada:
+2. Os arquivos propostos, agrupados por camada:
    - Camada de instrução (AGENTS.md raiz, AGENTS.md com escopo, skill
      `executar-grupo`, init.sh, SESSION_STATE.md, README.md, etc.)
    - Camada de enforcement (hooks, pre-commit, /dod, workflow de CI,
      lockfile, .mcp.json, .editorconfig, .gitignore append, subagente)
+
+   **Quanto mostrar de cada um depende do risco de aprovar sem ler.** São
+   perto de vinte artefatos: despejar o conteúdo integral dos vinte produz
+   uma parede de texto que ninguém revisa, e aprovação que ninguém leu não
+   é aprovação — é a pausa virando formalidade. Pior, gasta o contexto
+   justamente antes da fase que grava.
+
+   - **Arquivo novo, que só existe por causa do harness** (hooks, `/dod`,
+     `SESSION_STATE.md`, manifesto, subagente, skill): uma linha com o
+     destino e os valores preenchidos. Nada é destruído se estiver errado,
+     e a FASE 5 verifica cada um.
+   - **Arquivo que sobrescreve, dá append ou altera conteúdo do usuário**
+     (`AGENTS.md`/`CLAUDE.md` preexistente, `.gitignore`, `.mcp.json` com
+     credencial, `.editorconfig`): **diff completo, sempre**. É o que o
+     usuário precisa auditar, porque é o único caso em que aprovar errado
+     custa trabalho dele.
+   - **AGENTS.md da raiz, quando é novo**: conteúdo integral mesmo assim.
+     É o arquivo que passa a governar todas as sessões de agente no
+     repositório, e os `MUST NOT` dele saíram da descoberta — se algum foi
+     inferido errado, este é o momento de o usuário ver.
+
+   Ofereça o conteúdo integral de qualquer outro sob demanda, numa linha.
+   Quem quiser ler tudo continua podendo; quem não quiser não paga por isso.
 3. **Plano de Remediação** — tudo que ainda separa o repositório do
    próximo nível, no formato do [catálogo](remediacoes.md): um item por
    ação (não por check), com os pontos, o nível que destrava, o que a
