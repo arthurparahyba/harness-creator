@@ -47,6 +47,15 @@ a camada de instrução — o que o modelo lê para executar a skill.
   que ainda diz `black --quiet`); lockfile no grupo A exige rede.
 - **Iteração 2 do nível D**, depois do 16: é o que prova que as correções
   pegaram. Desta vez a U10 vira sinal limpo em vez de moeda.
+- **Grupos 18, 19 e 20** (escritos, não iniciados) — segunda análise
+  skill-creator, agora sobre COMO a SKILL.md diz, não o que diz. O 18 fecha a
+  contradição que o 11.1 deixou aberta (a fronteira de escopo contra a regra
+  que manda começar pela FASE 1 sem condição) e enxuga as três cópias do
+  roteiro. O 19 é o maior: a FASE 5 vira `verificar-harness.sh` em POSIX
+  shell — os 19 itens são quase todos determinísticos e as assertions U1-U12
+  do nível D já são os mesmos checks escritos de novo. Shell e não Python
+  pelo motivo do Grupo 6: roda no repo alvo. O 20 fecha a pendência da
+  `description`. Os dois primeiros dependem do 16.
 - **Grupo 17 (por escrever)**, dos achados ainda sem grupo: `/dod` gerado
   mesmo com DoD vazia (contra a regra inviolável 7); ordem dos hooks do
   pre-commit não especificada mas decisiva em .NET (`dotnet test --no-build`
@@ -57,9 +66,9 @@ a camada de instrução — o que o modelo lê para executar a skill.
   nas duas versões). Converter em pytest — o eval descobre, o teste segura.
 
 ## Bloqueios / pendências fora de escopo
-- **Descrição nunca otimizada para triggering.** É trilha independente do
-  nível D: precisa de ~20 queries (metade near-miss) e do otimizador do
-  skill-creator. A fronteira de escopo criada no Grupo 11 nunca foi medida.
+- ~~**Descrição nunca otimizada para triggering.**~~ Deixou de ser pendência
+  solta: virou o Grupo 20, com dependência declarada no Grupo 18 (que é quem
+  fixa a fronteira de escopo a ser medida).
 - **O nível D não exercita o ramo mais complexo da regra de honestidade**:
   os subagentes recebem instrução de RECUSAR remediações que instalem deps,
   então "usuário aceita sensores → DoD deixa de ser vazia → enforcement é
