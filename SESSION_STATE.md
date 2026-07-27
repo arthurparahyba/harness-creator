@@ -3,18 +3,12 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `726c4e5` na branch `feature/revisao-skill-creator`
-  — "checkpoint: infraestrutura de eval (parcial)". Branch não publicada;
-  base é `main` (`4838f30`)
-- Testes: 254/254 passando (`pytest -q`); ruff e mypy strict limpos
-- Change/plano ativo: TASKS.md na raiz (Grupos 1, 2, 4, 6–13 concluídos)
-- **Em andamento: Grupo 14, task 14.3 — BLOQUEADO.** 14.1, 14.2 e 14.4 estão
-  commitados e verdes; falta rodar e graduar. Os 6 subagentes da iteração 1
-  (3 casos × v2.4/v2.3) morreram por limite de sessão da API antes de
-  qualquer um terminar de gravar. Retomar = redisparar os 6 runs com os
-  mesmos prompts (estão em `evals/evals.json`) e rodar `evals/gradua.py`.
-  Workspace da tentativa 1 está no scratchpad da sessão e **não sobrevive**;
-  recriar as cópias de fixture do zero.
+- Commit verificado: `f1ba380` na branch `feature/revisao-skill-creator`
+  — "checkpoint: contradições que só a execução revelou". Branch **não
+  publicada**; base é `main` (`4838f30`), 9 commits à frente
+- Testes: 258/258 passando (`pytest -q`); ruff e mypy strict limpos
+- Change/plano ativo: TASKS.md na raiz (Grupos 1, 2, 4, 6–15 concluídos)
+- Em andamento: nada — fronteira limpa
 - Não commitado: só o arquivo `-c` na raiz, lixo de execução manual antiga de
   teste (contém "FORMATADO" repetido, do formatador falso). Deixado fora do
   commit de propósito; remover com `rm ./-c` se confirmar que não serve.
@@ -45,18 +39,34 @@ a camada de instrução — o que o modelo lê para executar a skill.
   dá append em arquivo do usuário — o único caso em que aprovar errado custa
   trabalho dele.
 
+## Próximos grupos, já planejados no TASKS.md
+- **Grupo 16** — checagens insatisfazíveis e fontes divergentes: o item 8 da
+  FASE 5 ("DoD IDÊNTICA em 6 arquivos") é impossível por construção; o item 5
+  se auto-bloqueia pelo gate; formatter de Python tem 3 respostas na skill
+  (o 15 já apontou a FASE 2 para `ecossistemas.md`, falta `01-descoberta.md`
+  que ainda diz `black --quiet`); lockfile no grupo A exige rede.
+- **Iteração 2 do nível D**, depois do 16: é o que prova que as correções
+  pegaram. Desta vez a U10 vira sinal limpo em vez de moeda.
+- **Grupo 17 (por escrever)**, dos achados ainda sem grupo: `/dod` gerado
+  mesmo com DoD vazia (contra a regra inviolável 7); ordem dos hooks do
+  pre-commit não especificada mas decisiva em .NET (`dotnet test --no-build`
+  exige build antes); `<setup-steps>` exige versão de runtime que a FASE 1
+  não coleta.
+- **Testes baratos do 3.2 e 5.2**: a iteração 1 provou o comportamento
+  (`sem-sensores` não gerou enforcement, `dotnet` não gerou `package.json`,
+  nas duas versões). Converter em pytest — o eval descobre, o teste segura.
+
 ## Bloqueios / pendências fora de escopo
-- **Grupo 14 aberto na 14.3** (ver acima). A infraestrutura existe e o
-  graduador foi validado (5/16 num run parcial, discriminando certo); o que
-  falta é uma rodada completa. Enquanto ela não existir, continua verdadeiro
-  que nada mede a skill sendo EXECUTADA por um modelo.
-- **Descrição nunca otimizada para triggering**: depende de a 14.3 fechar,
-  senão não há como saber se uma mudança regride o disparo.
-- **A 14.3 não exercita o caminho mais interessante da regra de honestidade**:
+- **Descrição nunca otimizada para triggering.** É trilha independente do
+  nível D: precisa de ~20 queries (metade near-miss) e do otimizador do
+  skill-creator. A fronteira de escopo criada no Grupo 11 nunca foi medida.
+- **O nível D não exercita o ramo mais complexo da regra de honestidade**:
   os subagentes recebem instrução de RECUSAR remediações que instalem deps,
   então "usuário aceita sensores → DoD deixa de ser vazia → enforcement é
   gerado na mesma execução" (FASE 2) nunca é testado. Documentado em
   `evals/README.md`; fechar exige um caso com deps pré-instaladas.
+- **PR não aberto**: 9 commits verificados numa branch não publicada. Quanto
+  mais grupos acumularem, mais caro fica revisar.
 - **O harness DESTE repo está desatualizado**: o `AGENTS.md` da raiz manda
   `git checkout develop` (só existe `main`) e usar `/opsx:propose` (não há
   `openspec/`). Agora que existe modo de atualização, é o primeiro caso de
