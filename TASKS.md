@@ -125,3 +125,24 @@ Verificação: `pytest -q && ruff check . && mypy` — 253 testes
 - [x] 13.3 Versão da skill 2.3 → 2.4 (o modo de atualização compara versões)
 Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
 — 254 testes; medição +64 a +67 nos 8 ecossistemas, inalterada
+
+## Grupo 14 - Medir a skill EXECUTADA por um modelo (depende: Grupo 13)
+<!-- Achado nº1 da análise: `tests/gerar.py` é uma reimplementação
+     determinística da FASE 2 em Python. Os 254 testes validam essa cópia,
+     não a skill. Se o modelo parafrasear um template, pular a ponte
+     CLAUDE.md ou ignorar a FASE 5, nenhum teste reprova. Os 19 itens da
+     FASE 5 já são a rubrica: viram assertions quase por transcrição. -->
+- [x] 14.1 Fixture `sem-sensores`: repo Python sem test runner nem linter,
+      com funções puras nomeáveis. É o caso mais informativo — mede a regra
+      de honestidade (não gerar enforcement vazio), hoje sem sensor nenhum
+- [x] 14.2 `evals/evals.json` com 3 casos (node, dotnet, sem-sensores) e
+      16 assertions derivadas da FASE 5, mais `evals/gradua.py` que as checa
+      programaticamente (validado: 5/16 num run parcial, discrimina certo)
+- [ ] 14.3 Rodar cada caso com a v2.4 e com a v2.3 (baseline em `4838f30`),
+      graduar contra as assertions e registrar o resultado
+      **BLOQUEADO**: os 6 runs da iteração 1 morreram por limite de sessão
+      da API antes de qualquer um terminar de gravar. Nada a graduar
+- [x] 14.4 Registrar em `evals/README.md` o que este nível mede e o que ele
+      NÃO mede, e a decisão de harness de aprovar a FASE 4 em nome do usuário
+Verificação: `pytest -q && ruff check . && mypy` + relatório de grading
+— sensores verdes (254 testes); **grading pendente do 14.3**
