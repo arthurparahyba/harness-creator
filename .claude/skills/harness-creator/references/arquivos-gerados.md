@@ -88,9 +88,15 @@ leem. Registrar isso na FASE 4 quando o usuário usar Devin.
 |---|---|---|
 | ci-workflow.yml | `.github/workflows/harness-dod.yml` | se NÃO existir CI **e a DoD tiver comandos reais** |
 | `README.md` | `/README.md` | se não existir |
-| Lockfile | depende da linguagem (nome convencional) | se não existir lockfile |
 | `.mcp.json` | `/.mcp.json` (raiz) | se MCP detectado em outro path mas não na raiz |
 | `editorconfig-base` | `/.editorconfig` | se não existir .editorconfig (qualquer linguagem) |
 | `editorconfig-dotnet` | `/.editorconfig` (mesclar sobre o base) | se a linguagem tem template específico (hoje só .NET/C#) |
 | `.env` no `.gitignore` | `/.gitignore` (append) | se `.gitignore` não cobrir `.env` |
 | `LICENSE` | `/LICENSE` | se não existir (oferecer ao usuário na FASE 4) |
+
+**Lockfile não está aqui de propósito.** Gerar um exige resolver
+dependências pela rede (`npm install`, `pip freeze`, `cargo generate-lockfile`),
+o que a skill não pode fazer em nome do usuário: a resolução escolhe versões
+que passam a valer para o time inteiro. Virou item do grupo B do
+[catálogo de remediações](remediacoes.md) — recomendado com o comando exato,
+aplicado só se o usuário aceitar.

@@ -640,3 +640,92 @@ def test_agents_scoped_nao_carrega_o_protocolo() -> None:
     corpo = re.sub(r"<!--.*?-->", "", (RESOURCES / "AGENTS-scoped.md").read_text(), flags=re.S)
     for termo in ("WIP=1", "Definition of Done", "SESSION_STATE", "## Commits"):
         assert termo not in corpo, f"protocolo duplicado no template com escopo: {termo}"
+
+
+def test_nenhuma_instrucao_da_skill_e_bloqueada_pelo_proprio_gate() -> None:
+    """A skill roda dentro de repositórios protegidos pelo gate que ela mesma
+    gera. Uma instrução que contenha a sequência destrutiva literal é
+    bloqueada na hora de ser executada — e o item que ela manda verificar
+    simplesmente não é verificado.
+
+    O caso real: a FASE 5 mandava testar o gate com `rm -rf` escrito por
+    extenso, então a checagem mais importante do enforcement nunca rodava.
+    """
+    gate = RESOURCES / "hooks" / "gate-destructive.sh"
+    bloqueadas = []
+    for doc in sorted(REFERENCES.glob("*.md")) + [SKILL / "SKILL.md"]:
+        # Só o que está em bloco de código: é o que alguém copia e executa.
+        # Prosa que menciona um comando destrutivo não roda, e proibi-la
+        # impediria a skill de explicar o que o gate bloqueia.
+        dentro = False
+        for n, linha in enumerate(doc.read_text().splitlines(), 1):
+            if linha.lstrip().startswith("```"):
+                dentro = not dentro
+                continue
+            if not dentro or not linha.strip():
+                continue
+            payload = json.dumps({"tool_name": "Bash", "tool_input": {"command": linha}})
+            r = subprocess.run(["bash", str(gate)], input=payload, capture_output=True, text=True)
+            if r.returncode == 2:
+                bloqueadas.append(f"{doc.name}:{n}: {linha.strip()[:60]}")
+    assert bloqueadas == [], f"instrução que o próprio gate bloqueia: {bloqueadas}"
+
+
+def test_fase5_cobra_equivalencia_da_dod_e_nao_igualdade_literal() -> None:
+    """Exigir a DoD IDÊNTICA em seis arquivos é insatisfazível por construção:
+    o init.sh roda só o baseline, o pre-commit é lista de hooks e o CI é um
+    step por sensor. Checagem impossível não é rigor — o agente marca como ok
+    sem ter verificado, que é pior do que não ter o item."""
+    texto = (REFERENCES / "05-verificacao-pos-geracao.md").read_text()
+    assert "IDÊNTICO em" not in texto, "voltou a exigir igualdade literal da DoD"
+    assert "Equivalência da DoD" in texto
+    assert "conjunto de sensores" in texto
+
+
+def test_formatter_de_python_tem_uma_resposta_so() -> None:
+    """Formatter com respostas divergentes faz a geração oscilar entre
+    execuções: o mesmo repo recebe `black` numa e `ruff format` noutra.
+    `ecossistemas.md` é a fonte única — o resto aponta para ela."""
+    fonte = REFERENCES / "ecossistemas.md"
+    culpados = []
+    for p in SKILL.rglob("*"):
+        if not p.is_file() or p == fonte or b"\0" in p.read_bytes()[:8192]:
+            continue
+        for n, linha in enumerate(p.read_text().splitlines(), 1):
+            if re.search(r"\bblack\b", linha) and "ecossistemas.md" not in linha:
+                # Citar `[tool.black]` como pista de descoberta é legítimo:
+                # é onde procurar o que o repo já usa, não uma prescrição.
+                if "[tool.black]" in linha:
+                    continue
+                culpados.append(f"{p.relative_to(SKILL)}:{n}")
+    assert culpados == [], f"segunda resposta para formatter de Python em: {culpados}"
+
+
+def test_lockfile_e_recomendado_e_nao_gerado() -> None:
+    """Gerar lockfile exige resolver dependências pela rede, e a resolução fixa
+    versões para o time inteiro. Isso muda o contrato do projeto, então é
+    grupo B (recomendado, item a item) e não grupo A (gerado)."""
+    gerados = (REFERENCES / "arquivos-gerados.md").read_text()
+    linhas_de_tabela = [ln for ln in gerados.splitlines() if ln.startswith("|")]
+    assert not any("Lockfile" in ln for ln in linhas_de_tabela), (
+        "lockfile voltou para a tabela de arquivos gerados"
+    )
+    catalogo = (REFERENCES / "remediacoes.md").read_text()
+    assert "### Lockfile ausente" in catalogo, "lockfile não virou item do grupo B"
+
+
+def test_criacao_de_branch_funciona_em_repo_sem_remoto() -> None:
+    """`git pull` num repo sem remoto falha, e o passo 4 do protocolo é a
+    primeira coisa que o agente executa numa funcionalidade nova: ele quebra
+    antes de qualquer trabalho."""
+    texto = (RESOURCES / "AGENTS.md").read_text()
+    assert "git remote" in texto, "git pull sem guarda para repo sem remoto"
+
+
+def test_plano_de_remediacao_nao_fala_em_pontuacao() -> None:
+    """O placar é de uma ferramenta externa que o usuário não roda. A FASE 4 é
+    onde o plano é redigido, então é lá que a proibição do catálogo precisa
+    valer — senão ela fica só no catálogo e o plano sai com pontos."""
+    texto = (REFERENCES / "04-saida-aprovacao.md").read_text()
+    assert "vocabulário de pontuação" in texto
+    assert "pontos depois" not in texto, "ordenação por pontuação voltou à FASE 4"

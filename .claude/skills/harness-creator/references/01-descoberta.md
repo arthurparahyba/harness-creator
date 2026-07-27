@@ -80,10 +80,12 @@ genérica ("escreva testes") não é acionável.
    `project.md` (legado)? Se `project.md`: avisar que `openspec update`
    faz a migração; não gerar config.yaml por cima sem avisar.
 9. **Formatter da linguagem**: qual formatter rodar no `format-on-edit.sh`?
-   (Python: `black --quiet`; JS/TS: `prettier --write`; Go: `gofmt -w`;
-   Rust: `rustfmt`; Ruby: `rubocop -A`; Java: `google-java-format -i` ou
-   `spotless` (Gradle); .NET/C#: `dotnet format`; PHP: `php-cs-fixer`).
-   Fonte: manifestos, configs de lint, `.prettierrc`, `[tool.black]`, etc.
+   A resposta por ecossistema está na coluna "Formatter" de
+   [ecossistemas.md](ecossistemas.md) — **fonte única**, para o mesmo repo
+   não receber um formatter aqui e outro na FASE 2. Não repita a tabela.
+   Confirme contra o que o repositório já usa: config de lint,
+   `.prettierrc`, `[tool.ruff]`, `[tool.black]`, hook de pre-commit
+   existente. O que está commitado ganha da tabela.
 10. **Lockfile**: qual gerenciador de deps? Tem lockfile commitado?
     Usar **apenas nomes convencionais do ecossistema** — um arquivo com
     nome inventado (ex: `requirements.lock`) não é instalado por nenhuma

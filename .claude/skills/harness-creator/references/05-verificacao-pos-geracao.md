@@ -25,16 +25,24 @@ funcional após gravar os arquivos.
    file .claude/hooks/*.sh init.sh    # nenhum deve dizer "CRLF"
    ```
    Se houver CRLF, converter para LF antes de qualquer outra coisa.
-5. **Gate hook funcional**: testar os dois caminhos com input simulado:
+5. **Gate hook funcional**: testar os dois caminhos com input simulado.
+   O comando destrutivo é **montado em partes**, nunca escrito literal:
+   se você digitar a sequência completa na chamada, o gate do repositório
+   onde a skill está rodando bloqueia a própria verificação. O item passa
+   a falhar justamente porque o gate funciona, e a checagem mais
+   importante do enforcement nunca chega a rodar.
    ```
-   echo '{"tool_name":"Bash","tool_input":{"command":"rm -rf /tmp/test"}}' \
-     | bash .claude/hooks/gate-destructive.sh
-   # Deve retornar exit 2 (BLOCKED). Exit 1 = gate quebrado, falha ABERTO.
+   RM=rm; FLAG=-rf
+   printf '{"tool_name":"Bash","tool_input":{"command":"%s %s /tmp/sonda-gate"}}' "$RM" "$FLAG" \
+     | bash .claude/hooks/gate-destructive.sh; echo "exit=$?"
+   # Deve imprimir exit=2 (BLOCKED). exit=1 = gate quebrado, falha ABERTO.
 
-   echo '{"tool_name":"Bash","tool_input":{"command":"pytest"}}' \
-     | bash .claude/hooks/gate-destructive.sh
-   # Deve retornar exit 0 (comando seguro passa)
+   printf '{"tool_name":"Bash","tool_input":{"command":"git status"}}' \
+     | bash .claude/hooks/gate-destructive.sh; echo "exit=$?"
+   # Deve imprimir exit=0 (comando seguro passa)
    ```
+   Nada é removido em nenhum dos dois: o gate inspeciona a string e
+   devolve o código de saída, o comando nunca chega a executar.
    Testar só o bloqueio esconde um gate que bloqueia tudo; testar só o
    caminho feliz esconde um gate que não bloqueia nada.
 6. **Nenhum marcador de preenchimento sobrou.** Verificar pela lista
@@ -67,14 +75,29 @@ funcional após gravar os arquivos.
    DoD já aparece. Não decidir sozinho: qual sensor sai da verificação por
    grupo é escolha do usuário. Se a DoD não puder ser executada aqui
    (faltam deps, precisa de rede), reportar isso em vez de estimar.
-8. **Consistência da DoD**: o comando da DoD deve ser IDÊNTICO em:
-   - AGENTS.md (seção "Definition of Done")
-   - openspec/config.yaml (se gerado)
-   - init.sh (passo de baseline)
-   - .claude/commands/dod.md
-   - .pre-commit-config.yaml (hooks)
-   - .github/workflows/harness-dod.yml (se gerado)
-   Reportar divergências se houver.
+8. **Equivalência da DoD** — não igualdade literal. Cada arquivo declara a
+   mesma DoD no formato que o seu consumidor entende, e exigir texto
+   idêntico é impossível por construção: o `init.sh` roda só o baseline, o
+   `.pre-commit-config.yaml` é uma lista de hooks e o workflow de CI é um
+   `- run:` por sensor. Item que ninguém consegue cumprir é pior que item
+   nenhum — o agente marca como ok sem ter verificado.
+
+   O que precisa bater é o **conjunto de sensores e a ordem**:
+
+   | Arquivo | Forma | Cobertura esperada |
+   |---|---|---|
+   | `AGENTS.md` ("Definition of Done") | cadeia com `&&` | completa — é a fonte |
+   | `.claude/commands/dod.md` | a mesma cadeia | completa |
+   | `.github/workflows/harness-dod.yml` | um `- run:` por sensor | completa, mesma ordem |
+   | `openspec/config.yaml` (se gerado) | a mesma cadeia | completa |
+   | `.pre-commit-config.yaml` | um hook por sensor | os que rodam sem rede |
+   | `init.sh` | passo de baseline | subconjunto: o runner de teste |
+
+   Reportar como divergência: sensor presente na fonte e ausente num
+   consumidor de cobertura completa, ou ordem trocada entre eles.
+   Diferença de formato não é divergência. Se a FASE 4 aprovou a divisão
+   da DoD (item 7), a comparação é contra a divisão aprovada e não contra
+   a cadeia única.
 9. **`.claude/settings.json` tem wrapper `hooks`**: validar que o JSON
    tem a chave `"hooks"` no nível raiz (não os eventos diretamente no
    raiz). Sem o wrapper, scanners não detectam os hooks.
@@ -121,10 +144,13 @@ funcional após gravar os arquivos.
     ```
     python -c "import json;[open(a) for a in json.load(open('.claude/harness.json'))['harness']['arquivos']]"
     ```
-17. **Lockfile tem nome convencional**: o arquivo gerado é reconhecido
-    pelo ecossistema (`uv.lock`, `poetry.lock`, `requirements.txt`,
-    `package-lock.json`, `Cargo.lock`, `go.sum`, …). Nome fora da
-    convenção não é instalado por ninguém.
+17. **Lockfile tem nome convencional** — só se o usuário **aceitou** a
+    remediação de lockfile (grupo B: exige rede, não é gerado sozinho). O
+    arquivo precisa ser reconhecido pelo ecossistema (`uv.lock`,
+    `poetry.lock`, `requirements.txt`, `package-lock.json`, `Cargo.lock`,
+    `go.sum`, …). Nome fora da convenção não é instalado por ninguém.
+    Se a remediação foi recusada ou adiada, este item não se aplica —
+    registrar como recusa na lista final, não como falha da geração.
 18. **Nenhuma credencial literal em `.mcp.json`**: valores de chaves tipo
     `token`/`key`/`secret`/`password` usam `${VAR}`.
 

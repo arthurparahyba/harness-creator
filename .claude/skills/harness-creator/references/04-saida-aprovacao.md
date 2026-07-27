@@ -37,11 +37,17 @@ aguardar aprovação explícita antes de gravar.
 
    Ofereça o conteúdo integral de qualquer outro sob demanda, numa linha.
    Quem quiser ler tudo continua podendo; quem não quiser não paga por isso.
-3. **Plano de Remediação** — tudo que ainda separa o repositório do
-   próximo nível, no formato do [catálogo](remediacoes.md): um item por
-   ação (não por check), com os pontos, o nível que destrava, o que a
-   aceitação modifica no repositório e o comando exato. Ordenar por
-   nível destravado primeiro, pontos depois.
+3. **Plano de Remediação** — tudo que ainda separa o repositório de um
+   harness completo, no formato do [catálogo](remediacoes.md): um item por
+   ação (não por check), dizendo o que a aceitação modifica no
+   repositório, o comando exato e o que o agente passa a poder fazer.
+   Ordenar pelo que **destrava outra coisa** primeiro — sensores antes de
+   tudo, porque habilitam a DoD, o pre-commit e o CI.
+
+   Não usar vocabulário de pontuação ("+6 pontos", "nível 4"): é o placar
+   de uma ferramenta externa que o usuário não roda e que não existe em
+   lugar nenhum do harness entregue. O catálogo já proíbe isso; a FASE 4 é
+   onde o plano é redigido, então é aqui que a proibição precisa valer.
 
    Colher a decisão **item a item** — aceitar, recusar ou adiar. Isto é
    parte da mesma pausa da FASE 4, não uma segunda rodada de perguntas:

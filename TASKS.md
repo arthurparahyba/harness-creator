@@ -170,20 +170,23 @@ Verificação: `pytest -q && ruff check . && mypy` + relatório de grading
 Verificação: `pytest -q && ruff check . && mypy` — 258 testes; medição nas
 8 fixtures inalterada (+64 a +67)
 
-## Grupo 16 - Checagens insatisfazíveis e fontes divergentes (depende: Grupo 15)
-- [ ] 16.1 FASE 5 item 8: "DoD IDÊNTICA em 6 arquivos" é impossível por
+## Grupo 16 - Checagens insatisfazíveis e fontes divergentes ✅
+- [x] 16.1 FASE 5 item 8: "DoD IDÊNTICA em 6 arquivos" é impossível por
       construção (init.sh roda só teste, pre-commit é lista, CI é step por
-      sensor). Reescrever para equivalência semântica, não igualdade literal
-- [ ] 16.2 FASE 5 item 5: o comando de teste do gate contém `rm -rf` literal
-      e é bloqueado pelo gate do repo onde a skill roda. Prescrever a forma
-      que não se auto-bloqueia
-- [ ] 16.3 Formatter de Python tem três respostas divergentes na skill
-      (`black --quiet`, `ruff format`, `# TODO`). `ecossistemas.md` é a fonte
-      única — as outras passam a apontar para ela, com teste
-- [ ] 16.4 Lockfile sai do grupo A para o B (exige rede), `git pull` ganha
-      guarda para repo sem remoto, e a FASE 4 perde o vocabulário de
-      pontuação que não existe em lugar nenhum
+      sensor). Virou tabela de equivalência: o que precisa bater é o
+      conjunto de sensores e a ordem, não o texto
+- [x] 16.2 FASE 5 item 5: o comando destrutivo passa a ser montado em partes
+      (`RM=rm; FLAG=-rf`), que é a forma que não se auto-bloqueia. O teste
+      novo varre os blocos de código de TODA reference contra o próprio gate
+- [x] 16.3 Formatter de Python: `01-descoberta.md` apontava `black --quiet` e
+      o comentário do `pre-commit-config.yaml` trazia black+pylint. Ambos
+      passam a apontar para `ecossistemas.md`, com teste que proíbe a segunda
+      resposta
+- [x] 16.4 Lockfile saiu do grupo A para o B (gerar exige rede e fixa versões
+      para o time), `git pull` ganhou guarda `git remote | grep -q .`, e a
+      FASE 4 perdeu "pontos"/"nível que destrava"
 Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
+— 264 testes (+6); medição inalterada (+64 a +67 nos 8 ecossistemas)
 
 <!-- O número 17 está reservado para os achados já registrados no
      SESSION_STATE e ainda sem grupo escrito (`/dod` gerado com DoD vazia,

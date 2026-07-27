@@ -3,12 +3,15 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `f1ba380` na branch `feature/revisao-skill-creator`
-  — "checkpoint: contradições que só a execução revelou". Branch **não
-  publicada**; base é `main` (`4838f30`), 9 commits à frente
-- Testes: 258/258 passando (`pytest -q`); ruff e mypy strict limpos
-- Change/plano ativo: TASKS.md na raiz (Grupos 1, 2, 4, 6–15 concluídos)
-- Em andamento: nada — fronteira limpa
+- Commit verificado: Grupo 16 na branch `feature/grupos-16-a-20`, criada a
+  partir da `main` em `2e3be23` (merge do PR #1, que trouxe os Grupos 11-15
+  e o plano dos 18-20)
+- Testes: 264/264 passando (`pytest -q`, +6 no Grupo 16); ruff e mypy strict
+  limpos; medição inalterada (+64 a +67 nos 8 ecossistemas)
+- Change/plano ativo: TASKS.md na raiz (Grupos 1, 2, 4, 6–16 concluídos)
+- Em andamento: sequência 16 → 18 → 19 → 20 a pedido do usuário, que dispensou
+  explicitamente a parada entre grupos. O commit por grupo verificado continua
+  valendo
 - Não commitado: só o arquivo `-c` na raiz, lixo de execução manual antiga de
   teste (contém "FORMATADO" repetido, do formatador falso). Deixado fora do
   commit de propósito; remover com `rm ./-c` se confirmar que não serve.
@@ -74,8 +77,8 @@ a camada de instrução — o que o modelo lê para executar a skill.
   então "usuário aceita sensores → DoD deixa de ser vazia → enforcement é
   gerado na mesma execução" (FASE 2) nunca é testado. Documentado em
   `evals/README.md`; fechar exige um caso com deps pré-instaladas.
-- **PR não aberto**: 9 commits verificados numa branch não publicada. Quanto
-  mais grupos acumularem, mais caro fica revisar.
+- ~~**PR não aberto**~~: resolvido — PR #1 mergeado em `main` em 2026-07-27.
+  A lição fica: 9 commits num PR só é caro de revisar; abrir mais cedo.
 - **O harness DESTE repo está desatualizado**: o `AGENTS.md` da raiz manda
   `git checkout develop` (só existe `main`) e usar `/opsx:propose` (não há
   `openspec/`). Agora que existe modo de atualização, é o primeiro caso de
@@ -87,5 +90,6 @@ a camada de instrução — o que o modelo lê para executar a skill.
   dos dois: cobre a regra de honestidade, o comportamento mais delicado da
   skill, hoje sem sensor nenhum.
 
-- Próxima ação: abrir PR da `feature/revisao-skill-creator`, ou planejar o
-  Grupo 14 (evals comportamentais).
+- Próxima ação: **Grupo 16** (checagens insatisfazíveis e fontes
+  divergentes), que é o próximo desmarcado e destrava os Grupos 18 e 19.
+  Branch nova a partir de `main`.

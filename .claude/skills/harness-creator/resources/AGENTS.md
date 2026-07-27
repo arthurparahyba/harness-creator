@@ -26,7 +26,9 @@ Nunca invente tarefas fora da fonte de trabalho ativa.
    funcionalidade nova), crie e mude para uma feature branch atualizada a
    partir de `<branch-base>`:
    ```
-   git checkout <branch-base> && git pull && git checkout -b feature/<nome-da-funcionalidade>
+   git checkout <branch-base>
+   git remote | grep -q . && git pull        # repo sem remoto: pular
+   git checkout -b feature/<nome-da-funcionalidade>
    ```
    Não é necessário criar branch nova para continuar um grupo já em
    andamento na branch atual (ver passo 2).
