@@ -509,6 +509,20 @@ def test_existe_exatamente_uma_pausa_no_fluxo() -> None:
     assert com_pausa == ["04-saida-aprovacao.md"], f"pausas em: {com_pausa}"
 
 
+def test_fase4_exige_conteudo_integral_no_que_destroi_trabalho_do_usuario() -> None:
+    """A FASE 4 mostra resumo do que é novo e diff do que altera arquivo do
+    usuário — a regra não pode degenerar em "resuma tudo".
+
+    Aprovar sem ler é o risco dos dois lados: o despejo de vinte arquivos
+    faz o usuário aprovar no atacado, e o resumo de um `.gitignore` sendo
+    reescrito esconde o único caso em que o erro custa trabalho dele.
+    """
+    texto = (REFERENCES / "04-saida-aprovacao.md").read_text()
+    assert "diff completo, sempre" in texto, "FASE 4 sem garantia de diff no destrutivo"
+    for destrutivo in (".gitignore", ".mcp.json", "AGENTS.md"):
+        assert destrutivo in texto, f"{destrutivo} fora da regra de apresentação"
+
+
 def test_modo_de_atualizacao_e_alcancavel_das_fases_que_o_usam() -> None:
     """O manifesto existe desde a v2.3 e nenhuma fase o usava para atualizar.
 

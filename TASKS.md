@@ -116,10 +116,12 @@ Verificação: `pytest -q && ruff check . && mypy` — 251 testes
       o usam e de que as recusas anteriores não são reprópostas
 Verificação: `pytest -q && ruff check . && mypy` — 253 testes
 
-## Grupo 13 - FASE 4 sem despejo de conteúdo (depende: Grupo 11)
-- [ ] 13.1 Apresentar resumo por arquivo (destino + o que muda + valores
-      preenchidos); conteúdo integral só para o que sobrescreve ou dá append
-      em arquivo do usuário
-- [ ] 13.2 Teste de que a FASE 4 exige o conteúdo integral justamente nos
+## Grupo 13 - FASE 4 sem despejo de conteúdo (depende: Grupo 11) ✅
+- [x] 13.1 Apresentar resumo por arquivo novo; diff completo para o que
+      sobrescreve ou dá append em arquivo do usuário; AGENTS.md da raiz
+      integral mesmo quando novo, porque governa todas as sessões
+- [x] 13.2 Teste de que a FASE 4 exige o conteúdo integral justamente nos
       casos destrutivos, que são os que o usuário precisa auditar
+- [x] 13.3 Versão da skill 2.3 → 2.4 (o modo de atualização compara versões)
 Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
+— 254 testes; medição +64 a +67 nos 8 ecossistemas, inalterada

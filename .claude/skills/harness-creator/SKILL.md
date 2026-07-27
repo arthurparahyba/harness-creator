@@ -14,7 +14,7 @@ description: >
 license: MIT
 metadata:
   author: squad-harness
-  version: "2.3"
+  version: "2.4"
 ---
 
 # Harness Creator
