@@ -1,0 +1,15 @@
+{
+  "harness": {
+    "skill": "harness-creator",
+    "versao": "<versao-da-skill>",
+    "gerado_em": "<data-iso>",
+    "ecossistema": "<ecossistema>",
+    "dod": "<dod-command>",
+    "arquivos": [
+      "<lista de caminhos gerados, um por linha, relativos à raiz>"
+    ],
+    "recusados": [
+      "<itens do Plano de Remediação recusados ou adiados, para não repropor>"
+    ]
+  }
+}

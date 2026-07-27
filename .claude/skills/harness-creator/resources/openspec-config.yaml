@@ -1,0 +1,54 @@
+# openspec/config.yaml
+# Regras dos ARTEFATOS OpenSpec (proposal/specs/design/tasks).
+# Protocolo de sessão vive no AGENTS.md raiz; aqui só se repete o
+# crítico (redundância defensiva: DoD, grupos, WIP=1).
+# Manter context abaixo de ~60 linhas — é injetado em toda requisição.
+
+schema: spec-driven
+
+context: |
+  ## Stack (versões exatas)
+  <stack e ferramentas de teste/lint/types descobertas — 2-3 linhas>
+
+  ## Protocolo de execução por grupos (checkpoints)
+  O tasks.md é organizado em GRUPOS. O grupo é a unidade de
+  execução, verificação e commit — não a task individual.
+  - Execute TODAS as tasks de um grupo, na ordem listada.
+  - Ao final do grupo: rode o comando de verificação do grupo.
+    Só com verificação passando: commit único do grupo
+    (mensagem: "checkpoint: <nome do grupo>").
+  - NUNCA inicie tasks do grupo seguinte antes do commit do atual.
+  - Após o commit de um grupo, PARE e informe: "Grupo N concluído
+    e commitado. Contexto pode ser reiniciado." Não prossiga
+    automaticamente.
+  - Se a sessão iniciar no meio de um grupo (ver SESSION_STATE.md),
+    termine esse grupo antes de qualquer outra coisa.
+
+  ## Definition of Done
+  Concluído = todos passam:
+    <comandos reais do repo encadeados com && — idênticos ao AGENTS.md>
+  Saída de comando é evidência; "parece funcionar" não é.
+
+  ## Restrições duras (MUST NOT)
+  <3-6 restrições — idênticas às do AGENTS.md, derivadas do repo real>
+
+rules:
+  proposal:
+    - Escopo explícito — listar o que está FORA do escopo, não só dentro
+    - Incluir plano de rollback para mudanças de risco
+  specs:
+    - Formato Given/When/Then em todos os cenários
+    - Referenciar padrões existentes no repo antes de inventar novos
+  design:
+    - Registrar alternativas consideradas e POR QUE foram descartadas
+  tasks:
+    - Organizar em grupos coesos de 2 a 5 tasks sob headers
+      "## Grupo N - <objetivo>". Agrupar tasks que só fazem sentido
+      verificadas juntas.
+    - Cada grupo termina em estado consistente e commitável — nenhum
+      grupo deixa o código quebrado para o seguinte.
+    - Cada grupo tem linha "Verificação:" com comando executável REAL
+      deste repositório validando o grupo inteiro.
+    - Cada grupo deve caber numa sessão (~30min); se maior, dividir.
+    - Dependências declaradas ENTRE grupos, não entre tasks de
+      grupos diferentes.

@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "./.claude/hooks/gate-destructive.sh",
+        "failClosed": true
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "./.claude/hooks/format-on-edit.sh"
+      }
+    ]
+  }
+}

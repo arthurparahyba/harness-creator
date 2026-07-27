@@ -1,0 +1,24 @@
+{
+  "PreToolUse": [
+    {
+      "matcher": "exec",
+      "hooks": [
+        {
+          "type": "command",
+          "command": ".claude/hooks/gate-destructive.sh"
+        }
+      ]
+    }
+  ],
+  "PostToolUse": [
+    {
+      "matcher": "edit",
+      "hooks": [
+        {
+          "type": "command",
+          "command": ".claude/hooks/format-on-edit.sh"
+        }
+      ]
+    }
+  ]
+}

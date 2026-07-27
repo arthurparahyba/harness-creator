@@ -1,0 +1,32 @@
+# .editorconfig — config base universal de estilo e formatação.
+# Funciona em qualquer linguagem que suporte .editorconfig.
+# Ferramentas como dotnet format, eslint, prettier e editorconfig-checker
+# leem este arquivo como fonte de estilo do projeto.
+#
+# PLACEHOLDER: ajustar as regras abaixo conforme convenções do repo.
+# Se o repo já tem .editorconfig, NÃO sobrescrever — mesclar.
+# Para regras específicas de linguagem (ex: dotnet_naming_rule para C#,
+# dotnet_diagnostic.* para analyzers), ver resources/editorconfig-dotnet
+# como exemplo de extensão.
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{js,ts,jsx,tsx,json,yml,yaml,md,html,css,scss}]
+indent_size = 2
+
+[*.{py,java,kt,go,rs,rb,php,cs,vb}]
+indent_size = 4
+
+[Makefile]
+indent_style = tab
+
+[*.{md,markdown}]
+trim_trailing_whitespace = false

@@ -1,0 +1,45 @@
+# .editorconfig — config de lint + formatter para .NET / C#.
+# Em .NET este arquivo faz o papel de linter (analyzers Roslyn) e de
+# config do formatter: `dotnet format` le as regras daqui.
+#
+# PLACEHOLDER: ajustar as regras abaixo conforme convenções do repo.
+# Se o repo já tem .editorconfig, NÃO sobrescrever — mesclar.
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{cs,vb}]
+indent_style = space
+indent_size = 4
+
+# Regras de estilo C# (dotnet format analizers)
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+
+# Convenções de naming
+[*.{cs,vb}]
+# Pascal case para classes, métodos, propriedades, eventos
+dotnet_naming_rule.types_and_members_should_be_pascal_case.severity = suggestion
+dotnet_naming_rule.types_and_members_should_be_pascal_case.symbols = types_and_members
+dotnet_naming_rule.types_and_members_should_be_pascal_case.style = pascal_case
+dotnet_naming_symbols.types_and_members.applicable_kinds = class,struct,interface,enum,property,method,event,delegate
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+
+# camel case para campos privados
+dotnet_naming_rule.private_fields_should_be_camel_case.severity = suggestion
+dotnet_naming_rule.private_fields_should_be_camel_case.symbols = private_fields
+dotnet_naming_rule.private_fields_should_be_camel_case.style = camel_case
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_style.camel_case.capitalization = camel_case
+
+# Regras de severidade do analyzer (lint)
+[*.cs]
+dotnet_diagnostic.CA1062.severity = none      # Validate arguments of public methods (opcional)
+dotnet_diagnostic.CA1707.severity = suggestion # No underscores in member names
+dotnet_diagnostic.CA2007.severity = none      # ConfigureAwait (específico de async)

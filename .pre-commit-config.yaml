@@ -1,0 +1,64 @@
+# .pre-commit-config.yaml — enforcement portatil da DoD do AGENTS.md.
+# Versionado: instalavel em qualquer clone via `pre-commit install`.
+#
+# PLACEHOLDER: os hooks abaixo devem ser substituidos pela skill com os
+# comandos de lint/format/types da linguagem detectada na FASE 1.
+# Exemplos por linguagem:
+#
+#   Python (black + pylint + mypy):
+#     - id: black-check
+#       entry: bash -c 'black --check app/'
+#     - id: pylint
+#       entry: bash -c 'PYTHONPATH=app pylint app/'
+#     - id: mypy
+#       entry: bash -c 'mypy app/'
+#
+#   JS/TS (eslint + prettier + tsc):
+#     - id: eslint
+#       entry: bash -c 'npx eslint .'
+#     - id: prettier
+#       entry: bash -c 'npx prettier --check .'
+#     - id: tsc
+#       entry: bash -c 'npx tsc --noEmit'
+#
+#   Go (gofmt + golangci-lint):
+#     - id: gofmt
+#       entry: bash -c 'gofmt -l .'
+#     - id: golangci-lint
+#       entry: bash -c 'golangci-lint run'
+#
+#   Rust (cargo fmt + clippy):
+#     - id: cargo-fmt
+#       entry: bash -c 'cargo fmt --check'
+#     - id: clippy
+#       entry: bash -c 'cargo clippy -- -D warnings'
+#
+#   .NET/C# (dotnet format + build):
+#     - id: dotnet-format
+#       entry: bash -c 'dotnet format <sln> --verify-no-changes'
+#     - id: dotnet-build
+#       entry: bash -c 'dotnet build <sln> -c Release'
+#
+#   Java (spotless + checkstyle):
+#     - id: spotless-check
+#       entry: bash -c './gradlew spotlessCheck'
+#     - id: checkstyle
+#       entry: bash -c 'mvn checkstyle:check'
+#
+# Para bypass: git commit --no-verify (nao recomendado em commits de grupo).
+repos:
+  - repo: local
+    hooks:
+      - id: ruff
+        name: ruff lint
+        entry: bash -c 'ruff check .'
+        language: system
+        pass_filenames: false
+        files: \.py$
+        stages: [pre-commit]
+      - id: pytest
+        name: pytest (sensores da skill)
+        entry: bash -c 'pytest -q'
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]

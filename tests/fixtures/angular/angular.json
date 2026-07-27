@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "projects": {
+    "portal-ng": {
+      "projectType": "application",
+      "architect": { "build": {}, "test": {}, "lint": {} }
+    }
+  }
+}

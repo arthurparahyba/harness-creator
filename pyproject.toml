@@ -1,0 +1,30 @@
+[project]
+name = "harness-creator"
+version = "2.2.0"
+description = "Skill que gera o harness completo de um repositorio para agentes de IA"
+requires-python = ">=3.11"
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.11", "pyyaml>=6", "types-PyYAML>=6"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["tests"]
+norecursedirs = ["tests/fixtures"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+files = ["tests"]
+strict = true
+mypy_path = "tests"
+exclude = "tests/fixtures/"
+
+[[tool.mypy.overrides]]
+module = "yaml"
+ignore_missing_imports = true

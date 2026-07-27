@@ -1,0 +1,11 @@
+# Sensores da skill — versões fixadas para instalação reprodutível.
+# Gerado com: python3 -m pip freeze | grep -E 'pytest|ruff|mypy|PyYAML'
+PyYAML==6.0.3
+iniconfig==2.3.0
+mypy==2.3.0
+mypy_extensions==1.1.0
+packaging==26.2
+pluggy==1.6.0
+pytest==9.1.1
+ruff==0.16.0
+types-PyYAML==6.0.12.20260724

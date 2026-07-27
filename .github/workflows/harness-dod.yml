@@ -1,0 +1,42 @@
+# harness-dod.yml — enforcement REMOTO da Definition of Done.
+# Gerado APENAS quando o repositório não tem nenhuma configuração de CI.
+# Se já existir CI, não gerar: propor o step da DoD no pipeline existente.
+#
+# Os placeholders a preencher estão SÓ no corpo do workflow, abaixo — este
+# cabeçalho não contém nenhum, de propósito: um mesmo marcador aparecendo em
+# comentário e em corpo faz a substituição corromper o arquivo.
+# Instruções de preenchimento: references/02-preenchimento-templates.md.
+#
+# Setup por linguagem (para o marcador de setup):
+#   Python:  uses actions/setup-python@v5 + pip install -r requirements.txt
+#   JS/TS:   uses actions/setup-node@v4 (cache npm) + npm ci
+#   Go:      uses actions/setup-go@v5
+#   .NET:    uses actions/setup-dotnet@v4 + dotnet restore
+#   Java:    uses actions/setup-java@v4 (distribution temurin)
+#   Rust:    uses dtolnay/rust-toolchain@stable
+name: Harness DoD
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  dod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install pytest ruff mypy pyyaml types-PyYAML
+      # A DoD é a MESMA do AGENTS.md, do /dod e do baseline do init.sh.
+      # Um comando por step: o step vermelho já aponta o sensor que falhou.
+      - run: pytest -q
+      - run: ruff check .
+      - run: mypy
+
+      # Gate de maturidade: falha se o harness regredir de nível.
+      # O valor é o nível MEDIDO NA FASE 5, depois da geração — não o do
+      # baseline da Fase 1. Travar no baseline (o repo antes do harness)
+      # deixa passar a remoção de tudo que a skill acabou de criar.
+      - name: Harness score gate
+        run: npx -y harness-score --min-level 4 --quiet
