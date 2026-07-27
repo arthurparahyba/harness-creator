@@ -3,12 +3,18 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: ver `git log -1` da branch `feature/revisao-skill-creator`
-  — "checkpoint: FASE 4 sem despejo de conteúdo". Branch ainda não publicada;
+- Commit verificado: `726c4e5` na branch `feature/revisao-skill-creator`
+  — "checkpoint: infraestrutura de eval (parcial)". Branch não publicada;
   base é `main` (`4838f30`)
 - Testes: 254/254 passando (`pytest -q`); ruff e mypy strict limpos
 - Change/plano ativo: TASKS.md na raiz (Grupos 1, 2, 4, 6–13 concluídos)
-- Em andamento: nada — fronteira limpa
+- **Em andamento: Grupo 14, task 14.3 — BLOQUEADO.** 14.1, 14.2 e 14.4 estão
+  commitados e verdes; falta rodar e graduar. Os 6 subagentes da iteração 1
+  (3 casos × v2.4/v2.3) morreram por limite de sessão da API antes de
+  qualquer um terminar de gravar. Retomar = redisparar os 6 runs com os
+  mesmos prompts (estão em `evals/evals.json`) e rodar `evals/gradua.py`.
+  Workspace da tentativa 1 está no scratchpad da sessão e **não sobrevive**;
+  recriar as cópias de fixture do zero.
 - Não commitado: só o arquivo `-c` na raiz, lixo de execução manual antiga de
   teste (contém "FORMATADO" repetido, do formatador falso). Deixado fora do
   commit de propósito; remover com `rm ./-c` se confirmar que não serve.
@@ -40,15 +46,17 @@ a camada de instrução — o que o modelo lê para executar a skill.
   trabalho dele.
 
 ## Bloqueios / pendências fora de escopo
-- **Achado nº1 da análise segue aberto**: nada mede a skill sendo EXECUTADA
-  por um modelo. `tests/gerar.py` é uma reimplementação determinística da
-  FASE 2 em Python — se o modelo parafrasear um template, pular a ponte
-  `CLAUDE.md` ou ignorar a FASE 5, nenhum dos 254 testes reprova. O caminho
-  é uma suíte de evals comportamentais usando os 19 itens da FASE 5 como
-  rubrica (eles já são assertions objetivas prontas), rodando com e sem a
-  skill sobre as fixtures. Precisa de subagentes. Seria o Grupo 14.
-- **Descrição nunca otimizada para triggering**: depende de o Grupo 14
-  existir, senão não há como saber se uma mudança regride o disparo.
+- **Grupo 14 aberto na 14.3** (ver acima). A infraestrutura existe e o
+  graduador foi validado (5/16 num run parcial, discriminando certo); o que
+  falta é uma rodada completa. Enquanto ela não existir, continua verdadeiro
+  que nada mede a skill sendo EXECUTADA por um modelo.
+- **Descrição nunca otimizada para triggering**: depende de a 14.3 fechar,
+  senão não há como saber se uma mudança regride o disparo.
+- **A 14.3 não exercita o caminho mais interessante da regra de honestidade**:
+  os subagentes recebem instrução de RECUSAR remediações que instalem deps,
+  então "usuário aceita sensores → DoD deixa de ser vazia → enforcement é
+  gerado na mesma execução" (FASE 2) nunca é testado. Documentado em
+  `evals/README.md`; fechar exige um caso com deps pré-instaladas.
 - **O harness DESTE repo está desatualizado**: o `AGENTS.md` da raiz manda
   `git checkout develop` (só existe `main`) e usar `/opsx:propose` (não há
   `openspec/`). Agora que existe modo de atualização, é o primeiro caso de
