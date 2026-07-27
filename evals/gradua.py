@@ -104,14 +104,35 @@ def _u9_manifesto(repo: Path) -> Resultado:
     return True, f"{len(listados)} arquivos, todos no disco"
 
 
+def _corpo(texto: str) -> str:
+    """Só as linhas funcionais: comentário de shell não executa nada.
+
+    Um `*.{js,ts}` na linha que ALERTA contra brace expansion é documentação
+    correta; o mesmo padrão no `case` é um hook que deixa de formatar em
+    silêncio. Misturar os dois faz o graduador acusar o template por dizer a
+    verdade.
+    """
+    return "\n".join(ln for ln in texto.splitlines() if not ln.lstrip().startswith("#"))
+
+
 def _u10_marcadores(repo: Path) -> Resultado:
+    """Implementa o item 6 da FASE 5 ao pé da letra, de propósito.
+
+    A distinção entre comentário e corpo é reportada mas NÃO absolve: o item 6
+    diz que estes marcadores não podem sobrar, sem ressalva. Se os templates
+    os mantêm em cabeçalho didático que a regra do VERBATIM manda preservar,
+    então a checagem é insatisfazível — e é isso que o resultado tem de
+    mostrar, em vez de esconder atrás de uma exceção conveniente.
+    """
     sobrou: list[str] = []
     for p in _arquivos(repo):
         txt = _texto(p)
+        corpo = _corpo(txt)
         for marcador in PREENCHIVEIS:
             if marcador in txt:
-                sobrou.append(f"{p.relative_to(repo)}:{marcador}")
-    return (not sobrou), "; ".join(sobrou[:5]) or "nenhum marcador sobrou"
+                onde = "corpo" if marcador in corpo else "comentario"
+                sobrou.append(f"{p.relative_to(repo)}:{marcador}({onde})")
+    return (not sobrou), "; ".join(sobrou[:6]) or "nenhum marcador sobrou"
 
 
 def _dod(repo: Path) -> str:
@@ -200,8 +221,10 @@ def caso_node(repo: Path, _relatorio: str) -> dict[str, Resultado]:
             f"DoD: {dod.strip()[:120]!r}",
         ),
         "N2: glob sem brace expansion": (
-            not re.search(r"\*\.\{[a-z,]+\}", fmt),
-            "glob com chaves (hook inerte)" if re.search(r"\*\.\{", fmt) else "alternancia com |",
+            not re.search(r"\*\.\{[a-z,]+\}", _corpo(fmt)),
+            "glob com chaves no corpo (hook inerte)"
+            if re.search(r"\*\.\{", _corpo(fmt))
+            else "alternancia com | no corpo",
         ),
         "N3: pre-commit gerado (repo tem sensores)": _existe(repo, ".pre-commit-config.yaml"),
     }

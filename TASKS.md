@@ -126,7 +126,7 @@ Verificação: `pytest -q && ruff check . && mypy` — 253 testes
 Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
 — 254 testes; medição +64 a +67 nos 8 ecossistemas, inalterada
 
-## Grupo 14 - Medir a skill EXECUTADA por um modelo (depende: Grupo 13)
+## Grupo 14 - Medir a skill EXECUTADA por um modelo (depende: Grupo 13) ✅
 <!-- Achado nº1 da análise: `tests/gerar.py` é uma reimplementação
      determinística da FASE 2 em Python. Os 254 testes validam essa cópia,
      não a skill. Se o modelo parafrasear um template, pular a ponte
@@ -138,11 +138,48 @@ Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
 - [x] 14.2 `evals/evals.json` com 3 casos (node, dotnet, sem-sensores) e
       16 assertions derivadas da FASE 5, mais `evals/gradua.py` que as checa
       programaticamente (validado: 5/16 num run parcial, discrimina certo)
-- [ ] 14.3 Rodar cada caso com a v2.4 e com a v2.3 (baseline em `4838f30`),
-      graduar contra as assertions e registrar o resultado
-      **BLOQUEADO**: os 6 runs da iteração 1 morreram por limite de sessão
-      da API antes de qualquer um terminar de gravar. Nada a graduar
+- [x] 14.3 Rodar cada caso com a v2.4 e com a v2.3 (baseline em `4838f30`),
+      graduar contra as assertions e registrar o resultado — 6 runs completos,
+      97/100 assertions, resultados em `evals/iteracao-1/`. Delta entre versões
+      = zero (o esperado: os Grupos 11-13 não mudam o artefato gerado)
+- [x] 14.5 `evals/agrega.py`: consolida os gradings e destaca quais assertions
+      discriminam as versões — a U10 oscila nos dois sentidos, então é
+      variância entre agentes, não melhoria
 - [x] 14.4 Registrar em `evals/README.md` o que este nível mede e o que ele
       NÃO mede, e a decisão de harness de aprovar a FASE 4 em nome do usuário
 Verificação: `pytest -q && ruff check . && mypy` + relatório de grading
-— sensores verdes (254 testes); **grading pendente do 14.3**
+— 254 testes verdes; grading em `evals/iteracao-1/grading.json` (97/100)
+
+## Grupo 15 - Contradições que só a execução revelou (depende: Grupo 14)
+<!-- Achados da iteração 1 do nível D. Seis agentes independentes, três
+     ecossistemas, duas versões da skill — todos bateram nos mesmos pontos.
+     Nenhum é detectável pelos 254 testes: só aparecem quando alguém tenta
+     OBEDECER a instrução. Ordem: o 15.1 primeiro porque é o que faz a
+     geração oscilar entre execuções. -->
+- [ ] 15.1 Marcador em cabeçalho de comentário: `format-on-edit.sh` traz
+      `<formatter_command>`/`<file_glob>`/`<sln>` no comentário E no corpo.
+      Regra 3 (VERBATIM) contra FASE 5 item 6 — decidir qual cede e aplicar
+      a mesma defesa que o `ci-workflow.yml` já tem. Teste que impede
+      marcador preenchível de aparecer em comentário de qualquer template
+- [ ] 15.2 `resources/AGENTS.md:59`: `MUST NOT: alterar migrations já
+      aplicadas` vira `<restrição N>` ou some. Hoje é regra inventada
+      transcrita verbatim em repo sem banco
+- [ ] 15.3 `# TODO: definir formatter` dentro de `if command -v ...; then`
+      comenta o `then` e mata o hook com erro de sintaxe. Escolher forma que
+      degrade sem quebrar, com teste que execute o script gerado sem formatter
+Verificação: `pytest -q && ruff check . && mypy`
+
+## Grupo 16 - Checagens insatisfazíveis e fontes divergentes (depende: Grupo 15)
+- [ ] 16.1 FASE 5 item 8: "DoD IDÊNTICA em 6 arquivos" é impossível por
+      construção (init.sh roda só teste, pre-commit é lista, CI é step por
+      sensor). Reescrever para equivalência semântica, não igualdade literal
+- [ ] 16.2 FASE 5 item 5: o comando de teste do gate contém `rm -rf` literal
+      e é bloqueado pelo gate do repo onde a skill roda. Prescrever a forma
+      que não se auto-bloqueia
+- [ ] 16.3 Formatter de Python tem três respostas divergentes na skill
+      (`black --quiet`, `ruff format`, `# TODO`). `ecossistemas.md` é a fonte
+      única — as outras passam a apontar para ela, com teste
+- [ ] 16.4 Lockfile sai do grupo A para o B (exige rede), `git pull` ganha
+      guarda para repo sem remoto, e a FASE 4 perde o vocabulário de
+      pontuação que não existe em lugar nenhum
+Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`

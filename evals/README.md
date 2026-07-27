@@ -61,10 +61,68 @@ Vale declarar, porque quem ler os números depois precisa saber:
    (FASE 2, regra de honestidade) **não é exercitado**. É a maior lacuna
    conhecida deste nível.
 
-## Estado
+## Iteração 1 — resultado
 
-A infraestrutura está pronta e o graduador validado. **A primeira rodada
-completa ainda não existe**: os seis runs da iteração 1 foram interrompidos
-por limite de sessão da API antes de qualquer um terminar de gravar. O que
-sobrou no disco não é resultado — é run pela metade, e graduá-lo produziria
-um número que não mede a skill.
+Seis runs completos (3 casos × v2.3/v2.4), em [`iteracao-1/`](iteracao-1/).
+
+| Caso / versão | Placar | Falhou |
+|---|---|---|
+| node / v2.3 | 16/16 | — |
+| node / v2.4 | 15/16 | U10 |
+| dotnet / v2.3 | 15/16 | U10 |
+| dotnet / v2.4 | 16/16 | — |
+| sem-sensores / v2.3 | 17/18 | U10 |
+| sem-sensores / v2.4 | 18/18 | — |
+
+**97 de 100 assertions.** O patamar absoluto é alto: um modelo lendo o
+`SKILL.md` produz um harness que passa na própria FASE 5, inclusive nos
+casos difíceis — em `dotnet` nenhum agente inventou `package.json`, e em
+`sem-sensores` os dois deixaram a DoD vazia e **não** geraram pre-commit
+nem CI, que é a regra de honestidade funcionando.
+
+### O delta entre versões é zero, e isso era o esperado
+
+A única assertion que falha em qualquer lugar é a U10 (marcador
+preenchível sobrando), e ela **inverte de lado**: falha na v2.3 em dois
+casos e na v2.4 no terceiro. Não é diferença de versão — é variância entre
+agentes diante de uma instrução ambígua (ver defeito 1 abaixo). Metade
+apagou o cabeçalho do template, metade o preservou.
+
+Dizer que a v2.4 "melhorou" seria ler ruído como sinal. Os Grupos 11–13
+mexeram na fronteira de escopo, no modo de atualização e na apresentação da
+FASE 4 — nada disso muda o artefato gerado, que é o que esta rubrica mede.
+
+### O que a rodada realmente entregou
+
+Os relatórios, não o placar. Seis agentes independentes encontraram os
+mesmos defeitos na instrução — nenhum deles detectável pelos 254 testes de
+`tests/`, porque só aparecem quando alguém tenta *obedecer* a skill:
+
+1. **`format-on-edit.sh` traz `<formatter_command>`, `<file_glob>` e `<sln>`
+   no cabeçalho de comentário e no corpo.** A regra 3 manda transcrever
+   VERBATIM; o item 6 da FASE 5 proíbe esses marcadores de sobrar. As duas
+   não podem valer ao mesmo tempo, e a skill não diz qual cede. É a causa
+   direta da oscilação da U10. O `ci-workflow.yml` já se defende disso no
+   próprio cabeçalho — a correção foi aplicada a um template só.
+2. **`resources/AGENTS.md:59` fixa `MUST NOT: alterar migrations já
+   aplicadas` fora de placeholder.** Todos os seis agentes bateram nisso;
+   todos removeram, sem respaldo textual. Regra 3 contra regra 4.
+3. **`# TODO: definir formatter` quebra o script.** Ele é substituído dentro
+   de `if command -v <formatter_bin> ...; then`, e o `#` comenta o `then`:
+   erro de sintaxe, hook morto a cada edição. Nenhum item da FASE 5 pega.
+4. **O item 8 da FASE 5 é insatisfazível.** Exige DoD idêntica em seis
+   arquivos, mas o `init.sh` roda só o teste, o pre-commit é lista de hooks
+   e o CI é um step por sensor. Três dos seis divergem por construção.
+5. **O item 5 da FASE 5 se auto-bloqueia.** O comando de teste contém
+   `rm -rf` literal e é barrado pelo gate do repo onde a skill roda.
+   Reproduzível 100%; aconteceu também fora dos runs, ao montar este eval.
+6. **Formatter de Python tem três respostas** na skill: `black --quiet`
+   (`01-descoberta.md`, `02-preenchimento`), `ruff format`
+   (`ecossistemas.md`) e `# TODO`. Nada diz qual vence.
+7. **Lockfile está no grupo A** (gerado sem perguntar) mas exige rede.
+8. **`git checkout <base> && git pull` falha em repo com git e sem remoto** —
+   a FASE 1 item 19 só previu "repo sem git".
+9. **A FASE 4 fala em "pontos" e "nível que destrava"**, vocabulário de um
+   sistema de pontuação que não existe em nenhum arquivo da skill.
+
+Viraram o Grupo 15 no `TASKS.md`.

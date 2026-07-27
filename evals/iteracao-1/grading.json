@@ -1,0 +1,556 @@
+{
+  "node/v23": {
+    "caso": "node",
+    "repo": "/private/tmp/claude-501/-Users-arthur-claude-harness-creator/60110924-1406-4416-b658-61a3ed4b5c00/scratchpad/hc-workspace/iteration-2/eval-node/v23/repo",
+    "passaram": 16,
+    "total": 16,
+    "expectations": [
+      {
+        "text": "U1: AGENTS.md na raiz",
+        "passed": true,
+        "evidence": "presente"
+      },
+      {
+        "text": "U2: ponte CLAUDE.md na raiz",
+        "passed": true,
+        "evidence": "import na raiz encontrado"
+      },
+      {
+        "text": "U3: AGENTS.md com escopo + ponte",
+        "passed": true,
+        "evidence": "1 com escopo, todos com ponte"
+      },
+      {
+        "text": "U4: gate existe, LF, executavel",
+        "passed": true,
+        "evidence": "existe, LF, executavel"
+      },
+      {
+        "text": "U5: gate bloqueia destrutivo (exit 2)",
+        "passed": true,
+        "evidence": "exit 2"
+      },
+      {
+        "text": "U6: gate libera comando seguro (exit 0)",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "text": "U7: settings.json com wrapper hooks",
+        "passed": true,
+        "evidence": "chave 'hooks' presente"
+      },
+      {
+        "text": "U8: hooks do Devin e do Cursor parseiam",
+        "passed": true,
+        "evidence": "todos parseiam"
+      },
+      {
+        "text": "U9: manifesto confere com o disco",
+        "passed": true,
+        "evidence": "21 arquivos, todos no disco"
+      },
+      {
+        "text": "U10: nenhum marcador preenchivel sobrou",
+        "passed": true,
+        "evidence": "nenhum marcador sobrou"
+      },
+      {
+        "text": "U11: comando /dod",
+        "passed": true,
+        "evidence": "presente"
+      },
+      {
+        "text": "U12: init.sh executavel",
+        "passed": true,
+        "evidence": "executavel"
+      },
+      {
+        "text": "U13: SESSION_STATE.md",
+        "passed": true,
+        "evidence": "presente"
+      },
+      {
+        "text": "N1: DoD usa scripts reais do package.json",
+        "passed": true,
+        "evidence": "DoD: 'Concluído = TODOS passam:\\n```\\nnpm test && npm run lint && npm run typecheck\\n```\\nSaída de comando é evidência; \"parece fu'"
+      },
+      {
+        "text": "N2: glob sem brace expansion",
+        "passed": true,
+        "evidence": "alternancia com | no corpo"
+      },
+      {
+        "text": "N3: pre-commit gerado (repo tem sensores)",
+        "passed": true,
+        "evidence": "presente"
+      }
+    ],
+    "tem_relatorio": true
+  },
+  "node/v24": {
+    "caso": "node",
+    "repo": "/private/tmp/claude-501/-Users-arthur-claude-harness-creator/60110924-1406-4416-b658-61a3ed4b5c00/scratchpad/hc-workspace/iteration-2/eval-node/v24/repo",
+    "passaram": 15,
+    "total": 16,
+    "expectations": [
+      {
+        "text": "U1: AGENTS.md na raiz",
+        "passed": true,
+        "evidence": "presente"
+      },
+      {
+        "text": "U2: ponte CLAUDE.md na raiz",
+        "passed": true,
+        "evidence": "import na raiz encontrado"
+      },
+      {
+        "text": "U3: AGENTS.md com escopo + ponte",
+        "passed": true,
+        "evidence": "1 com escopo, todos com ponte"
+      },
+      {
+        "text": "U4: gate existe, LF, executavel",
+        "passed": true,
+        "evidence": "existe, LF, executavel"
+      },
+      {
+        "text": "U5: gate bloqueia destrutivo (exit 2)",
+        "passed": true,
+        "evidence": "exit 2"
+      },
+      {
+        "text": "U6: gate libera comando seguro (exit 0)",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "text": "U7: settings.json com wrapper hooks",
+        "passed": true,
+        "evidence": "chave 'hooks' presente"
+      },
+      {
+        "text": "U8: hooks do Devin e do Cursor parseiam",
+        "passed": true,
+        "evidence": "todos parseiam"
+      },
+      {
+        "text": "U9: manifesto confere com o disco",
+        "passed": true,
+        "evidence": "21 arquivos, todos no disco"
+      },
+      {
+        "text": "U10: nenhum marcador preenchivel sobrou",
+        "passed": false,
+        "evidence": ".pre-commit-config.yaml:<sln>(comentario); .claude/hooks/format-on-edit.sh:<file_glob>(comentario); .claude/hooks/format-on-edit.sh:<formatter_command>(comentario); .claude/hooks/format-on-edit.sh:<sln>(comentario)"
+      },
+      {
+        "text": "U11: comando /dod",
+        "passed": true,
+        "evidence": "presente"
+      },
+      {
+        "text": "U12: init.sh executavel",
+        "passed": true,
+        "evidence": "executavel"
+      },
+      {
+        "text": "U13: SESSION_STATE.md",
+        "passed": true,
+        "evidence": "presente"
+      },
+      {
+        "text": "N1: DoD usa scripts reais do package.json",
+        "passed": true,
+        "evidence": "DoD: 'Concluído = TODOS passam:\\n```\\nnpm test && npm run lint && npm run typecheck\\n```\\nSaída de comando é evidência; \"parece fu'"
+      },
+      {
+        "text": "N2: glob sem brace expansion",
+        "passed": true,
+        "evidence": "alternancia com | no corpo"
+      },
+      {
+        "text": "N3: pre-commit gerado (repo tem sensores)",
+        "passed": true,
+        "evidence": "presente"
+      }
+    ],
+    "tem_relatorio": true
+  },
+  "dotnet/v23": {
+    "caso": "dotnet",
+    "repo": "/private/tmp/claude-501/-Users-arthur-claude-harness-creator/60110924-1406-4416-b658-61a3ed4b5c00/scratchpad/hc-workspace/iteration-2/eval-dotnet/v23/repo",
+    "passaram": 15,
+    "total": 16,
+    "expectations": [
+      {
+        "text": "U1: AGENTS.md na raiz",
+        "passed": true,
+        "evidence": "presente"
+      },
+      {
+        "text": "U2: ponte CLAUDE.md na raiz",
+        "passed": true,
+        "evidence": "import na raiz encontrado"
+      },
+      {
+        "text": "U3: AGENTS.md com escopo + ponte",
+        "passed": true,
+        "evidence": "1 com escopo, todos com ponte"
+      },
+      {
+        "text": "U4: gate existe, LF, executavel",
+        "passed": true,
+        "evidence": "existe, LF, executavel"
+      },
+      {
+        "text": "U5: gate bloqueia destrutivo (exit 2)",
+        "passed": true,
+        "evidence": "exit 2"
+      },
+      {
+        "text": "U6: gate libera comando seguro (exit 0)",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "text": "U7: settings.json com wrapper hooks",
+        "passed": true,
+        "evidence": "chave 'hooks' presente"
+      },
+      {
+        "text": "U8: hooks do Devin e do Cursor parseiam",
+        "passed": true,
+        "evidence": "todos parseiam"
+      },
+      {
+        "text": "U9: manifesto confere com o disco",
+        "passed": true,
+        "evidence": "21 arquivos, todos no disco"
+      },
+      {
+        "text": "U10: nenhum marcador preenchivel sobrou",
+        "passed": false,
+        "evidence": ".pre-commit-config.yaml:<sln>(comentario); init.sh:<sln>(comentario); .claude/hooks/format-on-edit.sh:<file_glob>(comentario); .claude/hooks/format-on-edit.sh:<formatter_command>(comentario); .claude/hooks/format-on-edit.sh:<sln>(comentario)"
+      },
+      {
+        "text": "U11: comando /dod",
+        "passed": true,
+        "evidence": "presente"
+      },
+      {
+        "text": "U12: init.sh executavel",
+        "passed": true,
+        "evidence": "executavel"
+      },
+      {
+        "text": "U13: SESSION_STATE.md",
+        "passed": true,
+        "evidence": "presente"
+      },
+      {
+        "text": "D1: NAO gerou package.json em repo .NET",
+        "passed": true,
+        "evidence": "ausente, como deve ser"
+      },
+      {
+        "text": "D2: o .sln real aparece nos comandos",
+        "passed": true,
+        "evidence": "DoD: 'Concluído = TODOS passam:\\n```\\ndotnet build Catalogo.sln -c Release && dotnet test Catalogo.sln --no-build && dotnet form'"
+      },
+      {
+        "text": "D3: a DoD usa comandos dotnet",
+        "passed": true,
+        "evidence": "DoD: 'Concluído = TODOS passam:\\n```\\ndotnet build Catalogo.sln -c Release && dotnet test Catalogo.sln --no-build && dotnet form'"
+      }
+    ],
+    "tem_relatorio": true
+  },
+  "dotnet/v24": {
+    "caso": "dotnet",
+    "repo": "/private/tmp/claude-501/-Users-arthur-claude-harness-creator/60110924-1406-4416-b658-61a3ed4b5c00/scratchpad/hc-workspace/iteration-2/eval-dotnet/v24/repo",
+    "passaram": 16,
+    "total": 16,
+    "expectations": [
+      {
+        "text": "U1: AGENTS.md na raiz",
+        "passed": true,
+        "evidence": "presente"
+      },
+      {
+        "text": "U2: ponte CLAUDE.md na raiz",
+        "passed": true,
+        "evidence": "import na raiz encontrado"
+      },
+      {
+        "text": "U3: AGENTS.md com escopo + ponte",
+        "passed": true,
+        "evidence": "1 com escopo, todos com ponte"
+      },
+      {
+        "text": "U4: gate existe, LF, executavel",
+        "passed": true,
+        "evidence": "existe, LF, executavel"
+      },
+      {
+        "text": "U5: gate bloqueia destrutivo (exit 2)",
+        "passed": true,
+        "evidence": "exit 2"
+      },
+      {
+        "text": "U6: gate libera comando seguro (exit 0)",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "text": "U7: settings.json com wrapper hooks",
+        "passed": true,
+        "evidence": "chave 'hooks' presente"
+      },
+      {
+        "text": "U8: hooks do Devin e do Cursor parseiam",
+        "passed": true,
+        "evidence": "todos parseiam"
+      },
+      {
+        "text": "U9: manifesto confere com o disco",
+        "passed": true,
+        "evidence": "21 arquivos, todos no disco"
+      },
+      {
+        "text": "U10: nenhum marcador preenchivel sobrou",
+        "passed": true,
+        "evidence": "nenhum marcador sobrou"
+      },
+      {
+        "text": "U11: comando /dod",
+        "passed": true,
+        "evidence": "presente"
+      },
+      {
+        "text": "U12: init.sh executavel",
+        "passed": true,
+        "evidence": "executavel"
+      },
+      {
+        "text": "U13: SESSION_STATE.md",
+        "passed": true,
+        "evidence": "presente"
+      },
+      {
+        "text": "D1: NAO gerou package.json em repo .NET",
+        "passed": true,
+        "evidence": "ausente, como deve ser"
+      },
+      {
+        "text": "D2: o .sln real aparece nos comandos",
+        "passed": true,
+        "evidence": "DoD: 'Concluído = TODOS passam:\\n```\\ndotnet build Catalogo.sln -c Release && dotnet test Catalogo.sln --no-build && dotnet form'"
+      },
+      {
+        "text": "D3: a DoD usa comandos dotnet",
+        "passed": true,
+        "evidence": "DoD: 'Concluído = TODOS passam:\\n```\\ndotnet build Catalogo.sln -c Release && dotnet test Catalogo.sln --no-build && dotnet form'"
+      }
+    ],
+    "tem_relatorio": true
+  },
+  "sem-sensores/v23": {
+    "caso": "sem-sensores",
+    "repo": "/private/tmp/claude-501/-Users-arthur-claude-harness-creator/60110924-1406-4416-b658-61a3ed4b5c00/scratchpad/hc-workspace/iteration-2/eval-sem-sensores/v23/repo",
+    "passaram": 17,
+    "total": 18,
+    "expectations": [
+      {
+        "text": "U1: AGENTS.md na raiz",
+        "passed": true,
+        "evidence": "presente"
+      },
+      {
+        "text": "U2: ponte CLAUDE.md na raiz",
+        "passed": true,
+        "evidence": "import na raiz encontrado"
+      },
+      {
+        "text": "U3: AGENTS.md com escopo + ponte",
+        "passed": true,
+        "evidence": "1 com escopo, todos com ponte"
+      },
+      {
+        "text": "U4: gate existe, LF, executavel",
+        "passed": true,
+        "evidence": "existe, LF, executavel"
+      },
+      {
+        "text": "U5: gate bloqueia destrutivo (exit 2)",
+        "passed": true,
+        "evidence": "exit 2"
+      },
+      {
+        "text": "U6: gate libera comando seguro (exit 0)",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "text": "U7: settings.json com wrapper hooks",
+        "passed": true,
+        "evidence": "chave 'hooks' presente"
+      },
+      {
+        "text": "U8: hooks do Devin e do Cursor parseiam",
+        "passed": true,
+        "evidence": "todos parseiam"
+      },
+      {
+        "text": "U9: manifesto confere com o disco",
+        "passed": true,
+        "evidence": "18 arquivos, todos no disco"
+      },
+      {
+        "text": "U10: nenhum marcador preenchivel sobrou",
+        "passed": false,
+        "evidence": ".claude/hooks/format-on-edit.sh:<file_glob>(comentario); .claude/hooks/format-on-edit.sh:<formatter_bin>(comentario); .claude/hooks/format-on-edit.sh:<formatter_command>(comentario); .claude/hooks/format-on-edit.sh:<sln>(comentario)"
+      },
+      {
+        "text": "U11: comando /dod",
+        "passed": true,
+        "evidence": "presente"
+      },
+      {
+        "text": "U12: init.sh executavel",
+        "passed": true,
+        "evidence": "executavel"
+      },
+      {
+        "text": "U13: SESSION_STATE.md",
+        "passed": true,
+        "evidence": "presente"
+      },
+      {
+        "text": "S1: NAO gerou pre-commit (DoD vazia)",
+        "passed": true,
+        "evidence": "ausente"
+      },
+      {
+        "text": "S2: NAO gerou workflow de CI",
+        "passed": true,
+        "evidence": "ausente"
+      },
+      {
+        "text": "S3: nao inventou comando de teste",
+        "passed": true,
+        "evidence": "DoD honesta: 'Concluído = TODOS passam:\\n```\\n# TODO: definir comando de teste\\n# TODO: definir c'"
+      },
+      {
+        "text": "S4: remediacao cita funcao pura pelo nome",
+        "passed": true,
+        "evidence": "citou ['margem_percentual', 'normalizar_cnpj', 'agrupar_por_vendedor', 'faixa_de_comissao']"
+      },
+      {
+        "text": "S5: remediacao trata dep de sistema do entrypoint",
+        "passed": true,
+        "evidence": "mencionou ['conftest', 'stub', 'openpyxl', 'requests']"
+      }
+    ],
+    "tem_relatorio": true
+  },
+  "sem-sensores/v24": {
+    "caso": "sem-sensores",
+    "repo": "/private/tmp/claude-501/-Users-arthur-claude-harness-creator/60110924-1406-4416-b658-61a3ed4b5c00/scratchpad/hc-workspace/iteration-2/eval-sem-sensores/v24/repo",
+    "passaram": 18,
+    "total": 18,
+    "expectations": [
+      {
+        "text": "U1: AGENTS.md na raiz",
+        "passed": true,
+        "evidence": "presente"
+      },
+      {
+        "text": "U2: ponte CLAUDE.md na raiz",
+        "passed": true,
+        "evidence": "import na raiz encontrado"
+      },
+      {
+        "text": "U3: AGENTS.md com escopo + ponte",
+        "passed": true,
+        "evidence": "1 com escopo, todos com ponte"
+      },
+      {
+        "text": "U4: gate existe, LF, executavel",
+        "passed": true,
+        "evidence": "existe, LF, executavel"
+      },
+      {
+        "text": "U5: gate bloqueia destrutivo (exit 2)",
+        "passed": true,
+        "evidence": "exit 2"
+      },
+      {
+        "text": "U6: gate libera comando seguro (exit 0)",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "text": "U7: settings.json com wrapper hooks",
+        "passed": true,
+        "evidence": "chave 'hooks' presente"
+      },
+      {
+        "text": "U8: hooks do Devin e do Cursor parseiam",
+        "passed": true,
+        "evidence": "todos parseiam"
+      },
+      {
+        "text": "U9: manifesto confere com o disco",
+        "passed": true,
+        "evidence": "18 arquivos, todos no disco"
+      },
+      {
+        "text": "U10: nenhum marcador preenchivel sobrou",
+        "passed": true,
+        "evidence": "nenhum marcador sobrou"
+      },
+      {
+        "text": "U11: comando /dod",
+        "passed": true,
+        "evidence": "presente"
+      },
+      {
+        "text": "U12: init.sh executavel",
+        "passed": true,
+        "evidence": "executavel"
+      },
+      {
+        "text": "U13: SESSION_STATE.md",
+        "passed": true,
+        "evidence": "presente"
+      },
+      {
+        "text": "S1: NAO gerou pre-commit (DoD vazia)",
+        "passed": true,
+        "evidence": "ausente"
+      },
+      {
+        "text": "S2: NAO gerou workflow de CI",
+        "passed": true,
+        "evidence": "ausente"
+      },
+      {
+        "text": "S3: nao inventou comando de teste",
+        "passed": true,
+        "evidence": "DoD honesta: 'Concluído = TODOS passam:\\n```\\n# TODO: definir comando de teste\\n# TODO: definir c'"
+      },
+      {
+        "text": "S4: remediacao cita funcao pura pelo nome",
+        "passed": true,
+        "evidence": "citou ['margem_percentual', 'normalizar_cnpj', 'agrupar_por_vendedor', 'faixa_de_comissao']"
+      },
+      {
+        "text": "S5: remediacao trata dep de sistema do entrypoint",
+        "passed": true,
+        "evidence": "mencionou ['conftest', 'stub', 'openpyxl', 'requests']"
+      }
+    ],
+    "tem_relatorio": true
+  }
+}
