@@ -146,6 +146,7 @@ a separacao existe para poupar.
 
 ## 📚 Referencias
 
+- [Atualizacao de harness existente (quando ha `.claude/harness.json`)](references/atualizacao.md)
 - [Ecossistemas (comandos, lockfiles e globs por stack)](references/ecossistemas.md)
 - [Catalogo de remediacoes (o que recomendar e a quem cabe decidir)](references/remediacoes.md)
 - [Arquivos gerados (templates e destinos)](references/arquivos-gerados.md)

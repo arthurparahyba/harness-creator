@@ -509,6 +509,27 @@ def test_existe_exatamente_uma_pausa_no_fluxo() -> None:
     assert com_pausa == ["04-saida-aprovacao.md"], f"pausas em: {com_pausa}"
 
 
+def test_modo_de_atualizacao_e_alcancavel_das_fases_que_o_usam() -> None:
+    """O manifesto existe desde a v2.3 e nenhuma fase o usava para atualizar.
+
+    O caminho só vale se a FASE 1 souber encurtar a descoberta e a FASE 3
+    souber que a regra de não sobrescrever não se aplica ao que a própria
+    skill gerou. Citado só na SKILL.md, o catálogo nunca é aberto na hora
+    em que decide alguma coisa.
+    """
+    for fase in ("01-descoberta.md", "03-resolucao-conflitos.md"):
+        assert "atualizacao.md" in (REFERENCES / fase).read_text(), (
+            f"{fase} não alcança o modo de atualização"
+        )
+
+
+def test_atualizacao_preserva_as_recusas_anteriores() -> None:
+    """Repropor um item recusado é a skill ignorando decisão já tomada — e
+    uma recusa não expira porque a skill mudou de versão."""
+    texto = (REFERENCES / "atualizacao.md").read_text()
+    assert "recusados" in texto and "repropor" in texto
+
+
 def test_agents_scoped_nao_carrega_o_protocolo() -> None:
     """O AGENTS.md com escopo é escopo, não protocolo: duplicado, ele diverge
     do da raiz na primeira edição."""

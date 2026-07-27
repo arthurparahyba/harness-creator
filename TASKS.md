@@ -103,18 +103,18 @@ Verificação: `pytest -q && ruff check . && mypy` — 249 testes
       que nenhuma fase alcança: harness já instalado que falha em silêncio
 Verificação: `pytest -q && ruff check . && mypy` — 251 testes
 
-## Grupo 12 - Atualizar harness existente (depende: Grupo 11)
+## Grupo 12 - Atualizar harness existente (depende: Grupo 11) ✅
 <!-- O manifesto `.claude/harness.json` existe desde o Grupo 9 e ninguém o
      usa para atualizar: o fluxo continua sendo o de 6 fases do zero. A prova
      está no SESSION_STATE deste repo — o harness local está desatualizado e
      não foi regenerado porque regenerar custa uma execução inteira. -->
-- [ ] 12.1 `references/atualizacao.md` (catálogo, não fase): lê o manifesto,
-      compara versões e propõe só o delta
-- [ ] 12.2 FASE 1 e FASE 3 bifurcam para o catálogo quando `harness.json`
-      existe, sem criar uma segunda pausa no fluxo
-- [ ] 12.3 Teste de que o modo de atualização não introduz `PAUSA` fora da
-      FASE 4 e de que o catálogo é alcançável por link
-Verificação: `pytest -q && ruff check . && mypy`
+- [x] 12.1 `references/atualizacao.md` (catálogo, não fase): lê o manifesto,
+      classifica cada arquivo em gerado/editado/do usuário e propõe só o delta
+- [x] 12.2 FASE 1 (passo 0) e FASE 3 bifurcam para o catálogo quando
+      `harness.json` existe, sem criar uma segunda pausa no fluxo
+- [x] 12.3 Testes de alcançabilidade do catálogo a partir das duas fases que
+      o usam e de que as recusas anteriores não são reprópostas
+Verificação: `pytest -q && ruff check . && mypy` — 253 testes
 
 ## Grupo 13 - FASE 4 sem despejo de conteúdo (depende: Grupo 11)
 - [ ] 13.1 Apresentar resumo por arquivo (destino + o que muda + valores

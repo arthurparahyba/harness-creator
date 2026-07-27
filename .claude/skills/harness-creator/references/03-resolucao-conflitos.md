@@ -56,12 +56,12 @@ template onde houver sobreposição.
   Adicionar `code-reviewer.md` apenas se não houver nenhum subagente.
 - **`LICENSE` já existe**: não sobrescrever.
 - **`.claude/harness.json` já existe**: o repositório já recebeu um harness
-  desta skill. Ler o manifesto ANTES de resolver os demais conflitos: os
-  arquivos listados em `arquivos` foram gerados pela skill e podem ser
-  atualizados; os que não estão na lista são do usuário e seguem a regra
-  normal de não sobrescrever. Comparar `versao` com a atual e apresentar na
-  FASE 4 o que mudou entre as duas. Os itens de `recusados` **não voltam a
-  ser propostos** — o usuário já decidiu.
+  desta skill, e as regras acima não se aplicam sozinhas — a de não
+  sobrescrever congelaria justamente os arquivos que a skill deveria
+  atualizar. Ler o manifesto ANTES de resolver os demais conflitos e seguir
+  a classificação de [atualizacao.md](atualizacao.md), que separa o que a
+  skill gerou do que o usuário escreveu ou editou depois. Os itens de
+  `recusados` **não voltam a ser propostos** — o usuário já decidiu.
 
 ---
 
