@@ -84,3 +84,42 @@ Verificação: `pytest -q && ruff check . && mypy` — 239 testes
 - [x] 10.3 `<checks-do-repo>` no `code-reviewer`: checklist derivado das
       convenções reais, universais fixos
 Verificação: `pytest -q && ruff check . && mypy` — 249 testes
+
+<!-- Grupos 11-13: análise da skill sob a ótica do skill-creator (2026-07-27).
+     Os três atacam a camada de instrução — o que o modelo lê para executar a
+     skill. O 11 vem primeiro porque enxuga o arquivo que os outros dois
+     editam. Segue aberto o achado nº1 da análise: nada mede a skill sendo
+     EXECUTADA por um modelo (`tests/gerar.py` é uma reimplementação da FASE 2
+     em Python, não a skill) — isso é o Grupo 14, ainda por planejar. -->
+
+## Grupo 11 - Enxugar a SKILL.md e destravar os catálogos ✅
+- [x] 11.1 Remover "Quando ativar esta skill" do corpo: duplica a
+      `description` e só carrega DEPOIS do trigger, então não influencia
+      disparo nenhum. No lugar, a fronteira fluxo completo × edição pontual
+- [x] 11.2 Regra 5 passa a permitir os catálogos que a fase citar — hoje ela
+      contradiz a FASE 1, que manda consultar `ecossistemas.md` e
+      `remediacoes.md`
+- [x] 11.3 Troubleshooting de 19 linhas vira diagnóstico de 5, restrito ao
+      que nenhuma fase alcança: harness já instalado que falha em silêncio
+Verificação: `pytest -q && ruff check . && mypy` — 251 testes
+
+## Grupo 12 - Atualizar harness existente (depende: Grupo 11)
+<!-- O manifesto `.claude/harness.json` existe desde o Grupo 9 e ninguém o
+     usa para atualizar: o fluxo continua sendo o de 6 fases do zero. A prova
+     está no SESSION_STATE deste repo — o harness local está desatualizado e
+     não foi regenerado porque regenerar custa uma execução inteira. -->
+- [ ] 12.1 `references/atualizacao.md` (catálogo, não fase): lê o manifesto,
+      compara versões e propõe só o delta
+- [ ] 12.2 FASE 1 e FASE 3 bifurcam para o catálogo quando `harness.json`
+      existe, sem criar uma segunda pausa no fluxo
+- [ ] 12.3 Teste de que o modo de atualização não introduz `PAUSA` fora da
+      FASE 4 e de que o catálogo é alcançável por link
+Verificação: `pytest -q && ruff check . && mypy`
+
+## Grupo 13 - FASE 4 sem despejo de conteúdo (depende: Grupo 11)
+- [ ] 13.1 Apresentar resumo por arquivo (destino + o que muda + valores
+      preenchidos); conteúdo integral só para o que sobrescreve ou dá append
+      em arquivo do usuário
+- [ ] 13.2 Teste de que a FASE 4 exige o conteúdo integral justamente nos
+      casos destrutivos, que são os que o usuário precisa auditar
+Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`

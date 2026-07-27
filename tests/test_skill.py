@@ -353,6 +353,28 @@ def test_frontmatter_nao_tem_campo_inerte() -> None:
     assert not presentes, f"campo inerte de volta no frontmatter: {sorted(presentes)}"
 
 
+def test_corpo_nao_repete_a_lista_de_gatilhos_da_description() -> None:
+    """Triggering se decide pela `description`; o corpo so carrega DEPOIS.
+
+    A secao "Quando ativar esta skill" repetia a description quase palavra
+    por palavra — nove linhas que nao influenciam disparo nenhum e que
+    disputam contexto com o roteiro das fases, que e o que o agente
+    realmente precisa ter em maos depois que a skill ja disparou.
+    """
+    corpo = SKILL.joinpath("SKILL.md").read_text().split("---", 2)[-1]
+    assert "## Quando ativar" not in corpo, (
+        "lista de gatilhos de volta no corpo: ela pertence a `description`"
+    )
+
+
+def test_skill_distingue_fluxo_completo_de_edicao_pontual() -> None:
+    """Sem essa fronteira, "acrescente uma linha no AGENTS.md" recebe seis
+    fases e uma pausa de aprovacao — um ritual que o usuario nao pediu e que
+    gasta a sessao dele."""
+    corpo = SKILL.joinpath("SKILL.md").read_text().split("---", 2)[-1]
+    assert "edicao pontual" in corpo, "fronteira de escopo perdida na SKILL.md"
+
+
 def test_regras_inviolaveis_estao_no_corpo() -> None:
     """As regras saíram do frontmatter para o corpo — não podem ter sumido."""
     corpo = SKILL.joinpath("SKILL.md").read_text().split("---", 2)[-1]
