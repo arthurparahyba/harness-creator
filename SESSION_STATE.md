@@ -3,11 +3,15 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: (repositório ainda não é git — `git init` pendente)
+- Commit verificado: `94c0ddd` — "checkpoint: harness inicial", publicado em
+  github.com/arthurparahyba/harness-creator (branch `main`, repo público)
 - Testes: 249/249 passando (`pytest -q`); ruff e mypy strict limpos
-- Change/plano ativo: TASKS.md na raiz (Grupos 2, 4, 6, 7, 8, 9, 10 concluídos)
+- CI: run 30265616998 verde nos 8 steps do `harness-dod.yml`, no primeiro push
+- Change/plano ativo: TASKS.md na raiz (Grupos 1, 2, 4, 6, 7, 8, 9, 10 concluídos)
 - Em andamento: nada — fronteira limpa
-- Não commitado: tudo (sem git)
+- Não commitado: só o arquivo `-c` na raiz, lixo de execução manual antiga de
+  teste (contém "FORMATADO" repetido, do formatador falso). Deixado fora do
+  commit de propósito; remover com `rm ./-c` se confirmar que não serve.
 - Maturidade: L4 · Self-correcting, 105/108 (`npx -y harness-score`);
   geração medida em 8 ecossistemas, +64 a +67 pontos (`python3 tests/medir.py`),
   inalterada pela revisão — como esperado, ela corrigiu defeitos, não mexeu

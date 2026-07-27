@@ -3,11 +3,12 @@
      Mesmo contrato de formato definido no AGENTS.md: grupos de 2-5
      tasks, verificação por grupo, dependências entre grupos. -->
 
-## Grupo 1 - Versionar o harness
-- [ ] 1.1 `git init` e primeiro commit `checkpoint: harness inicial`
-- [ ] 1.2 Confirmar que `.gitignore` cobre os caches de ferramenta
-- [ ] 1.3 Confirmar que `harness-dod.yml` roda verde no primeiro push
+## Grupo 1 - Versionar o harness ✅
+- [x] 1.1 `git init` e primeiro commit `checkpoint: harness inicial`
+- [x] 1.2 Confirmar que `.gitignore` cobre os caches de ferramenta
+- [x] 1.3 Confirmar que `harness-dod.yml` roda verde no primeiro push
 Verificação: `pytest -q && ruff check . && mypy && npx -y harness-score --min-level 4 --quiet`
+— commit 94c0ddd, run 30265616998 verde nos 8 steps
 
 ## Grupo 2 - Cobrir a geração, não só os templates ✅
 - [x] 2.1 Fixtures de 8 ecossistemas em `tests/fixtures/`
