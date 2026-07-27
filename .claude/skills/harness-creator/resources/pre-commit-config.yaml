@@ -35,9 +35,9 @@
 #
 #   .NET/C# (dotnet format + build):
 #     - id: dotnet-format
-#       entry: bash -c 'dotnet format <sln> --verify-no-changes'
+#       entry: bash -c 'dotnet format SOLUCAO.sln --verify-no-changes'
 #     - id: dotnet-build
-#       entry: bash -c 'dotnet build <sln> -c Release'
+#       entry: bash -c 'dotnet build SOLUCAO.sln -c Release'
 #
 #   Java (spotless + checkstyle):
 #     - id: spotless-check

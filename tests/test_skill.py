@@ -509,6 +509,96 @@ def test_existe_exatamente_uma_pausa_no_fluxo() -> None:
     assert com_pausa == ["04-saida-aprovacao.md"], f"pausas em: {com_pausa}"
 
 
+def test_marcador_preenchivel_nunca_aparece_em_comentario_de_template() -> None:
+    """Marcador em comentário E em corpo é uma contradição sem saída.
+
+    A regra 3 manda transcrever VERBATIM, e o item 6 da FASE 5 proíbe o
+    marcador de sobrar. Com o marcador dentro do cabeçalho didático, cumprir
+    uma quebra a outra — e a substituição ainda grava a instrução falsa
+    "PLACEHOLDER: prettier --write deve ser substituido pela skill" no repo
+    do usuário. Na iteração 1 do nível D, seis agentes bateram nisso e
+    metade apagou o cabeçalho, metade o preservou: a geração passou a
+    depender de qual saída o modelo escolheu.
+
+    O `ci-workflow.yml` já se defendia disso; a defesa não tinha sido
+    aplicada aos demais templates.
+    """
+    culpados = []
+    for p in RESOURCES.rglob("*"):
+        if not p.is_file() or b"\0" in p.read_bytes()[:8192]:
+            continue
+        # Em Markdown `#` é título, não comentário: o marcador ali é conteúdo
+        # a substituir, não documentação. Só `<!-- -->` comenta em .md.
+        prefixos = ("<!--",) if p.suffix == ".md" else ("#", "<!--")
+        for n, linha in enumerate(p.read_text().splitlines(), 1):
+            if not linha.lstrip().startswith(prefixos):
+                continue
+            for marcador in PREENCHIVEIS:
+                if marcador in linha:
+                    culpados.append(f"{p.relative_to(RESOURCES)}:{n} {marcador}")
+    assert culpados == [], f"marcador preenchivel em comentario: {culpados}"
+
+
+def test_format_hook_sobrevive_a_ausencia_de_formatter(tmp_path: Path) -> None:
+    """Sem formatter, o hook tem de virar no-op — não morrer.
+
+    `# TODO: definir formatter` era a instrução da FASE 2, e o marcador do
+    binário fica dentro de `if command -v ... ; then`: o `#` comenta o resto
+    da linha, inclusive o `then`. O script passa a falhar com erro de
+    sintaxe a cada edição de arquivo, e nenhum item da FASE 5 acusa.
+    """
+    script, env = _preparar_format_hook(tmp_path, "*.py")
+    texto = script.read_text().replace(str(tmp_path / "formatador-falso"), "formatter-nao-definido")
+    script.write_text(texto.replace("formatador-falso", "formatter-nao-definido"))
+    alvo = tmp_path / "modulo.py"
+    alvo.write_text("x = 1\n")
+    r = subprocess.run(
+        ["bash", str(script)],
+        input=json.dumps({"tool_name": "Edit", "tool_input": {"file_path": str(alvo)}}),
+        capture_output=True,
+        text=True,
+        env=env,
+        check=False,
+    )
+    assert r.returncode == 0, f"hook sem formatter quebrou: {r.stderr.strip()[:200]}"
+    assert "syntax error" not in r.stderr, r.stderr
+    assert alvo.read_text() == "x = 1\n", "no-op deveria deixar o arquivo intacto"
+
+
+def test_fase2_proibe_todo_dentro_do_hook_de_formatacao() -> None:
+    """A instrução que causava o bug não pode voltar por descuido."""
+    fase2 = (REFERENCES / "02-preenchimento-templates.md").read_text()
+    assert "formatter-nao-definido" in fase2, "FASE 2 sem o preenchimento seguro"
+
+
+def test_template_agents_nao_traz_restricao_sem_evidencia() -> None:
+    """`MUST NOT` fora de `<restrição N>` é regra inventada em todo repo.
+
+    A de migrations vinha fixa e chegava em repositório sem banco nenhum.
+    Regra sem evidência ensina o leitor a ignorar a lista inteira.
+    """
+    # As fixas permitidas são as do PROTOCOLO, que valem em qualquer
+    # repositório porque falam do próprio jeito de trabalhar — não do domínio.
+    # A allowlist é explícita de propósito: acrescentar uma exige justificar
+    # por que ela vale para todo repo do mundo, que é a pergunta certa.
+    do_protocolo = ("fonte de trabalho ativa", "escopo do grupo atual")
+    # Bullets quebram em várias linhas, e a continuação costuma carregar
+    # justamente o trecho que identifica a regra: avaliar linha a linha
+    # acusaria a primeira metade de uma regra legítima.
+    bullets: list[str] = []
+    for ln in (RESOURCES / "AGENTS.md").read_text().splitlines():
+        if ln.strip().startswith("- "):
+            bullets.append(ln.strip())
+        elif bullets and ln.startswith("  ") and ln.strip():
+            bullets[-1] += " " + ln.strip()
+    inventadas = [
+        b
+        for b in bullets
+        if b.startswith("- MUST NOT:") and "<" not in b and not any(p in b for p in do_protocolo)
+    ]
+    assert inventadas == [], f"restrição sem evidência fixa no template: {inventadas}"
+
+
 def test_fase4_exige_conteudo_integral_no_que_destroi_trabalho_do_usuario() -> None:
     """A FASE 4 mostra resumo do que é novo e diff do que altera arquivo do
     usuário — a regra não pode degenerar em "resuma tudo".

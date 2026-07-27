@@ -63,6 +63,12 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
 - `<MUST NOT>`: 3-6 restrições derivadas de convenções REAIS encontradas
   (ex.: padrão de acesso a dados, ferramenta de migration). Nunca inventar
   restrições genéricas sem evidência.
+  - "Não alterar migrations já aplicadas — criar nova" é uma boa restrição
+    **quando a Fase 1 encontrou ferramenta de migration**, e entra como uma
+    das `<restrição N>`. Ela já esteve fixa no template, fora de placeholder:
+    todo repositório recebia uma regra sobre um banco que muitos não têm, e
+    o agente que transcrevia VERBATIM violava a regra de não inventar
+    restrição. Restrição sem evidência ensina o leitor a ignorar a lista.
 - Descrição do projeto e stack no topo do AGENTS.md, e comandos do
   init.sh: conforme a Fase 1, com a fonte citada.
 - `<branch-base>`: o nome real descoberto no item 19 da Fase 1 — o default
@@ -148,12 +154,20 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
 
 - `<dod-command>` no `dod-command.md`: o MESMO comando da DoD do AGENTS.md.
 - `<formatter_command>` no `format-on-edit.sh`: comando de formatação da
-  linguagem detectada (ex: `black --quiet` para Python, `prettier --write`
-  para JS). Se nenhum formatter for detectado, usar `# TODO: definir
-  formatter` e registrar como pendência.
+  linguagem detectada, **conforme a coluna Formatter de
+  [ecossistemas.md](ecossistemas.md)** — ela é a fonte única (ex.: Python é
+  `ruff format`; JS/TS é `prettier --write`).
 - `<formatter_bin>` no `format-on-edit.sh`: nome do binário do formatter
-  (ex: `black`, `prettier`, `gofmt`, `rustfmt`). É testado com
+  (ex.: `ruff`, `prettier`, `gofmt`, `rustfmt`). É testado com
   `command -v`, então precisa ser o executável, não a linha inteira.
+- **Sem formatter detectado**, preencher os DOIS com `formatter-nao-definido`
+  e registrar a pendência no relatório. O `command -v` falha, o hook vira um
+  no-op e o script continua válido.
+  Nunca preencher com `# TODO`: o marcador do binário fica dentro da linha
+  `if command -v ... ; then`, e o `#` comenta o resto dela — inclusive o
+  `then`. O resultado é um `format-on-edit.sh` com erro de sintaxe que morre
+  a cada edição de arquivo, e nenhum item da FASE 5 acusa isso. O `# TODO`
+  é honesto no AGENTS.md, onde é texto; dentro de shell ele é um bug.
 - `<sln>` (somente .NET): caminho do `.sln` ou do `.csproj` principal
   descoberto na Fase 1. Aparece nos exemplos de DoD, de pre-commit e no
   `format-on-edit.sh` da stack .NET. Se sobreviver à geração, todo comando

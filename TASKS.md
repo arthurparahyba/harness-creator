@@ -150,24 +150,25 @@ Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
 Verificação: `pytest -q && ruff check . && mypy` + relatório de grading
 — 254 testes verdes; grading em `evals/iteracao-1/grading.json` (97/100)
 
-## Grupo 15 - Contradições que só a execução revelou (depende: Grupo 14)
+## Grupo 15 - Contradições que só a execução revelou (depende: Grupo 14) ✅
 <!-- Achados da iteração 1 do nível D. Seis agentes independentes, três
      ecossistemas, duas versões da skill — todos bateram nos mesmos pontos.
      Nenhum é detectável pelos 254 testes: só aparecem quando alguém tenta
      OBEDECER a instrução. Ordem: o 15.1 primeiro porque é o que faz a
      geração oscilar entre execuções. -->
-- [ ] 15.1 Marcador em cabeçalho de comentário: `format-on-edit.sh` traz
+- [x] 15.1 Marcador em cabeçalho de comentário: `format-on-edit.sh` traz
       `<formatter_command>`/`<file_glob>`/`<sln>` no comentário E no corpo.
       Regra 3 (VERBATIM) contra FASE 5 item 6 — decidir qual cede e aplicar
-      a mesma defesa que o `ci-workflow.yml` já tem. Teste que impede
-      marcador preenchível de aparecer em comentário de qualquer template
-- [ ] 15.2 `resources/AGENTS.md:59`: `MUST NOT: alterar migrations já
+      a mesma defesa que o `ci-workflow.yml` já tem. O teste novo achou mais
+      4 ocorrências além da relatada (`init.sh`, `.pre-commit-config.yaml`)
+- [x] 15.2 `resources/AGENTS.md:59`: `MUST NOT: alterar migrations já
       aplicadas` vira `<restrição N>` ou some. Hoje é regra inventada
       transcrita verbatim em repo sem banco
-- [ ] 15.3 `# TODO: definir formatter` dentro de `if command -v ...; then`
-      comenta o `then` e mata o hook com erro de sintaxe. Escolher forma que
-      degrade sem quebrar, com teste que execute o script gerado sem formatter
-Verificação: `pytest -q && ruff check . && mypy`
+- [x] 15.3 `# TODO: definir formatter` dentro de `if command -v ...; then`
+      comenta o `then` e mata o hook com erro de sintaxe. Passa a preencher
+      com `formatter-nao-definido`: o `command -v` falha e o hook vira no-op
+Verificação: `pytest -q && ruff check . && mypy` — 258 testes; medição nas
+8 fixtures inalterada (+64 a +67)
 
 ## Grupo 16 - Checagens insatisfazíveis e fontes divergentes (depende: Grupo 15)
 - [ ] 16.1 FASE 5 item 8: "DoD IDÊNTICA em 6 arquivos" é impossível por
