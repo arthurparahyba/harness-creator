@@ -224,7 +224,7 @@ Verificação: `pytest -q && ruff check . && mypy` — 269 testes (+5).
 SKILL.md: 169 → 181 linhas. Cresceu de propósito: saíram ~30 linhas de
 repetição e entraram modos de falhar e exemplos, que é conteúdo novo.
 
-## Grupo 19 - FASE 5 executável em vez de checklist (depende: Grupo 16)
+## Grupo 19 - FASE 5 executável em vez de checklist ✅
 <!-- Achado nº1 desta análise. Os 19 itens da FASE 5 são quase todos
      determinísticos, e as assertions U1-U12 do nível D são os mesmos checks
      escritos de novo. Hoje todo invocation reescreve esse shell do zero e o
@@ -234,20 +234,22 @@ repetição e entraram modos de falhar e exemplos, que é conteúdo novo.
      16.1 e 16.2 corrigem justamente dois dos itens a automatizar — script
      antes disso codifica uma regra insatisfazível e um teste que se
      auto-bloqueia. -->
-- [ ] 19.1 `resources/verificar-harness.sh` (POSIX shell) cobrindo os itens
+- [x] 19.1 `resources/verificar-harness.sh` (POSIX shell) cobrindo os itens
       determinísticos: JSON parseia, CRLF, bit de execução, gate nos dois
       caminhos, wrapper `hooks`, caminhos do manifesto, ponte `@AGENTS.md`,
       marcadores da lista nominal, credencial literal
-- [ ] 19.2 FASE 5 passa a chamar o script e fica só com o que exige
+- [x] 19.2 FASE 5 passa a chamar o script e fica só com o que exige
       julgamento: por que cada check importa, o que fazer quando um falha, e
       os itens não automatizáveis (tempo da DoD, remediações aceitas rodando,
       AGENTS.md com escopo não duplicando o protocolo)
-- [ ] 19.3 `evals/gradua.py` passa a chamar o mesmo script nas assertions
+- [x] 19.3 `evals/gradua.py` passa a chamar o mesmo script nas assertions
       U1-U12, para skill e eval não poderem divergir
-- [ ] 19.4 O script entra em `references/arquivos-gerados.md` e no manifesto
+- [x] 19.4 O script entra em `references/arquivos-gerados.md` e no manifesto
       `.claude/harness.json` — é artefato entregue ao repo alvo junto com os
       hooks, não ferramenta interna da skill
 Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
+— 275 testes (+6); verificador 11/11 nos 8 ecossistemas gerados e 4/11 em
+diretório sem harness; medição inalterada
 
 ## Grupo 20 - Medir o disparo da skill (depende: Grupo 18)
 <!-- Pendência mais antiga do SESSION_STATE: a `description` nunca foi

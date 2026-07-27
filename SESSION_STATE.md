@@ -6,9 +6,11 @@
 - Commit verificado: Grupo 16 na branch `feature/grupos-16-a-20`, criada a
   partir da `main` em `2e3be23` (merge do PR #1, que trouxe os Grupos 11-15
   e o plano dos 18-20)
-- Testes: 264/264 passando (`pytest -q`, +6 no Grupo 16); ruff e mypy strict
-  limpos; medição inalterada (+64 a +67 nos 8 ecossistemas)
-- Change/plano ativo: TASKS.md na raiz (Grupos 1, 2, 4, 6–16 concluídos)
+- Testes: 275/275 passando (`pytest -q`); ruff e mypy strict limpos; medição
+  inalterada (+64 a +67 nos 8 ecossistemas). O verificador novo dá 11/11 nos
+  8 ecossistemas gerados e 4/11 em diretório sem harness
+- Change/plano ativo: TASKS.md na raiz (Grupos 1, 2, 4, 6–16, 18, 19
+  concluídos)
 - Em andamento: sequência 16 → 18 → 19 → 20 a pedido do usuário, que dispensou
   explicitamente a parada entre grupos. O commit por grupo verificado continua
   valendo

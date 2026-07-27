@@ -318,13 +318,19 @@ def gerar(nome: str, destino: Path) -> Stack:
         ("devin-hooks.json", ".devin/hooks.v1.json"),
         ("cursor-hooks.json", ".cursor/hooks.json"),
         ("hooks/gate-destructive.sh", ".claude/hooks/gate-destructive.sh"),
+        ("verificar-harness.sh", ".claude/verificar-harness.sh"),
         ("skills/executar-grupo/SKILL.md", ".claude/skills/executar-grupo/SKILL.md"),
         ("CLAUDE.md", "CLAUDE.md"),
         ("CLAUDE.md", f"{stack.dir_escopo}/CLAUDE.md"),
     ]:
         _grava(destino, alvo, (RESOURCES / origem).read_text())
 
-    scripts = ("init.sh", ".claude/hooks/gate-destructive.sh", ".claude/hooks/format-on-edit.sh")
+    scripts = (
+        "init.sh",
+        ".claude/hooks/gate-destructive.sh",
+        ".claude/hooks/format-on-edit.sh",
+        ".claude/verificar-harness.sh",
+    )
     for script in scripts:
         (destino / script).chmod(0o755)
 

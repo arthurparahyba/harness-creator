@@ -9,6 +9,7 @@ outra pessoa.
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -720,6 +721,90 @@ def test_criacao_de_branch_funciona_em_repo_sem_remoto() -> None:
     antes de qualquer trabalho."""
     texto = (RESOURCES / "AGENTS.md").read_text()
     assert "git remote" in texto, "git pull sem guarda para repo sem remoto"
+
+
+VERIFICADOR = RESOURCES / "verificar-harness.sh"
+
+
+def test_verificador_aprova_harness_recem_gerado(tmp_path: Path) -> None:
+    """O verificador é a FASE 5 executável. Se ele reprova o que a própria
+    skill acabou de gerar, ou ele está errado ou a geração está — e nos dois
+    casos o usuário recebe um harness que se declara quebrado."""
+    import gerar
+
+    repo = tmp_path / "node"
+    gerar.gerar("node", repo)
+    r = subprocess.run(
+        ["sh", str(VERIFICADOR), "--raiz", str(repo)], capture_output=True, text=True
+    )
+    assert r.returncode == 0, f"verificador reprovou geração limpa:\n{r.stdout}"
+
+
+def test_verificador_reprova_repo_sem_harness(tmp_path: Path) -> None:
+    """Checagem que passa em diretório vazio não mede nada. As de ponte e de
+    hooks registrados passavam por vacuidade: sem nenhum AGENTS.md, "todo
+    AGENTS.md tem irmão" é verdade e não significa coisa alguma."""
+    r = subprocess.run(
+        ["sh", str(VERIFICADOR), "--raiz", str(tmp_path)], capture_output=True, text=True
+    )
+    assert r.returncode == 1, "verificador aprovou diretório sem harness nenhum"
+    for check in ("Ponte CLAUDE.md", "Hooks registrados"):
+        linha = next(ln for ln in r.stdout.splitlines() if check in ln)
+        assert linha.startswith("FALHA"), f"passou por vacuidade: {linha}"
+
+
+def test_verificador_nao_depende_de_python(tmp_path: Path) -> None:
+    """Ele roda no repositório do usuário, que pode ser Go, .NET ou Java. Foi
+    o mesmo motivo que fez o Grupo 6 tirar o Python do gate: exigi-lo
+    transformava o enforcement em erro de setup."""
+    import gerar
+
+    repo = tmp_path / "go"
+    gerar.gerar("go", repo)
+    # Stub que se anuncia como Python e não roda: é o caso real (binário
+    # presente mas quebrado, como o stub da MS Store) e isola a variável sem
+    # amputar o resto do PATH, que o script legitimamente usa.
+    falso = tmp_path / "bin-sem-python"
+    falso.mkdir()
+    for nome in ("python3", "python"):
+        stub = falso / nome
+        stub.write_text("#!/bin/sh\nexit 1\n")
+        stub.chmod(0o755)
+    env = {**os.environ, "PATH": f"{falso}:{os.environ['PATH']}"}
+    r = subprocess.run(
+        ["sh", str(VERIFICADOR), "--raiz", str(repo)],
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+    assert r.returncode == 0, f"verificador falhou sem Python no PATH:\n{r.stdout}\n{r.stderr}"
+    assert "sem Python" in r.stdout, "não anunciou que caiu na checagem mais fraca"
+
+
+def test_verificador_nao_carrega_marcador_preenchivel() -> None:
+    """Ele é template como os outros: um marcador escrito por extenso seria
+    substituído pela FASE 2 dentro do próprio script, corrompendo a lista que
+    ele usa para detectar marcadores que sobraram."""
+    texto = VERIFICADOR.read_text()
+    presentes = [m for m in PREENCHIVEIS if m in texto]
+    assert presentes == [], f"marcador literal no verificador: {presentes}"
+
+
+def test_fase5_delega_as_checagens_mecanicas_ao_verificador() -> None:
+    """Dezenove itens em prosa dependem de o modelo ter paciência com os
+    dezenove. O que é mecânico vira script; o que sobra na fase é o que exige
+    julgamento — e aí a prosa está justificada."""
+    texto = (REFERENCES / "05-verificacao-pos-geracao.md").read_text()
+    assert "verificar-harness.sh" in texto, "FASE 5 não chama o verificador"
+    for julgamento in ("Tempo da DoD", "Equivalência da DoD", "Remediações aceitas"):
+        assert julgamento in texto, f"item de julgamento perdido da FASE 5: {julgamento}"
+
+
+def test_eval_e_skill_verificam_pela_mesma_fonte() -> None:
+    """Duas implementações da mesma checagem divergem, e aí o eval aprova o
+    que o verificador reprova sem ninguém saber qual está certo."""
+    texto = (RAIZ / "evals" / "gradua.py").read_text()
+    assert "verificar-harness.sh" in texto, "gradua.py voltou a reimplementar as checagens"
 
 
 def test_triagem_de_escopo_nao_e_contradita_pelo_resto_do_corpo() -> None:

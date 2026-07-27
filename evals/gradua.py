@@ -21,19 +21,10 @@ import sys
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(RAIZ / "tests"))
-
-from gerar import PREENCHIVEIS  # noqa: E402
 
 Resultado = tuple[bool, str]
 
 IGNORAR = {".git", "node_modules", "__pycache__", ".venv"}
-
-
-def _arquivos(repo: Path) -> list[Path]:
-    return [
-        p for p in repo.rglob("*") if p.is_file() and not IGNORAR & set(p.relative_to(repo).parts)
-    ]
 
 
 def _texto(p: Path) -> str:
@@ -41,24 +32,6 @@ def _texto(p: Path) -> str:
         return p.read_text(errors="replace")
     except OSError:
         return ""
-
-
-def _gate(script: Path, comando: str) -> int:
-    entrada = json.dumps({"tool_name": "Bash", "tool_input": {"command": comando}})
-    return subprocess.run(
-        ["bash", str(script)], input=entrada, capture_output=True, text=True, check=False
-    ).returncode
-
-
-def _u2_ponte(repo: Path) -> Resultado:
-    """`@AGENTS.md` dentro de crase nao e parseado como import: vira texto."""
-    claude = repo / "CLAUDE.md"
-    if not claude.is_file():
-        return False, "CLAUDE.md ausente na raiz"
-    linhas = [ln.strip() for ln in _texto(claude).splitlines()]
-    if "@AGENTS.md" in linhas:
-        return True, "import na raiz encontrado"
-    return False, f"sem linha '@AGENTS.md' solta; linhas: {linhas[:6]}"
 
 
 def _u3_escopo(repo: Path) -> Resultado:
@@ -75,35 +48,6 @@ def _u3_escopo(repo: Path) -> Resultado:
     return True, f"{len(escopados)} com escopo, todos com ponte"
 
 
-def _u4_gate_arquivo(repo: Path) -> Resultado:
-    g = repo / ".claude" / "hooks" / "gate-destructive.sh"
-    if not g.is_file():
-        return False, "gate-destructive.sh ausente"
-    problemas = []
-    if b"\r\n" in g.read_bytes():
-        problemas.append("CRLF (gate falha ABERTO)")
-    if not g.stat().st_mode & 0o111:
-        problemas.append("sem bit de execucao")
-    return (not problemas), "; ".join(problemas) or "existe, LF, executavel"
-
-
-def _u9_manifesto(repo: Path) -> Resultado:
-    m = repo / ".claude" / "harness.json"
-    if not m.is_file():
-        return False, ".claude/harness.json ausente"
-    try:
-        dados = json.loads(_texto(m))
-    except json.JSONDecodeError as e:
-        return False, f"manifesto nao parseia: {e}"
-    listados = dados.get("harness", {}).get("arquivos", [])
-    if not listados:
-        return False, "manifesto sem lista de arquivos"
-    fantasmas = [a for a in listados if not (repo / a).exists()]
-    if fantasmas:
-        return False, f"manifesto lista arquivo inexistente: {fantasmas[:4]}"
-    return True, f"{len(listados)} arquivos, todos no disco"
-
-
 def _corpo(texto: str) -> str:
     """Só as linhas funcionais: comentário de shell não executa nada.
 
@@ -115,63 +59,53 @@ def _corpo(texto: str) -> str:
     return "\n".join(ln for ln in texto.splitlines() if not ln.lstrip().startswith("#"))
 
 
-def _u10_marcadores(repo: Path) -> Resultado:
-    """Implementa o item 6 da FASE 5 ao pé da letra, de propósito.
-
-    A distinção entre comentário e corpo é reportada mas NÃO absolve: o item 6
-    diz que estes marcadores não podem sobrar, sem ressalva. Se os templates
-    os mantêm em cabeçalho didático que a regra do VERBATIM manda preservar,
-    então a checagem é insatisfazível — e é isso que o resultado tem de
-    mostrar, em vez de esconder atrás de uma exceção conveniente.
-    """
-    sobrou: list[str] = []
-    for p in _arquivos(repo):
-        txt = _texto(p)
-        corpo = _corpo(txt)
-        for marcador in PREENCHIVEIS:
-            if marcador in txt:
-                onde = "corpo" if marcador in corpo else "comentario"
-                sobrou.append(f"{p.relative_to(repo)}:{marcador}({onde})")
-    return (not sobrou), "; ".join(sobrou[:6]) or "nenhum marcador sobrou"
-
-
 def _dod(repo: Path) -> str:
     agents = _texto(repo / "AGENTS.md")
     m = re.search(r"## Definition of Done(.*?)(?=\n## |\Z)", agents, re.S)
     return m.group(1) if m else ""
 
 
+VERIFICADOR = RAIZ / ".claude" / "skills" / "harness-creator" / "resources" / "verificar-harness.sh"
+
+
+def _do_verificador(repo: Path) -> dict[str, Resultado]:
+    """Delega as checagens mecânicas ao script que a própria skill entrega.
+
+    Reimplementar aqui o que o `verificar-harness.sh` já faz criava duas
+    fontes: o eval podia aprovar um harness que o verificador reprovava, e
+    ninguém saberia qual dos dois estava certo. Agora o eval mede o mesmo que
+    o usuário vê ao rodar o script no repositório dele.
+    """
+    r = subprocess.run(
+        ["sh", str(VERIFICADOR), "--raiz", str(repo), "--json"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    try:
+        dados = json.loads(r.stdout)
+    except json.JSONDecodeError:
+        return {"V0: verificador executa": (False, f"saida ilegivel: {r.stderr[:120]}")}
+    return {f"V: {c['check']}": (bool(c["passed"]), str(c["evidence"])) for c in dados["checks"]}
+
+
 def universais(repo: Path, _relatorio: str) -> dict[str, Resultado]:
-    gate = repo / ".claude" / "hooks" / "gate-destructive.sh"
-    seguro = gate.is_file()
-    return {
+    # O que o verificador não cobre porque não é mecânico ou é específico do
+    # eval: presença dos artefatos que a FASE 4 prometeu entregar.
+    proprias: dict[str, Resultado] = {
         "U1: AGENTS.md na raiz": (
             (repo / "AGENTS.md").is_file(),
             "presente" if (repo / "AGENTS.md").is_file() else "ausente",
         ),
-        "U2: ponte CLAUDE.md na raiz": _u2_ponte(repo),
         "U3: AGENTS.md com escopo + ponte": _u3_escopo(repo),
-        "U4: gate existe, LF, executavel": _u4_gate_arquivo(repo),
-        "U5: gate bloqueia destrutivo (exit 2)": (
-            seguro and _gate(gate, "rm -rf /tmp/x") == 2,
-            f"exit {_gate(gate, 'rm -rf /tmp/x')}" if seguro else "sem gate",
-        ),
-        "U6: gate libera comando seguro (exit 0)": (
-            seguro and _gate(gate, "git status") == 0,
-            f"exit {_gate(gate, 'git status')}" if seguro else "sem gate",
-        ),
-        "U7: settings.json com wrapper hooks": _json_com_chave(
-            repo / ".claude/settings.json", "hooks"
-        ),
         "U8: hooks do Devin e do Cursor parseiam": _parseiam(
             repo, [".devin/hooks.v1.json", ".cursor/hooks.json"]
         ),
-        "U9: manifesto confere com o disco": _u9_manifesto(repo),
-        "U10: nenhum marcador preenchivel sobrou": _u10_marcadores(repo),
         "U11: comando /dod": _existe(repo, ".claude/commands/dod.md"),
         "U12: init.sh executavel": _executavel(repo, "init.sh"),
         "U13: SESSION_STATE.md": _existe(repo, "SESSION_STATE.md"),
     }
+    return _do_verificador(repo) | proprias
 
 
 def _existe(repo: Path, rel: str) -> Resultado:
@@ -185,17 +119,6 @@ def _executavel(repo: Path, rel: str) -> Resultado:
         return False, "ausente"
     ok = bool(p.stat().st_mode & 0o111)
     return ok, "executavel" if ok else "sem bit de execucao"
-
-
-def _json_com_chave(p: Path, chave: str) -> Resultado:
-    if not p.is_file():
-        return False, "ausente"
-    try:
-        dados = json.loads(_texto(p))
-    except json.JSONDecodeError as e:
-        return False, f"nao parseia: {e}"
-    ok = chave in dados
-    return ok, f"chave '{chave}' {'presente' if ok else 'AUSENTE no nivel raiz'}"
 
 
 def _parseiam(repo: Path, rels: list[str]) -> Resultado:
