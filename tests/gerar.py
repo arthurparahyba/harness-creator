@@ -162,6 +162,20 @@ STACKS: dict[str, Stack] = {
         formatavel="apps/web/src/formata.ts",
         nao_formatavel="package.json",
     ),
+    # Mesma árvore do `monorepo`, com o ponto de entrada único já aplicado na
+    # raiz. É a recomendação do grupo B em forma de fixture: com ela, a DoD
+    # usa os scripts REAIS do repositório (`npm test`) em vez da forma
+    # delegante que a skill precisa inventar quando a raiz é vazia.
+    "monorepo-com-raiz": Stack(
+        dod="npm test && npm run lint && npm run typecheck",
+        file_glob="*.js|*.jsx|*.ts|*.tsx",
+        formatter_bin="npx",
+        dir_escopo="apps/web/src",
+        setup_steps="      - uses: actions/setup-node@v4\n      - run: npm ci",
+        pre_commit="npm run lint",
+        formatavel="apps/web/src/formata.ts",
+        nao_formatavel="package.json",
+    ),
     # Os quatro abaixo estavam só documentados em `ecossistemas.md`. Sem
     # fixture, a linha da tabela era uma promessa que nada exercitava.
     "python": Stack(

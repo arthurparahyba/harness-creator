@@ -37,13 +37,15 @@ Verificação: `pytest -q && ruff check . && mypy` — 364 testes
 - [x] 4.3 CI do workflow gerado passou a rodar TODOS os comandos da DoD
 Verificação: `python tests/medir.py` — 8 ecossistemas, +64 a +67 pontos
 
-## Grupo 5 - Fechar as recomendações do grupo B (depende: Grupo 3)
-- [ ] 5.1 Fixture de monorepo com o script raiz já aplicado, para provar
-      que a recomendação funciona sem intervenção manual
+## Grupo 5 - Fechar as recomendações do grupo B ✅
+- [x] 5.1 Fixture `monorepo-com-raiz`: mesma árvore do `monorepo`, só o
+      `package.json` da raiz muda. O teste prova o contraste — sem o ponto de
+      entrada a DoD precisa delegar (`--workspaces`), com ele usa os scripts
+      reais do repo
 - [x] 5.2 Teste de que a skill NÃO gera artefato estranho à stack — cobre o
       `package.json` em .NET pedido aqui, mais 7 combinações (Gemfile em PHP,
       composer.json em Ruby, requirements.txt em .NET...). Regra inviolável 8
-Verificação: `pytest -q && python tests/medir.py`
+Verificação: `pytest -q && python tests/medir.py` — 384 testes
 
 <!-- Grupos 6-10: revisão completa da skill (2026-07-27). Cada um fecha um
      bloco do relatório de melhorias; a ordem importa porque o 7 renomeia
@@ -260,19 +262,24 @@ Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
 — 275 testes (+6); verificador 11/11 nos 8 ecossistemas gerados e 4/11 em
 diretório sem harness; medição inalterada
 
-## Grupo 20 - Medir o disparo da skill (depende: Grupo 18)
+## Grupo 20 - Medir o disparo da skill ✅
 <!-- Pendência mais antiga do SESSION_STATE: a `description` nunca foi
      otimizada para triggering, e a fronteira de escopo criada no 11.1 nunca
      foi medida. Depende do 18 porque é o 18 que fixa essa fronteira — medir
      antes é medir um comportamento que ainda vai mudar. Mede disparo, não
      execução: é trilha independente do nível D. -->
-- [ ] 20.1 ~20 queries de triggering em `evals/`, metade near-miss — pedidos
-      concretos, com caminho de arquivo e contexto, não abstrações. As
-      negativas úteis são as que compartilham vocabulário com a skill e ainda
-      assim pedem outra coisa (ex.: "cria um CI pra esse repo")
-- [ ] 20.2 Rodar `scripts/run_loop.py` do skill-creator com o model id da
-      sessão, sobre o eval set revisado
-- [ ] 20.3 Aplicar `best_description` (a selecionada por score de teste, não
-      de treino) e registrar score antes/depois em `evals/`
-Verificação: `pytest -q && ruff check . && mypy` — score antes/depois
-registrado em `evals/`
+- [x] 20.1 `evals/triggering.json`: 20 queries, 10 near-miss (CI, README,
+      eslint, MCP, git hook comum, explicação conceitual de WIP=1)
+- [x] 20.2 `run_loop.py` rodado com opus-5, 3 iterações. **Descoberta de
+      método**: rodar de dentro deste repo invalida a medição — o sub-agente
+      carrega o `CLAUDE.md`/`AGENTS.md` daqui e obedece o protocolo local em
+      vez de consultar a skill. Precisa de diretório neutro. Documentado em
+      `evals/README.md` com as duas execuções inválidas preservadas
+- [x] 20.3 Nada a aplicar: nenhuma das 3 candidatas bateu a original
+      (treino 6/12, teste 4/8 em todas). A `description` só foi corrigida no
+      ponto factual que o Grupo 16 tornou falso (lockfile → verificador)
+- [x] 20.4 (não planejado) Diagnóstico do resultado: negativas 10/10,
+      positivas ~0/10. É subdisparo real, reproduzido em 3 configurações. A
+      causa provável não é redação — é o modelo achar que resolve sozinho
+Verificação: `pytest -q && ruff check . && mypy` — resultado e método
+registrados em `evals/README.md`

@@ -29,6 +29,11 @@
     "depois": "L4 97/108",
     "delta": 67
   },
+  "monorepo-com-raiz": {
+    "antes": "L0 36/108",
+    "depois": "L4 103/108",
+    "delta": 67
+  },
   "node": {
     "antes": "L0 36/108",
     "depois": "L4 103/108",

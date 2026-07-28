@@ -1,0 +1,5 @@
+{
+  "name": "api",
+  "scripts": { "test": "vitest run", "lint": "eslint ." },
+  "devDependencies": { "vitest": "^2.0.0", "eslint": "^9.0.0" }
+}

@@ -107,3 +107,29 @@ def test_todo_ecossistema_da_tabela_tem_fixture() -> None:
     }
     faltando = documentados - set(STACKS)
     assert faltando == set(), f"ecossistema documentado e sem fixture: {sorted(faltando)}"
+
+
+def test_ponto_de_entrada_na_raiz_dispensa_a_recomendacao(tmp_path: Path) -> None:
+    """Monorepo sem script na raiz não tem um comando que valide o repositório
+    inteiro, e a DoD precisa de um — daí a recomendação do grupo B.
+
+    As duas fixtures têm a MESMA árvore; a única diferença é o `package.json`
+    da raiz. Com o ponto de entrada aplicado, a DoD passa a usar os scripts
+    reais do repositório em vez da forma delegante que a skill inventa quando
+    a raiz é vazia. É isso que prova que a recomendação funciona sozinha.
+    """
+    sem_raiz = tmp_path / "sem"
+    com_raiz = tmp_path / "com"
+    gerar("monorepo", sem_raiz)
+    gerar("monorepo-com-raiz", com_raiz)
+
+    def dod(repo: Path) -> str:
+        return (repo / "AGENTS.md").read_text().split("## Definition of Done")[1].split("## ")[0]
+
+    assert "--workspaces" in dod(sem_raiz), (
+        "sem script na raiz, a DoD precisa delegar explicitamente"
+    )
+    assert "--workspaces" not in dod(com_raiz), (
+        "com ponto de entrada na raiz, a DoD deve usar os scripts reais"
+    )
+    assert "npm test" in dod(com_raiz)
