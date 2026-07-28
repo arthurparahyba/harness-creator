@@ -1,0 +1,840 @@
+{
+  "exit_reason": "max_iterations (3)",
+  "original_description": "Gera um harness completo para agentes de codigo (AGENTS.md com protocolo de sessao, config.yaml do OpenSpec, init.sh, SESSION_STATE.md, TASKS.md, hooks de agent loop, pre-commit, comando /dod, verificador do harness) adaptado ao repositorio atual, via descoberta de stack/comandos/convencoes + templates de protocolo fixo. Use esta skill sempre que o usuario pedir para configurar um harness, criar ou melhorar um AGENTS.md, preparar um repositorio para agentes de IA, configurar OpenSpec com regras de execucao, criar init.sh ou protocolo de sessao, ou mencionar harness engineering, checkpoints por grupos de tasks, WIP=1 ou continuidade entre sessoes - mesmo que nao use a palavra \"harness\".",
+  "best_description": "Gera um harness completo para agentes de codigo (AGENTS.md com protocolo de sessao, config.yaml do OpenSpec, init.sh, SESSION_STATE.md, TASKS.md, hooks de agent loop, pre-commit, comando /dod, verificador do harness) adaptado ao repositorio atual, via descoberta de stack/comandos/convencoes + templates de protocolo fixo. Use esta skill sempre que o usuario pedir para configurar um harness, criar ou melhorar um AGENTS.md, preparar um repositorio para agentes de IA, configurar OpenSpec com regras de execucao, criar init.sh ou protocolo de sessao, ou mencionar harness engineering, checkpoints por grupos de tasks, WIP=1 ou continuidade entre sessoes - mesmo que nao use a palavra \"harness\".",
+  "best_score": "4/8",
+  "best_train_score": "6/12",
+  "best_test_score": "4/8",
+  "final_description": "Use this skill to make a repository work well for AI coding agents (Claude Code, Cursor, Devin, Codex). Trigger it whenever someone wants a repo prepared, organized, or standardized for AI agents \u2014 or complains that agents lose context between sessions, redo finished work, don't know where they stopped, or invent different rules each time; or wants several agents/teammates following the same rules. Also trigger on requests for AGENTS.md/CLAUDE.md, session protocol, init.sh, SESSION_STATE.md, TASKS.md, handoff, definition of done, agent gate/pre-commit hooks, OpenSpec, WIP=1, task groups with checkpoints, or \"harness engineering\" \u2014 in Portuguese or English, and even without the word \"harness\". It inspects the repo's stack and commands and writes the whole harness (instructions + enforcement). Skip it for conceptual questions with no target repo, for debugging an existing hook or CI pipeline, and for ordinary technical docs (README, ARCHITECTURE).",
+  "iterations_run": 3,
+  "holdout": 0.4,
+  "train_size": 12,
+  "test_size": 8,
+  "history": [
+    {
+      "iteration": 1,
+      "description": "Gera um harness completo para agentes de codigo (AGENTS.md com protocolo de sessao, config.yaml do OpenSpec, init.sh, SESSION_STATE.md, TASKS.md, hooks de agent loop, pre-commit, comando /dod, verificador do harness) adaptado ao repositorio atual, via descoberta de stack/comandos/convencoes + templates de protocolo fixo. Use esta skill sempre que o usuario pedir para configurar um harness, criar ou melhorar um AGENTS.md, preparar um repositorio para agentes de IA, configurar OpenSpec com regras de execucao, criar init.sh ou protocolo de sessao, ou mencionar harness engineering, checkpoints por grupos de tasks, WIP=1 ou continuidade entre sessoes - mesmo que nao use a palavra \"harness\".",
+      "train_passed": 6,
+      "train_failed": 6,
+      "train_total": 12,
+      "train_results": [
+        {
+          "query": "esse projeto ta uma bagunca pra IA trabalhar. nao tem doc, nao tem regra, cada sessao o modelo inventa um jeito diferente de commitar",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "esse repo aqui vai ser usado por mim no cursor e por um colega no devin. queria que os dois seguissem as mesmas regras",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "harness engineering nesse projeto: quero init.sh, definition of done e handoff entre sessoes",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "monta pra mim a estrutura de trabalho em grupos de tasks com checkpoint e WIP=1 nesse repo",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "acabei de assumir esse monorepo aqui na empresa e vamos botar o Claude Code pra trabalhar nele de verdade. da uma olhada e deixa ele preparado",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "toda vez que eu volto pro projeto depois de uns dias o agente nao faz ideia de onde parou e refaz coisa que ja tava pronta. tem como resolver isso?",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "meu hook de pre-commit ta falhando com 'black not found' mas o black ta instalado no venv. o que pode ser?",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "documenta a arquitetura desse servico num ARCHITECTURE.md, com os bounded contexts e como eles conversam",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "roda a definition of done aqui e me fala o que ta quebrado antes de eu abrir o PR",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "cria um workflow do github actions que roda npm test e npm run lint em cada pull request pra branch main",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "configura o mcp do postgres no cursor pra eu conseguir consultar o banco de staging direto do editor",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "me explica o que significa WIP=1 em kanban e se vale a pena pro meu time de 6 devs",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ],
+      "test_passed": 4,
+      "test_failed": 4,
+      "test_total": 8,
+      "test_results": [
+        {
+          "query": "o AGENTS.md ta l\u00e1 na raiz mas o Claude simplesmente ignora tudo que ta escrito nele. ja conferi e o arquivo existe",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "quero que o agente nao consiga rodar migration nem git push --force sem eu aprovar. da pra travar isso?",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "escreve um README bonito pro projeto explicando como rodar local e as variaveis de ambiente que precisa",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "preciso de um AGENTS.md decente pro nosso servico de pagamentos em .NET, hoje tem um arquivo de 4 linhas que ninguem segue",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "acrescenta no AGENTS.md que a gente usa pnpm e nao npm, o agente fica errando isso",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "instala o pytest aqui e escreve testes pras funcoes puras de calculos.py, principalmente margem_percentual e normalizar_cnpj",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "configura o eslint + prettier nesse projeto react, com as regras de hooks e import order",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "adiciona um git hook de pre-push que roda a suite de testes antes de deixar subir",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ],
+      "passed": 6,
+      "failed": 6,
+      "total": 12,
+      "results": [
+        {
+          "query": "esse projeto ta uma bagunca pra IA trabalhar. nao tem doc, nao tem regra, cada sessao o modelo inventa um jeito diferente de commitar",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "esse repo aqui vai ser usado por mim no cursor e por um colega no devin. queria que os dois seguissem as mesmas regras",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "harness engineering nesse projeto: quero init.sh, definition of done e handoff entre sessoes",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "monta pra mim a estrutura de trabalho em grupos de tasks com checkpoint e WIP=1 nesse repo",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "acabei de assumir esse monorepo aqui na empresa e vamos botar o Claude Code pra trabalhar nele de verdade. da uma olhada e deixa ele preparado",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "toda vez que eu volto pro projeto depois de uns dias o agente nao faz ideia de onde parou e refaz coisa que ja tava pronta. tem como resolver isso?",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "meu hook de pre-commit ta falhando com 'black not found' mas o black ta instalado no venv. o que pode ser?",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "documenta a arquitetura desse servico num ARCHITECTURE.md, com os bounded contexts e como eles conversam",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "roda a definition of done aqui e me fala o que ta quebrado antes de eu abrir o PR",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "cria um workflow do github actions que roda npm test e npm run lint em cada pull request pra branch main",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "configura o mcp do postgres no cursor pra eu conseguir consultar o banco de staging direto do editor",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "me explica o que significa WIP=1 em kanban e se vale a pena pro meu time de 6 devs",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ]
+    },
+    {
+      "iteration": 2,
+      "description": "Use quando o usu\u00e1rio quiser que agentes de IA (Claude Code, Cursor, Devin, Codex) trabalhem bem num reposit\u00f3rio \u2014 ou reclamar que hoje n\u00e3o trabalham bem. Sinais t\u00edpicos: \"prepara esse repo pra IA\", \"o agente se perde entre sess\u00f5es / refaz coisa pronta / n\u00e3o sabe onde parou\", \"cada sess\u00e3o o modelo inventa uma regra diferente\", \"quero que todos os agentes sigam as mesmas regras\", \"assumi esse projeto, deixa ele pronto pro Claude Code\", ou pedidos por AGENTS.md/CLAUDE.md, protocolo de sess\u00e3o, init.sh, SESSION_STATE.md, TASKS.md, handoff, definition of done, hooks de gate/pre-commit, OpenSpec, harness engineering, WIP=1, grupos de tasks com checkpoint. A skill descobre stack e comandos do repo e grava o harness completo (instru\u00e7\u00e3o + enforcement). N\u00e3o use para d\u00favidas conceituais sem repo alvo, para consertar um hook ou CI j\u00e1 existente, nem para documenta\u00e7\u00e3o t\u00e9cnica comum (README, ARCHITECTURE).",
+      "train_passed": 6,
+      "train_failed": 6,
+      "train_total": 12,
+      "train_results": [
+        {
+          "query": "harness engineering nesse projeto: quero init.sh, definition of done e handoff entre sessoes",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "esse repo aqui vai ser usado por mim no cursor e por um colega no devin. queria que os dois seguissem as mesmas regras",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "esse projeto ta uma bagunca pra IA trabalhar. nao tem doc, nao tem regra, cada sessao o modelo inventa um jeito diferente de commitar",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "monta pra mim a estrutura de trabalho em grupos de tasks com checkpoint e WIP=1 nesse repo",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "acabei de assumir esse monorepo aqui na empresa e vamos botar o Claude Code pra trabalhar nele de verdade. da uma olhada e deixa ele preparado",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "meu hook de pre-commit ta falhando com 'black not found' mas o black ta instalado no venv. o que pode ser?",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "toda vez que eu volto pro projeto depois de uns dias o agente nao faz ideia de onde parou e refaz coisa que ja tava pronta. tem como resolver isso?",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "documenta a arquitetura desse servico num ARCHITECTURE.md, com os bounded contexts e como eles conversam",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "cria um workflow do github actions que roda npm test e npm run lint em cada pull request pra branch main",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "roda a definition of done aqui e me fala o que ta quebrado antes de eu abrir o PR",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "configura o mcp do postgres no cursor pra eu conseguir consultar o banco de staging direto do editor",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "me explica o que significa WIP=1 em kanban e se vale a pena pro meu time de 6 devs",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ],
+      "test_passed": 4,
+      "test_failed": 4,
+      "test_total": 8,
+      "test_results": [
+        {
+          "query": "o AGENTS.md ta l\u00e1 na raiz mas o Claude simplesmente ignora tudo que ta escrito nele. ja conferi e o arquivo existe",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "quero que o agente nao consiga rodar migration nem git push --force sem eu aprovar. da pra travar isso?",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "preciso de um AGENTS.md decente pro nosso servico de pagamentos em .NET, hoje tem um arquivo de 4 linhas que ninguem segue",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "acrescenta no AGENTS.md que a gente usa pnpm e nao npm, o agente fica errando isso",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "escreve um README bonito pro projeto explicando como rodar local e as variaveis de ambiente que precisa",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "instala o pytest aqui e escreve testes pras funcoes puras de calculos.py, principalmente margem_percentual e normalizar_cnpj",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "configura o eslint + prettier nesse projeto react, com as regras de hooks e import order",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "adiciona um git hook de pre-push que roda a suite de testes antes de deixar subir",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ],
+      "passed": 6,
+      "failed": 6,
+      "total": 12,
+      "results": [
+        {
+          "query": "harness engineering nesse projeto: quero init.sh, definition of done e handoff entre sessoes",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "esse repo aqui vai ser usado por mim no cursor e por um colega no devin. queria que os dois seguissem as mesmas regras",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "esse projeto ta uma bagunca pra IA trabalhar. nao tem doc, nao tem regra, cada sessao o modelo inventa um jeito diferente de commitar",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "monta pra mim a estrutura de trabalho em grupos de tasks com checkpoint e WIP=1 nesse repo",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "acabei de assumir esse monorepo aqui na empresa e vamos botar o Claude Code pra trabalhar nele de verdade. da uma olhada e deixa ele preparado",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "meu hook de pre-commit ta falhando com 'black not found' mas o black ta instalado no venv. o que pode ser?",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "toda vez que eu volto pro projeto depois de uns dias o agente nao faz ideia de onde parou e refaz coisa que ja tava pronta. tem como resolver isso?",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "documenta a arquitetura desse servico num ARCHITECTURE.md, com os bounded contexts e como eles conversam",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "cria um workflow do github actions que roda npm test e npm run lint em cada pull request pra branch main",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "roda a definition of done aqui e me fala o que ta quebrado antes de eu abrir o PR",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "configura o mcp do postgres no cursor pra eu conseguir consultar o banco de staging direto do editor",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "me explica o que significa WIP=1 em kanban e se vale a pena pro meu time de 6 devs",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ]
+    },
+    {
+      "iteration": 3,
+      "description": "Use this skill to make a repository work well for AI coding agents (Claude Code, Cursor, Devin, Codex). Trigger it whenever someone wants a repo prepared, organized, or standardized for AI agents \u2014 or complains that agents lose context between sessions, redo finished work, don't know where they stopped, or invent different rules each time; or wants several agents/teammates following the same rules. Also trigger on requests for AGENTS.md/CLAUDE.md, session protocol, init.sh, SESSION_STATE.md, TASKS.md, handoff, definition of done, agent gate/pre-commit hooks, OpenSpec, WIP=1, task groups with checkpoints, or \"harness engineering\" \u2014 in Portuguese or English, and even without the word \"harness\". It inspects the repo's stack and commands and writes the whole harness (instructions + enforcement). Skip it for conceptual questions with no target repo, for debugging an existing hook or CI pipeline, and for ordinary technical docs (README, ARCHITECTURE).",
+      "train_passed": 6,
+      "train_failed": 6,
+      "train_total": 12,
+      "train_results": [
+        {
+          "query": "esse projeto ta uma bagunca pra IA trabalhar. nao tem doc, nao tem regra, cada sessao o modelo inventa um jeito diferente de commitar",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "esse repo aqui vai ser usado por mim no cursor e por um colega no devin. queria que os dois seguissem as mesmas regras",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "harness engineering nesse projeto: quero init.sh, definition of done e handoff entre sessoes",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "acabei de assumir esse monorepo aqui na empresa e vamos botar o Claude Code pra trabalhar nele de verdade. da uma olhada e deixa ele preparado",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "monta pra mim a estrutura de trabalho em grupos de tasks com checkpoint e WIP=1 nesse repo",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "toda vez que eu volto pro projeto depois de uns dias o agente nao faz ideia de onde parou e refaz coisa que ja tava pronta. tem como resolver isso?",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "meu hook de pre-commit ta falhando com 'black not found' mas o black ta instalado no venv. o que pode ser?",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "documenta a arquitetura desse servico num ARCHITECTURE.md, com os bounded contexts e como eles conversam",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "configura o mcp do postgres no cursor pra eu conseguir consultar o banco de staging direto do editor",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "cria um workflow do github actions que roda npm test e npm run lint em cada pull request pra branch main",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "me explica o que significa WIP=1 em kanban e se vale a pena pro meu time de 6 devs",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "roda a definition of done aqui e me fala o que ta quebrado antes de eu abrir o PR",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ],
+      "test_passed": 4,
+      "test_failed": 4,
+      "test_total": 8,
+      "test_results": [
+        {
+          "query": "o AGENTS.md ta l\u00e1 na raiz mas o Claude simplesmente ignora tudo que ta escrito nele. ja conferi e o arquivo existe",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "quero que o agente nao consiga rodar migration nem git push --force sem eu aprovar. da pra travar isso?",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "preciso de um AGENTS.md decente pro nosso servico de pagamentos em .NET, hoje tem um arquivo de 4 linhas que ninguem segue",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "acrescenta no AGENTS.md que a gente usa pnpm e nao npm, o agente fica errando isso",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "escreve um README bonito pro projeto explicando como rodar local e as variaveis de ambiente que precisa",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "instala o pytest aqui e escreve testes pras funcoes puras de calculos.py, principalmente margem_percentual e normalizar_cnpj",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "configura o eslint + prettier nesse projeto react, com as regras de hooks e import order",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "adiciona um git hook de pre-push que roda a suite de testes antes de deixar subir",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ],
+      "passed": 6,
+      "failed": 6,
+      "total": 12,
+      "results": [
+        {
+          "query": "esse projeto ta uma bagunca pra IA trabalhar. nao tem doc, nao tem regra, cada sessao o modelo inventa um jeito diferente de commitar",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "esse repo aqui vai ser usado por mim no cursor e por um colega no devin. queria que os dois seguissem as mesmas regras",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "harness engineering nesse projeto: quero init.sh, definition of done e handoff entre sessoes",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "acabei de assumir esse monorepo aqui na empresa e vamos botar o Claude Code pra trabalhar nele de verdade. da uma olhada e deixa ele preparado",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "monta pra mim a estrutura de trabalho em grupos de tasks com checkpoint e WIP=1 nesse repo",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "toda vez que eu volto pro projeto depois de uns dias o agente nao faz ideia de onde parou e refaz coisa que ja tava pronta. tem como resolver isso?",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "meu hook de pre-commit ta falhando com 'black not found' mas o black ta instalado no venv. o que pode ser?",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "documenta a arquitetura desse servico num ARCHITECTURE.md, com os bounded contexts e como eles conversam",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "configura o mcp do postgres no cursor pra eu conseguir consultar o banco de staging direto do editor",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "cria um workflow do github actions que roda npm test e npm run lint em cada pull request pra branch main",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "me explica o que significa WIP=1 em kanban e se vale a pena pro meu time de 6 devs",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "roda a definition of done aqui e me fala o que ta quebrado antes de eu abrir o PR",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ]
+    }
+  ]
+}

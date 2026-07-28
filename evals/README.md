@@ -126,3 +126,83 @@ mesmos defeitos na instrução — nenhum deles detectável pelos 254 testes de
    sistema de pontuação que não existe em nenhum arquivo da skill.
 
 Viraram o Grupo 15 no `TASKS.md`.
+
+---
+
+## Nível E — disparo da skill (`triggering.json`)
+
+Mede coisa diferente dos níveis A–D: se a skill é **consultada**, não se ela
+executa bem. São 20 queries, metade near-miss (pedidos que compartilham
+vocabulário com a skill e precisam de outra coisa: CI, README, eslint,
+explicação conceitual de WIP=1).
+
+Rodado com o otimizador do `skill-creator`:
+
+```
+cd <repo-neutro>
+PYTHONPATH=<skill-creator> python3 -m scripts.run_loop \
+  --eval-set <repo>/evals/triggering.json \
+  --skill-path <repo>/.claude/skills/harness-creator \
+  --model <model-id> --timeout 120 --report none
+```
+
+### O `cd <repo-neutro>` não é detalhe — é a validade da medição
+
+`run_eval.py` resolve o "project root" subindo a partir do **cwd**, e o
+`claude -p` que ele dispara herda esse diretório. Rodando de dentro deste
+repositório, o sub-agente carrega o `CLAUDE.md` → `AGENTS.md` **daqui**, que
+manda rodar `./init.sh`, ler o `SESSION_STATE.md` e não implementar fora do
+`TASKS.md`. Ele obedece o protocolo local em vez de consultar a skill.
+
+O sintoma é característico e fácil de confundir com descrição ruim:
+**0/10 positivas, 10/10 negativas, taxa exatamente 0.0**, idêntico em todas
+as iterações — inclusive numa query que contém "harness engineering", termo
+que está literalmente na `description`. Descrição ruim não produz zero
+absoluto em query com match literal; harness que sequestra o sub-agente,
+sim.
+
+A mesma query, num diretório com a fixture `node` e um `.claude/` vazio,
+dispara com taxa 1.0.
+
+Duas execuções inválidas ficaram em `triggering-runs/` de propósito
+(`2026-07-27_195234`, feita do diretório do skill-creator, e
+`2026-07-27_195733`, feita da raiz deste repo). Servem de contraexemplo: um
+resultado de eval só vale junto com o diretório de onde foi medido.
+
+### O que este nível NÃO mede
+
+Se a skill, uma vez consultada, faz um bom trabalho — isso é o nível D. Uma
+descrição que dispara sempre e uma skill que executa mal produzem um harness
+ruim com a mesma eficiência.
+
+### Resultado da primeira rodada (2026-07-28)
+
+Descrição original: **treino 6/12, teste 4/8**. Três iterações do otimizador,
+nenhuma candidata bateu a original — `best_description` voltou igual à de
+entrada, e a descrição não foi alterada.
+
+A leitura por polaridade é o que importa, porque as duas metades dizem coisas
+opostas:
+
+- **Negativas: 10/10.** A descrição não sobre-dispara. Os near-miss (CI,
+  README, eslint, MCP, explicação de WIP=1, rodar a DoD) não acionam a skill
+  em nenhuma das 3 execuções.
+- **Positivas: ~0/10.** Mesmo a query que contém "harness engineering" —
+  termo literal da `description` — dispara **1 vez em 3**. As demais, zero.
+
+Isso é subdisparo real, não erro de medição: foi reproduzido em diretório
+neutro e com `--timeout` de 120s e de 300s. Uma execução isolada anterior deu
+taxa 1.0 na mesma query; com n=1 aquilo era ruído, e é a razão de as taxas
+serem sempre lidas sobre 3 execuções.
+
+**A hipótese que sobra não é de redação.** O `skill-creator` documenta que o
+Claude só consulta uma skill para tarefas que ele não resolve sozinho — e
+"prepare este repositório para agentes" é algo que ele começa a fazer
+direto, escrevendo um AGENTS.md à mão. O concorrente da skill não é outra
+skill: é o próprio modelo achando que já sabe. Mexer no texto da descrição
+não ataca isso, o que explica por que três iterações de reescrita não
+mudaram o número.
+
+Próximo passo registrado como pendência: subir `--runs-per-query` (3 é pouco
+para separar candidatas quando a taxa vive entre 0 e 0.33) antes de tirar
+qualquer conclusão sobre uma redação específica.

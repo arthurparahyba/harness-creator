@@ -16,12 +16,15 @@ from pathlib import Path
 
 import pytest
 import yaml
-from gerar import PREENCHIVEIS, STACKS, Stack, entrada_do_hook, gerar
+from gerar import COM_SENSORES, PREENCHIVEIS, Stack, entrada_do_hook, gerar
 
 MARCADORES = re.compile("|".join(re.escape(m) for m in PREENCHIVEIS))
 
 
-@pytest.fixture(params=sorted(STACKS), name="repo")
+# Só os ecossistemas com DoD real: `sem-sensores` não recebe enforcement por
+# construção, então as asserções sobre CI e pre-commit não se aplicam a ele.
+# O que ele deve NÃO ter é verificado em `test_honestidade`.
+@pytest.fixture(params=sorted(COM_SENSORES), name="repo")
 def _repo(request: pytest.FixtureRequest, tmp_path: Path) -> tuple[Path, Stack, str]:
     nome = str(request.param)
     destino = tmp_path / nome

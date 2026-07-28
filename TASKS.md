@@ -16,11 +16,18 @@ Verificação: `pytest -q && ruff check . && mypy && npx -y harness-score --min-
 - [x] 2.3 Hook de formatação e gate executados contra código real de cada stack
 Verificação: `pytest -q` — 165 testes
 
-## Grupo 3 - Ampliar a cobertura dos ecossistemas (depende: Grupo 2)
-- [ ] 3.1 Fixtures de Python, Rust, Ruby e PHP (hoje só documentados)
-- [ ] 3.2 Teste de que o enforcement NÃO é gerado quando a DoD é vazia
-- [ ] 3.3 Fixture com CI e AGENTS.md preexistentes, para cobrir a FASE 3
-Verificação: `pytest -q && ruff check . && mypy`
+## Grupo 3 - Ampliar a cobertura dos ecossistemas ✅
+- [x] 3.1 Fixtures de Python, Rust, Ruby e PHP, com Stack registrada em
+      `gerar.py`. As quatro linhas de `ecossistemas.md` eram promessa que nada
+      exercitava; agora as parametrizações de geração rodam sobre 12 stacks
+- [x] 3.2 `tests/test_honestidade.py`: `gerar.py` passa a respeitar a regra da
+      FASE 2 (DoD vazia → sem pre-commit e sem CI), e o teste cobra isso mais
+      a não-invenção de comando de teste. Antes não havia sensor nenhum
+- [x] 3.3 Fixture `com-preexistentes` (AGENTS.md do usuário com convenções
+      reais + `ci.yml`) e caso novo em `evals/evals.json`. A FASE 3 é conflito,
+      não preenchimento: `gerar.py` não a implementa, então quem exercita é o
+      nível D com um modelo real
+Verificação: `pytest -q && ruff check . && mypy` — 364 testes
 
 ## Grupo 4 - Medir os ecossistemas com o scanner ✅
 <!-- Só deste repositório: a skill entregue não depende de harness-score.
@@ -30,11 +37,15 @@ Verificação: `pytest -q && ruff check . && mypy`
 - [x] 4.3 CI do workflow gerado passou a rodar TODOS os comandos da DoD
 Verificação: `python tests/medir.py` — 8 ecossistemas, +64 a +67 pontos
 
-## Grupo 5 - Fechar as recomendações do grupo B (depende: Grupo 3)
-- [ ] 5.1 Fixture de monorepo com o script raiz já aplicado, para provar
-      que a recomendação vale os 6 pontos de SNS-01 sem intervenção manual
-- [ ] 5.2 Teste de que a skill NÃO gera `package.json` em repo .NET
-Verificação: `pytest -q && python tests/medir.py`
+## Grupo 5 - Fechar as recomendações do grupo B ✅
+- [x] 5.1 Fixture `monorepo-com-raiz`: mesma árvore do `monorepo`, só o
+      `package.json` da raiz muda. O teste prova o contraste — sem o ponto de
+      entrada a DoD precisa delegar (`--workspaces`), com ele usa os scripts
+      reais do repo
+- [x] 5.2 Teste de que a skill NÃO gera artefato estranho à stack — cobre o
+      `package.json` em .NET pedido aqui, mais 7 combinações (Gemfile em PHP,
+      composer.json em Ruby, requirements.txt em .NET...). Regra inviolável 8
+Verificação: `pytest -q && python tests/medir.py` — 384 testes
 
 <!-- Grupos 6-10: revisão completa da skill (2026-07-27). Cada um fecha um
      bloco do relatório de melhorias; a ordem importa porque o 7 renomeia
@@ -170,20 +181,23 @@ Verificação: `pytest -q && ruff check . && mypy` + relatório de grading
 Verificação: `pytest -q && ruff check . && mypy` — 258 testes; medição nas
 8 fixtures inalterada (+64 a +67)
 
-## Grupo 16 - Checagens insatisfazíveis e fontes divergentes (depende: Grupo 15)
-- [ ] 16.1 FASE 5 item 8: "DoD IDÊNTICA em 6 arquivos" é impossível por
+## Grupo 16 - Checagens insatisfazíveis e fontes divergentes ✅
+- [x] 16.1 FASE 5 item 8: "DoD IDÊNTICA em 6 arquivos" é impossível por
       construção (init.sh roda só teste, pre-commit é lista, CI é step por
-      sensor). Reescrever para equivalência semântica, não igualdade literal
-- [ ] 16.2 FASE 5 item 5: o comando de teste do gate contém `rm -rf` literal
-      e é bloqueado pelo gate do repo onde a skill roda. Prescrever a forma
-      que não se auto-bloqueia
-- [ ] 16.3 Formatter de Python tem três respostas divergentes na skill
-      (`black --quiet`, `ruff format`, `# TODO`). `ecossistemas.md` é a fonte
-      única — as outras passam a apontar para ela, com teste
-- [ ] 16.4 Lockfile sai do grupo A para o B (exige rede), `git pull` ganha
-      guarda para repo sem remoto, e a FASE 4 perde o vocabulário de
-      pontuação que não existe em lugar nenhum
+      sensor). Virou tabela de equivalência: o que precisa bater é o
+      conjunto de sensores e a ordem, não o texto
+- [x] 16.2 FASE 5 item 5: o comando destrutivo passa a ser montado em partes
+      (`RM=rm; FLAG=-rf`), que é a forma que não se auto-bloqueia. O teste
+      novo varre os blocos de código de TODA reference contra o próprio gate
+- [x] 16.3 Formatter de Python: `01-descoberta.md` apontava `black --quiet` e
+      o comentário do `pre-commit-config.yaml` trazia black+pylint. Ambos
+      passam a apontar para `ecossistemas.md`, com teste que proíbe a segunda
+      resposta
+- [x] 16.4 Lockfile saiu do grupo A para o B (gerar exige rede e fixa versões
+      para o time), `git pull` ganhou guarda `git remote | grep -q .`, e a
+      FASE 4 perdeu "pontos"/"nível que destrava"
 Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
+— 264 testes (+6); medição inalterada (+64 a +67 nos 8 ecossistemas)
 
 <!-- O número 17 está reservado para os achados já registrados no
      SESSION_STATE e ainda sem grupo escrito (`/dod` gerado com DoD vazia,
@@ -198,29 +212,30 @@ Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
      já foi destravada no 11.2, e a `description` já é o ponto mais forte do
      arquivo — só nunca foi medida, que é o Grupo 20. -->
 
-## Grupo 18 - Contradições e redundância na SKILL.md (depende: Grupo 16)
+## Grupo 18 - Contradições e redundância na SKILL.md ✅
 <!-- O 11.1 criou a fronteira "fluxo completo × edição pontual" mas não
      revisou as duas seções que mandam começar pela FASE 1 sem condição
      nenhuma. Para quem lê de cima para baixo, elas sobrescrevem a fronteira:
      a instrução mais específica vem primeiro e a mais genérica vem depois. -->
-- [ ] 18.1 A triagem de escopo vira passo 0 explícito do fluxo. "EXECUÇÃO
-      IMEDIATA" e a regra 1 deixam de mandar começar pela FASE 1 sem condição
-      e passam a mandar não perguntar QUAL DOS DOIS caminhos seguir — com
-      teste que impede a contradição de voltar
-- [ ] 18.2 O roteiro de 6 fases aparece três vezes (EXECUÇÃO IMEDIATA, regras
-      1/2/5, Roteiro das fases) e "leia só a fase atual" duas vezes com a
-      mesma justificativa: ~25 das 169 linhas repetindo dois fatos. Uma seção
-      só, com os links
-- [ ] 18.3 "Regras invioláveis" promete que cada regra existe porque a falha
-      aconteceu, mas 1, 2, 6, 7 e 10 não dizem qual foi. Cada uma ganha o modo
-      de falhar em uma linha ou sai; 6 e 8 duplicam FASE 2 e FASE 1 e passam a
-      apontar para a fase, em vez de serem a segunda fonte que diverge
-- [ ] 18.4 Par de exemplos pedido-a → ação na fronteira de escopo. É o ponto
-      onde a skill mais erra de tamanho, e dois exemplos de duas linhas
-      resolvem melhor que um critério em prosa
-Verificação: `pytest -q && ruff check . && mypy`
+- [x] 18.1 "EXECUÇÃO IMEDIATA" e "Escopo" viraram uma seção só, com a triagem
+      como passo 0 explícito. A ordem incondicional de começar pela FASE 1
+      sumiu; a regra 1 agora manda não perguntar QUAL caminho seguir
+- [x] 18.2 O roteiro de 6 fases estava em três lugares e "leia só a fase
+      atual" em dois. Sobrou uma cópia de cada. A seção "Arquivos gerados"
+      também duplicava a de Referências e foi absorvida por ela
+- [x] 18.3 As 10 regras (eram 12) trazem cada uma o modo de falhar; as que
+      duplicavam FASE 1/FASE 2 (credencial, remediação) passam a apontar para
+      a fase, com teste que reprova regra curta demais para explicar o porquê
+- [x] 18.4 Três exemplos pedido → ação na fronteira de escopo, incluindo o
+      caso de diagnóstico, que não é nem fluxo nem edição de conteúdo
+- [x] 18.5 (não planejado) A SKILL.md contradizia a FASE 5 recém-corrigida em
+      dois pontos — prometia "DoD idêntica" e listava lockfile como
+      enforcement gerado. Teste novo trava os dois
+Verificação: `pytest -q && ruff check . && mypy` — 269 testes (+5).
+SKILL.md: 169 → 181 linhas. Cresceu de propósito: saíram ~30 linhas de
+repetição e entraram modos de falhar e exemplos, que é conteúdo novo.
 
-## Grupo 19 - FASE 5 executável em vez de checklist (depende: Grupo 16)
+## Grupo 19 - FASE 5 executável em vez de checklist ✅
 <!-- Achado nº1 desta análise. Os 19 itens da FASE 5 são quase todos
      determinísticos, e as assertions U1-U12 do nível D são os mesmos checks
      escritos de novo. Hoje todo invocation reescreve esse shell do zero e o
@@ -230,34 +245,41 @@ Verificação: `pytest -q && ruff check . && mypy`
      16.1 e 16.2 corrigem justamente dois dos itens a automatizar — script
      antes disso codifica uma regra insatisfazível e um teste que se
      auto-bloqueia. -->
-- [ ] 19.1 `resources/verificar-harness.sh` (POSIX shell) cobrindo os itens
+- [x] 19.1 `resources/verificar-harness.sh` (POSIX shell) cobrindo os itens
       determinísticos: JSON parseia, CRLF, bit de execução, gate nos dois
       caminhos, wrapper `hooks`, caminhos do manifesto, ponte `@AGENTS.md`,
       marcadores da lista nominal, credencial literal
-- [ ] 19.2 FASE 5 passa a chamar o script e fica só com o que exige
+- [x] 19.2 FASE 5 passa a chamar o script e fica só com o que exige
       julgamento: por que cada check importa, o que fazer quando um falha, e
       os itens não automatizáveis (tempo da DoD, remediações aceitas rodando,
       AGENTS.md com escopo não duplicando o protocolo)
-- [ ] 19.3 `evals/gradua.py` passa a chamar o mesmo script nas assertions
+- [x] 19.3 `evals/gradua.py` passa a chamar o mesmo script nas assertions
       U1-U12, para skill e eval não poderem divergir
-- [ ] 19.4 O script entra em `references/arquivos-gerados.md` e no manifesto
+- [x] 19.4 O script entra em `references/arquivos-gerados.md` e no manifesto
       `.claude/harness.json` — é artefato entregue ao repo alvo junto com os
       hooks, não ferramenta interna da skill
 Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
+— 275 testes (+6); verificador 11/11 nos 8 ecossistemas gerados e 4/11 em
+diretório sem harness; medição inalterada
 
-## Grupo 20 - Medir o disparo da skill (depende: Grupo 18)
+## Grupo 20 - Medir o disparo da skill ✅
 <!-- Pendência mais antiga do SESSION_STATE: a `description` nunca foi
      otimizada para triggering, e a fronteira de escopo criada no 11.1 nunca
      foi medida. Depende do 18 porque é o 18 que fixa essa fronteira — medir
      antes é medir um comportamento que ainda vai mudar. Mede disparo, não
      execução: é trilha independente do nível D. -->
-- [ ] 20.1 ~20 queries de triggering em `evals/`, metade near-miss — pedidos
-      concretos, com caminho de arquivo e contexto, não abstrações. As
-      negativas úteis são as que compartilham vocabulário com a skill e ainda
-      assim pedem outra coisa (ex.: "cria um CI pra esse repo")
-- [ ] 20.2 Rodar `scripts/run_loop.py` do skill-creator com o model id da
-      sessão, sobre o eval set revisado
-- [ ] 20.3 Aplicar `best_description` (a selecionada por score de teste, não
-      de treino) e registrar score antes/depois em `evals/`
-Verificação: `pytest -q && ruff check . && mypy` — score antes/depois
-registrado em `evals/`
+- [x] 20.1 `evals/triggering.json`: 20 queries, 10 near-miss (CI, README,
+      eslint, MCP, git hook comum, explicação conceitual de WIP=1)
+- [x] 20.2 `run_loop.py` rodado com opus-5, 3 iterações. **Descoberta de
+      método**: rodar de dentro deste repo invalida a medição — o sub-agente
+      carrega o `CLAUDE.md`/`AGENTS.md` daqui e obedece o protocolo local em
+      vez de consultar a skill. Precisa de diretório neutro. Documentado em
+      `evals/README.md` com as duas execuções inválidas preservadas
+- [x] 20.3 Nada a aplicar: nenhuma das 3 candidatas bateu a original
+      (treino 6/12, teste 4/8 em todas). A `description` só foi corrigida no
+      ponto factual que o Grupo 16 tornou falso (lockfile → verificador)
+- [x] 20.4 (não planejado) Diagnóstico do resultado: negativas 10/10,
+      positivas ~0/10. É subdisparo real, reproduzido em 3 configurações. A
+      causa provável não é redação — é o modelo achar que resolve sozinho
+Verificação: `pytest -q && ruff check . && mypy` — resultado e método
+registrados em `evals/README.md`

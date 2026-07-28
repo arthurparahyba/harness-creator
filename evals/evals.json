@@ -7,21 +7,40 @@
       "fixture": "tests/fixtures/node",
       "prompt": "acabei de entrar nesse projeto e vamos usar o Claude Code nele pra valer. dá uma olhada e deixa o repo preparado pra isso",
       "expected_output": "Harness completo para ecossistema Node/TS: DoD com os scripts reais do package.json, ponte CLAUDE.md nos dois niveis, hooks nos tres agentes, pre-commit e CI gerados (o repo tem sensores).",
-      "assertions": ["universais", "node"]
+      "assertions": [
+        "universais",
+        "node"
+      ]
     },
     {
       "id": "dotnet",
       "fixture": "tests/fixtures/dotnet",
       "prompt": "preciso configurar esse repo aqui pra trabalhar com agente de IA. é um serviço .NET que a gente vai começar a mexer bastante agora",
       "expected_output": "Harness para ecossistema .NET: DoD com comandos dotnet apontando para Catalogo.sln, e NENHUM artefato estranho a stack (regra inviolavel 10).",
-      "assertions": ["universais", "dotnet"]
+      "assertions": [
+        "universais",
+        "dotnet"
+      ]
     },
     {
       "id": "sem-sensores",
       "fixture": "tests/fixtures/sem-sensores",
       "prompt": "quero deixar esse projeto pronto pra uma IA trabalhar nele com segurança",
       "expected_output": "Regra de honestidade: repo Python sem test runner nem linter. A DoD fica vazia, o pre-commit e o workflow de CI NAO sao gerados, e o Plano de Remediacao propoe sensores citando as funcoes puras pelo nome e o stub para as deps de sistema do entrypoint.",
-      "assertions": ["universais", "sem-sensores"]
+      "assertions": [
+        "universais",
+        "sem-sensores"
+      ]
+    },
+    {
+      "id": "com-preexistentes",
+      "fixture": "tests/fixtures/com-preexistentes",
+      "prompt": "esse repo ja tem um AGENTS.md e um CI que a gente usa. queria deixar ele preparado pro Claude Code sem perder o que ja esta ali",
+      "expected_output": "FASE 3: as convencoes reais do AGENTS.md do usuario (commits assinados, nao editar src/legado/, dois aprovadores) sobrevivem; o workflow ci.yml existente NAO e editado — o step da DoD e proposto, nao aplicado; a DoD usa os scripts reais do package.json (vitest, biome, tsc).",
+      "assertions": [
+        "universais",
+        "com-preexistentes"
+      ]
     }
   ],
   "assertions": {
@@ -56,6 +75,12 @@
       "S3: nao inventou comando de teste — a DoD declara a lacuna",
       "S4: o Plano de Remediacao cita funcao pura do repo pelo nome",
       "S5: o Plano de Remediacao trata a dep de sistema do entrypoint (stub/conftest)"
+    ],
+    "com-preexistentes": [
+      "P1: as tres convencoes do AGENTS.md do usuario continuam no arquivo",
+      "P2: .github/workflows/ci.yml nao foi modificado (byte a byte)",
+      "P3: a DoD usa vitest/biome/tsc, os scripts reais, e nao os generico npm test",
+      "P4: se um harness-dod.yml foi criado, ele coexiste com o ci.yml em vez de substitui-lo"
     ]
   }
 }

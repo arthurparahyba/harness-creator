@@ -31,7 +31,7 @@ skill faz; o segundo ela propõe.
 AGENTS.md na raiz e com escopo, skill `executar-grupo`, comando `/dod`,
 subagente `code-reviewer`, hooks de agent loop com `settings.json`,
 `init.sh`, `SESSION_STATE.md`, fonte de trabalho, `.editorconfig`,
-lockfile, `.gitignore`, README mínimo e conversão de credencial de MCP
+`.gitignore`, README mínimo e conversão de credencial de MCP
 para `${VAR}`.
 
 Ver [arquivos-gerados.md](arquivos-gerados.md).
@@ -72,6 +72,22 @@ Se os comandos de teste e lint vivem só nos pacotes, não existe um comando
 que valide o repositório inteiro — e a DoD precisa de um. Recomendar o
 script raiz que delega: `npm test --workspaces`, `turbo test`,
 `nx run-many -t test`, `pnpm -r test`, ou o agregador equivalente.
+
+### Lockfile ausente
+
+Sem lockfile, `init.sh` instala versões diferentes a cada execução e o
+"baseline verde" de uma sessão não vale para a seguinte.
+
+É recomendação e não geração porque **gerar um exige rede**: `npm install`,
+`pip freeze`, `cargo generate-lockfile` e equivalentes resolvem as
+dependências online, e a resolução fixa versões que passam a valer para o
+time inteiro — decisão do projeto, não do harness. Recomendar com o comando
+do gerenciador detectado e o **nome convencional** do ecossistema (tabela em
+[ecossistemas.md](ecossistemas.md)); nome inventado como `requirements.lock`
+não é instalado por nenhuma ferramenta.
+
+.NET e Java/Maven não têm lockfile convencional — nesses, reportar como
+pendência do grupo C em vez de recomendar comando.
 
 ### Arquivo `.env` desprotegido
 

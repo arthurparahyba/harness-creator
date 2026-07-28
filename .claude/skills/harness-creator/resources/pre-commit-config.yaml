@@ -5,11 +5,11 @@
 # comandos de lint/format/types da linguagem detectada na FASE 1.
 # Exemplos por linguagem:
 #
-#   Python (black + pylint + mypy):
-#     - id: black-check
-#       entry: bash -c 'black --check app/'
-#     - id: pylint
-#       entry: bash -c 'PYTHONPATH=app pylint app/'
+#   Python (ruff + mypy — ver references/ecossistemas.md):
+#     - id: ruff-format-check
+#       entry: bash -c 'ruff format --check .'
+#     - id: ruff
+#       entry: bash -c 'ruff check .'
 #     - id: mypy
 #       entry: bash -c 'mypy app/'
 #

@@ -1,0 +1,82 @@
+[
+  {
+    "query": "acabei de assumir esse monorepo aqui na empresa e vamos botar o Claude Code pra trabalhar nele de verdade. da uma olhada e deixa ele preparado",
+    "should_trigger": true
+  },
+  {
+    "query": "toda vez que eu volto pro projeto depois de uns dias o agente nao faz ideia de onde parou e refaz coisa que ja tava pronta. tem como resolver isso?",
+    "should_trigger": true
+  },
+  {
+    "query": "preciso de um AGENTS.md decente pro nosso servico de pagamentos em .NET, hoje tem um arquivo de 4 linhas que ninguem segue",
+    "should_trigger": true
+  },
+  {
+    "query": "quero que o agente nao consiga rodar migration nem git push --force sem eu aprovar. da pra travar isso?",
+    "should_trigger": true
+  },
+  {
+    "query": "monta pra mim a estrutura de trabalho em grupos de tasks com checkpoint e WIP=1 nesse repo",
+    "should_trigger": true
+  },
+  {
+    "query": "esse repo aqui vai ser usado por mim no cursor e por um colega no devin. queria que os dois seguissem as mesmas regras",
+    "should_trigger": true
+  },
+  {
+    "query": "harness engineering nesse projeto: quero init.sh, definition of done e handoff entre sessoes",
+    "should_trigger": true
+  },
+  {
+    "query": "o AGENTS.md ta lá na raiz mas o Claude simplesmente ignora tudo que ta escrito nele. ja conferi e o arquivo existe",
+    "should_trigger": true
+  },
+  {
+    "query": "acrescenta no AGENTS.md que a gente usa pnpm e nao npm, o agente fica errando isso",
+    "should_trigger": true
+  },
+  {
+    "query": "esse projeto ta uma bagunca pra IA trabalhar. nao tem doc, nao tem regra, cada sessao o modelo inventa um jeito diferente de commitar",
+    "should_trigger": true
+  },
+  {
+    "query": "cria um workflow do github actions que roda npm test e npm run lint em cada pull request pra branch main",
+    "should_trigger": false
+  },
+  {
+    "query": "meu hook de pre-commit ta falhando com 'black not found' mas o black ta instalado no venv. o que pode ser?",
+    "should_trigger": false
+  },
+  {
+    "query": "configura o eslint + prettier nesse projeto react, com as regras de hooks e import order",
+    "should_trigger": false
+  },
+  {
+    "query": "escreve um README bonito pro projeto explicando como rodar local e as variaveis de ambiente que precisa",
+    "should_trigger": false
+  },
+  {
+    "query": "adiciona um git hook de pre-push que roda a suite de testes antes de deixar subir",
+    "should_trigger": false
+  },
+  {
+    "query": "instala o pytest aqui e escreve testes pras funcoes puras de calculos.py, principalmente margem_percentual e normalizar_cnpj",
+    "should_trigger": false
+  },
+  {
+    "query": "me explica o que significa WIP=1 em kanban e se vale a pena pro meu time de 6 devs",
+    "should_trigger": false
+  },
+  {
+    "query": "configura o mcp do postgres no cursor pra eu conseguir consultar o banco de staging direto do editor",
+    "should_trigger": false
+  },
+  {
+    "query": "documenta a arquitetura desse servico num ARCHITECTURE.md, com os bounded contexts e como eles conversam",
+    "should_trigger": false
+  },
+  {
+    "query": "roda a definition of done aqui e me fala o que ta quebrado antes de eu abrir o PR",
+    "should_trigger": false
+  }
+]
