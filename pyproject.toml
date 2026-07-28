@@ -24,7 +24,7 @@ exclude = ["tests/fixtures"]
 select = ["E", "F", "I", "UP", "B"]
 
 [tool.mypy]
-files = ["tests", "evals"]
+files = ["tests", "evals", "eval"]
 strict = true
 mypy_path = "tests"
 exclude = "tests/fixtures/"
