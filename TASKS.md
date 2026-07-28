@@ -311,12 +311,12 @@ Verificação: `pytest -q && ruff check . && mypy`
       vazio, scripts sem CRLF e executáveis, patch do bug aplica limpo
 Verificação: `pytest -q && ruff check . && mypy`
 
-## Grupo 23 - Medição automática e comando (depende: Grupo 22)
-- [ ] 23.1 `eval/nivel-c/mede.py`: lê os JSONs das células, o `git log` e o
+## Grupo 23 - Medição automática e comando (depende: Grupo 22) ✅
+- [x] 23.1 `eval/nivel-c/mede.py`: lê os JSONs das células, o `git log` e o
       estado da árvore de cada repo, roda a DoD do alvo e calcula M1–M9
-- [ ] 23.2 Saída em tabela markdown comparativa, no formato do relatório do
+- [x] 23.2 Saída em tabela markdown comparativa, no formato do relatório do
       Grupo 21 — o relatório escrito à mão vira o formato de referência
-- [ ] 23.3 `.claude/commands/exp-nivel-c.md`: comando que dispara a bateria e
+- [x] 23.3 `.claude/commands/exp-nivel-c.md`: comando que dispara a bateria e
       cobra evidência de comando, como o `/dod`
-- [ ] 23.4 Testes de `mede.py` sobre saídas sintéticas das duas condições
+- [x] 23.4 Testes de `mede.py` sobre saídas sintéticas das duas condições
 Verificação: `pytest -q && ruff check . && mypy && python3 eval/nivel-c/mede.py --autoteste`

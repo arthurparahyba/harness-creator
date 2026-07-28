@@ -5,12 +5,13 @@
 
 - Commit verificado: `09e8e2e` (Grupo 21), branch `feature/bateria-nivel-c`,
   criada da `main` em `0cc6f7c`. Branch **não publicada**.
-- Testes: 384/384 (`pytest -q`); ruff e mypy strict limpos.
-- Change/plano ativo: `TASKS.md` na raiz — Grupos 21 (✅), 22 e 23 abertos.
-- Em andamento: nada — Grupo 21 commitado, fronteira limpa.
+- Testes: 404/404 (`pytest -q`); ruff e mypy strict limpos; `mede.py --autoteste` OK.
+- Change/plano ativo: `TASKS.md` na raiz — **nenhuma task aberta**
+  (Grupos 21, 22 e 23 concluídos).
+- Em andamento: nada — Grupo 23 commitado, fronteira limpa.
 - Não commitado: só o arquivo `-c` na raiz, lixo de execução manual antiga.
 
-## O que mudou nesta sessão (Grupo 21)
+## O que mudou nesta sessão (Grupos 21, 22 e 23)
 Primeira execução do **nível C**, que existia só como protocolo em prosa
 desde que foi escrito. Alvo: `spring-projects/spring-petclinic` (Java 17,
 Maven, Spring Boot 4.1), duas cópias — uma com o harness gerado pela skill,
@@ -23,6 +24,15 @@ dentro de cada repo alvo.
 - Relatório em `eval/nivel-c/petclinic-2026-07-28.md`, protocolo de execução
   em `eval/nivel-c/README.md`, JSONs brutos das 8 sessões em
   `eval/nivel-c/runs/`.
+- A bateria virou reexecutável: `preparar.sh` (painel + baseline), `roda.sh`
+  (uma célula, com o bug plantado e a DoD medida DEPOIS da sessão),
+  `tarefas.json` (T1–T4 com prompt literal) e `mede.py` (tabela comparativa).
+  Comando `/exp-nivel-c` amarra os quatro. `pyproject.toml` passou a incluir
+  `eval` no mypy.
+- Dois defeitos do `mede.py` apareceram ao rodá-lo sobre os dados reais e
+  foram corrigidos com teste: DoD não medida contava como verde (`0 de 4` lido
+  como quatro sessões boas), e o commit de instalação do harness inflava a
+  contagem de commits da célula `harness` em um.
 
 ## Pendências
 - **`format-on-edit.sh` é inerte em Java/Maven e em Java/Gradle.** O template
@@ -41,5 +51,6 @@ dentro de cada repo alvo.
   Grupo 17 por escrever; o `AGENTS.md` deste repo ainda manda
   `git checkout develop` (só existe `main`) e citar `/opsx:propose` (não há
   `openspec/`).
-- Próxima ação: Grupo 22 — `eval/nivel-c/tarefas.json`, `roda.sh`,
-  `preparar.sh` e `tests/test_nivel_c.py`.
+- Próxima ação: abrir PR da `feature/bateria-nivel-c`. Depois, a rodada com
+  n=3 usando o `/exp-nivel-c`, ou o grupo de correção do `format-on-edit.sh`
+  em Java.

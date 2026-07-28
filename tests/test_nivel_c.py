@@ -8,9 +8,12 @@ sumiu, bug plantado apontando para um trecho que o alvo não tem mais.
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import subprocess
+import sys
 from pathlib import Path
+from types import ModuleType
 from typing import Any
 
 import pytest
@@ -18,6 +21,23 @@ import pytest
 RAIZ = Path(__file__).resolve().parent.parent
 NIVEL_C = RAIZ / "eval" / "nivel-c"
 SCRIPTS = ["preparar.sh", "roda.sh"]
+
+
+def _mede() -> ModuleType:
+    """`eval/nivel-c/` não é pacote nem está no pythonpath do pytest, e não
+    vai virar um só para o teste: o `mede.py` é chamado por caminho, do
+    comando e da linha `Verificação:` do grupo. Carregar por caminho aqui é
+    exercitar a mesma porta de entrada que o uso real."""
+    spec = importlib.util.spec_from_file_location("mede", NIVEL_C / "mede.py")
+    assert spec and spec.loader
+    mod = importlib.util.module_from_spec(spec)
+    # Registrar ANTES de executar: o módulo usa `from __future__ import
+    # annotations`, e `@dataclass` resolve as anotações em texto procurando a
+    # classe em `sys.modules`. Sem esta linha o import morre no primeiro
+    # dataclass, com um erro que não fala nada sobre a causa.
+    sys.modules["mede"] = mod
+    spec.loader.exec_module(mod)
+    return mod
 
 
 @pytest.fixture(scope="module", name="catalogo")
@@ -115,3 +135,64 @@ def test_relatorio_da_rodada_esta_linkado_no_readme() -> None:
     readme = (NIVEL_C / "README.md").read_text()
     for rodada in NIVEL_C.glob("*-20*.md"):
         assert rodada.name in readme, f"{rodada.name} não aparece na tabela de rodadas"
+
+
+def _rodada_sintetica(raiz: Path, dod_por_condicao: dict[str, str]) -> Path:
+    """Uma rodada de mentira, com os arquivos que o `roda.sh` deixaria."""
+    work = raiz / "rodada"
+    (work / "runs").mkdir(parents=True)
+    (work / "runs" / "commit-base.txt").write_text("abc1234\n")
+    for tarefa in ("T1", "T3", "T2", "T4"):
+        for cond, cod in dod_por_condicao.items():
+            (work / "runs" / f"{tarefa}-{cond}.json").write_text(
+                json.dumps({"num_turns": 3, "duration_ms": 2000, "total_cost_usd": 0.25})
+            )
+            if cod:
+                (work / "runs" / f"{tarefa}-{cond}.dod").write_text(cod)
+    return work
+
+
+def test_mede_separa_as_duas_condicoes(tmp_path: Path) -> None:
+    mede = _mede()
+    work = _rodada_sintetica(tmp_path, {"control": "1\n", "harness": "0\n"})
+    resultado = mede.coletar(work, NIVEL_C / "tarefas.json")
+    assert resultado["control"].vermelhas == 4
+    assert resultado["harness"].vermelhas == 0
+    assert resultado["control"].custo == pytest.approx(1.0)
+
+
+def test_mede_nao_conta_dod_nao_medida_como_verde(tmp_path: Path) -> None:
+    """O modo de falhar que este teste existe para impedir: sem nenhum arquivo
+    `.dod`, a contagem de vermelhas é zero — e `0 de 4` lê-se como quatro
+    sessões verdes, que é o oposto do que se sabe."""
+    mede = _mede()
+    work = _rodada_sintetica(tmp_path, {"control": "", "harness": ""})
+    resultado = mede.coletar(work, NIVEL_C / "tarefas.json")
+    assert "n/d" in resultado["control"].placar_dod
+    assert "0 de 4" not in resultado["control"].placar_dod
+
+
+def test_mede_recusa_workdir_sem_runs(tmp_path: Path) -> None:
+    mede = _mede()
+    assert mede.main([str(tmp_path)]) == 2
+
+
+def test_autoteste_do_medidor_passa() -> None:
+    """O `--autoteste` é a verificação do Grupo 23 no TASKS.md: se ele deixar
+    de valer, a linha `Verificação:` daquele grupo vira decoração."""
+    r = subprocess.run(
+        [sys.executable, str(NIVEL_C / "mede.py"), "--autoteste"],
+        capture_output=True,
+        text=True,
+    )
+    assert r.returncode == 0, r.stderr
+    assert "autoteste OK" in r.stdout
+
+
+def test_comando_aponta_para_os_scripts_reais() -> None:
+    texto = (RAIZ / ".claude" / "commands" / "exp-nivel-c.md").read_text()
+    for script in ("preparar.sh", "roda.sh", "mede.py"):
+        assert script in texto, f"o comando não menciona {script}"
+    assert "verificar-harness.sh" in texto, (
+        "o comando deixou de exigir a verificação do harness antes de medir comportamento"
+    )

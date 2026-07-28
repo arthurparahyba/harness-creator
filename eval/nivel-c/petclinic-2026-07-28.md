@@ -166,6 +166,25 @@ R1 não se aplica — o alvo tem sensores.
 
 `verificar-harness.sh` no repo gerado: **11 de 11**.
 
+## Reproduzindo
+
+A bateria virou executável depois desta rodada
+([`README.md`](README.md), comando `/exp-nivel-c`):
+
+```
+sh eval/nivel-c/preparar.sh <workdir>
+# aplicar a skill em <workdir>/harness e commitar
+sh eval/nivel-c/roda.sh <workdir> control T1     # e assim por diante
+python3 eval/nivel-c/mede.py <workdir>
+```
+
+O `mede.py` rodado sobre os artefatos **desta** rodada devolve custo, turns,
+commits e estado da árvore idênticos aos da tabela acima. As colunas de DoD
+saem como `n/d`: o `roda.sh`, que grava o exit code da DoD depois de cada
+sessão, não existia quando estas 8 sessões rodaram — aqui a DoD foi executada
+à mão, e está transcrita nas seções por tarefa. Em rodada futura essa coluna
+vem preenchida sozinha.
+
 ## O que esta rodada não prova
 
 - **n=1 por célula.** O protocolo pede 3. Os números são direcionais; o que

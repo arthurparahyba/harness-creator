@@ -48,6 +48,13 @@ PROMPT=$(campo prompt)
 SESSAO=$(campo sessao)
 AUTORIZACAO=$(campo autorizacao)
 
+# Ponto de partida da celula, gravado uma vez so, antes da primeira sessao.
+# Na celula `harness` o HEAD aqui ja inclui o commit de instalacao do harness,
+# que nao e trabalho da rodada: contar a partir do commit base daria um commit
+# de vantagem a ela sem nenhuma tarefa ter sido feita.
+INICIO="$RUNS/inicio-$COND.txt"
+[ -f "$INICIO" ] || git -C "$ALVO" rev-parse --short HEAD > "$INICIO"
+
 # ------------------------------------------------------------------ preparo
 # Bug plantado: substituicao literal, aplicada identica nas duas condicoes.
 python3 - "$TAREFAS" "$TAREFA" "$ALVO" <<'PY'
