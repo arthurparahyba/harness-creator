@@ -102,6 +102,16 @@ Arquivo existir não é o benefício; o agente obedecer é. O
 tarefa, mesmo modelo, repo com e sem harness, medindo aderência ao protocolo,
 falsos "pronto", retrabalho entre sessões e recuperação de contexto perdido.
 
+**Saiu do papel em 2026-07-28.** A primeira execução está em
+[`nivel-c/`](nivel-c/README.md), sobre `spring-petclinic`: falso "pronto" em
+3 de 4 sessões sem harness contra 0 de 4 com, ao custo de +65% em dólar. O
+relatório é [`nivel-c/petclinic-2026-07-28.md`](nivel-c/petclinic-2026-07-28.md)
+e os JSONs brutos das 8 sessões ficaram em `nivel-c/runs/`.
+
+Foi ali também que apareceu um defeito que nenhum teste deste repositório
+pegava: o `format-on-edit.sh` gerado é inerte em Java/Maven, porque formatter
+de plugin não aceita caminho de arquivo como argumento.
+
 ---
 
 ## Primeira medição (2026-07-26, repo `harness-creator`)
@@ -141,4 +151,5 @@ tudo com vocabulário próprio, o que a isola das ferramentas do curso.
 - [`score-harness.sh`](score-harness.sh) — scorer semântico, zero dependência, bash 3.2+
 - [`compare-harness.sh`](compare-harness.sh) — delta antes/depois, requer `python3`
 - [`mapa-equivalencias.md`](mapa-equivalencias.md) — de/para entre o vocabulário do curso e o da skill
-- [`protocolo-experimento.md`](protocolo-experimento.md) — nível C, medição comportamental
+- [`protocolo-experimento.md`](protocolo-experimento.md) — nível C, o desenho do experimento
+- [`nivel-c/`](nivel-c/README.md) — nível C, as execuções e seus relatórios
