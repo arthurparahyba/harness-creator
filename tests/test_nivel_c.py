@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -196,3 +197,37 @@ def test_comando_aponta_para_os_scripts_reais() -> None:
     assert "verificar-harness.sh" in texto, (
         "o comando deixou de exigir a verificação do harness antes de medir comportamento"
     )
+
+
+def _secao_do_readme() -> str:
+    texto = (RAIZ / "README.md").read_text()
+    inicio = texto.index("## Isso funciona?")
+    fim = texto.index("## ", inicio + 3)
+    return texto[inicio:fim]
+
+
+def test_readme_aponta_para_o_relatorio_e_para_a_bateria() -> None:
+    secao = _secao_do_readme()
+    alvo = "eval/nivel-c/petclinic-2026-07-28.md"
+    assert alvo in secao, "a seção do README não leva ao relatório que a sustenta"
+    assert (RAIZ / alvo).is_file(), f"{alvo} não existe: link quebrado na vitrine"
+    assert "exp-nivel-c" in secao, "o README mostra o resultado sem dizer como reproduzir"
+
+
+def test_todo_numero_do_readme_existe_no_relatorio() -> None:
+    """A vitrine não pode andar sozinha. Número que aparece no README e não no
+    relatório é ou erro de digitação ou dado que envelheceu — e nos dois casos
+    quem lê o README não tem como saber. Vale a pena o teste ser chato aqui:
+    a alternativa é o repositório que prega evidência de comando publicar um
+    número sem lastro."""
+    relatorio = (RAIZ / "eval" / "nivel-c" / "petclinic-2026-07-28.md").read_text()
+    secao = _secao_do_readme()
+    padroes = [
+        r"US\$ \d+,\d+",  # custo por célula
+        r"\d+ de \d+",  # placar de sessões
+        r"\d+%",  # variação de custo
+    ]
+    afirmacoes = [m for p in padroes for m in re.findall(p, secao)]
+    assert afirmacoes, "a seção perdeu os números: virou texto de marketing"
+    orfas = [a for a in afirmacoes if a not in relatorio]
+    assert orfas == [], f"número no README sem lastro no relatório: {orfas}"

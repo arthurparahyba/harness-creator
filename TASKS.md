@@ -320,3 +320,14 @@ Verificação: `pytest -q && ruff check . && mypy`
       cobra evidência de comando, como o `/dod`
 - [x] 23.4 Testes de `mede.py` sobre saídas sintéticas das duas condições
 Verificação: `pytest -q && ruff check . && mypy && python3 eval/nivel-c/mede.py --autoteste`
+
+## Grupo 24 - Resultado do nível C no README da raiz ✅
+<!-- O README hoje descreve o que a skill faz e como trabalhar no repo, mas
+     não responde "isso funciona?". A rodada do nível C respondeu com número;
+     o número está em eval/nivel-c/ e ninguém que abre o README o encontra. -->
+- [x] 24.1 Seção no `README.md` com a comparação com/sem harness da rodada
+      petclinic e ponteiro para o relatório e para o comando `/exp-nivel-c`
+- [x] 24.2 Teste que amarra os números do README ao relatório: número que
+      aparece num e não no outro é divergência, e divergência entre a vitrine
+      e a evidência é pior do que não ter vitrine
+Verificação: `pytest -q && ruff check . && mypy`

@@ -5,13 +5,13 @@
 
 - Commit verificado: `09e8e2e` (Grupo 21), branch `feature/bateria-nivel-c`,
   criada da `main` em `0cc6f7c`. Branch **não publicada**.
-- Testes: 404/404 (`pytest -q`); ruff e mypy strict limpos; `mede.py --autoteste` OK.
+- Testes: 406/406 (`pytest -q`); ruff e mypy strict limpos; `mede.py --autoteste` OK.
 - Change/plano ativo: `TASKS.md` na raiz — **nenhuma task aberta**
-  (Grupos 21, 22 e 23 concluídos).
-- Em andamento: nada — Grupo 23 commitado, fronteira limpa.
+  (Grupos 21, 22, 23 e 24 concluídos).
+- Em andamento: nada — Grupo 24 commitado, fronteira limpa.
 - Não commitado: só o arquivo `-c` na raiz, lixo de execução manual antiga.
 
-## O que mudou nesta sessão (Grupos 21, 22 e 23)
+## O que mudou nesta sessão (Grupos 21, 22, 23 e 24)
 Primeira execução do **nível C**, que existia só como protocolo em prosa
 desde que foi escrito. Alvo: `spring-projects/spring-petclinic` (Java 17,
 Maven, Spring Boot 4.1), duas cópias — uma com o harness gerado pela skill,
@@ -33,6 +33,9 @@ dentro de cada repo alvo.
   foram corrigidos com teste: DoD não medida contava como verde (`0 de 4` lido
   como quatro sessões boas), e o commit de instalação do harness inflava a
   contagem de commits da célula `harness` em um.
+- O `README.md` da raiz ganhou a seção "Isso funciona?" com o placar da
+  rodada, e um teste que reprova se algum número dela não existir no
+  relatório — a vitrine não anda sozinha.
 
 ## Pendências
 - **`format-on-edit.sh` é inerte em Java/Maven e em Java/Gradle.** O template
