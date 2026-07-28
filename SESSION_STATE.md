@@ -3,7 +3,7 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `f0cb0dd` (Grupo 21), branch `feature/bateria-nivel-c`,
+- Commit verificado: `09e8e2e` (Grupo 21), branch `feature/bateria-nivel-c`,
   criada da `main` em `0cc6f7c`. Branch **não publicada**.
 - Testes: 384/384 (`pytest -q`); ruff e mypy strict limpos.
 - Change/plano ativo: `TASKS.md` na raiz — Grupos 21 (✅), 22 e 23 abertos.
