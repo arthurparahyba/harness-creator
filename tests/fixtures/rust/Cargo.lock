@@ -1,0 +1,5 @@
+version = 3
+
+[[package]]
+name = "estoque"
+version = "0.2.1"

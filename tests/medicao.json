@@ -34,9 +34,34 @@
     "depois": "L4 103/108",
     "delta": 67
   },
+  "php": {
+    "antes": "L0 18/108",
+    "depois": "L2 85/108",
+    "delta": 67
+  },
+  "python": {
+    "antes": "L0 27/108",
+    "depois": "L4 94/108",
+    "delta": 67
+  },
   "react": {
     "antes": "L0 36/108",
     "depois": "L4 103/108",
     "delta": 67
+  },
+  "ruby": {
+    "antes": "L0 23/108",
+    "depois": "L2 90/108",
+    "delta": 67
+  },
+  "rust": {
+    "antes": "L0 23/108",
+    "depois": "L2 90/108",
+    "delta": 67
+  },
+  "sem-sensores": {
+    "antes": "L0 14/108",
+    "depois": "L2 66/108",
+    "delta": 52
   }
 }

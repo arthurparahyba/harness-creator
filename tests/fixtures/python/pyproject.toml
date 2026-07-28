@@ -1,0 +1,14 @@
+[project]
+name = "cobranca"
+version = "0.3.0"
+requires-python = ">=3.11"
+dependencies = ["httpx>=0.27"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.11"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.mypy]
+strict = true

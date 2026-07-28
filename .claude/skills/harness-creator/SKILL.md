@@ -3,10 +3,10 @@ name: harness-creator
 description: >
   Gera um harness completo para agentes de codigo (AGENTS.md com protocolo
   de sessao, config.yaml do OpenSpec, init.sh, SESSION_STATE.md, TASKS.md,
-  hooks de agent loop, pre-commit, comando /dod, lockfile) adaptado ao
-  repositorio atual, via descoberta de stack/comandos/convencoes + templates
-  de protocolo fixo. Use esta skill sempre que o usuario pedir para
-  configurar um harness, criar ou melhorar um AGENTS.md, preparar um
+  hooks de agent loop, pre-commit, comando /dod, verificador do harness)
+  adaptado ao repositorio atual, via descoberta de stack/comandos/convencoes
+  + templates de protocolo fixo. Use esta skill sempre que o usuario pedir
+  para configurar um harness, criar ou melhorar um AGENTS.md, preparar um
   repositorio para agentes de IA, configurar OpenSpec com regras de
   execucao, criar init.sh ou protocolo de sessao, ou mencionar harness
   engineering, checkpoints por grupos de tasks, WIP=1 ou continuidade

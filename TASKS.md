@@ -16,11 +16,18 @@ Verificação: `pytest -q && ruff check . && mypy && npx -y harness-score --min-
 - [x] 2.3 Hook de formatação e gate executados contra código real de cada stack
 Verificação: `pytest -q` — 165 testes
 
-## Grupo 3 - Ampliar a cobertura dos ecossistemas (depende: Grupo 2)
-- [ ] 3.1 Fixtures de Python, Rust, Ruby e PHP (hoje só documentados)
-- [ ] 3.2 Teste de que o enforcement NÃO é gerado quando a DoD é vazia
-- [ ] 3.3 Fixture com CI e AGENTS.md preexistentes, para cobrir a FASE 3
-Verificação: `pytest -q && ruff check . && mypy`
+## Grupo 3 - Ampliar a cobertura dos ecossistemas ✅
+- [x] 3.1 Fixtures de Python, Rust, Ruby e PHP, com Stack registrada em
+      `gerar.py`. As quatro linhas de `ecossistemas.md` eram promessa que nada
+      exercitava; agora as parametrizações de geração rodam sobre 12 stacks
+- [x] 3.2 `tests/test_honestidade.py`: `gerar.py` passa a respeitar a regra da
+      FASE 2 (DoD vazia → sem pre-commit e sem CI), e o teste cobra isso mais
+      a não-invenção de comando de teste. Antes não havia sensor nenhum
+- [x] 3.3 Fixture `com-preexistentes` (AGENTS.md do usuário com convenções
+      reais + `ci.yml`) e caso novo em `evals/evals.json`. A FASE 3 é conflito,
+      não preenchimento: `gerar.py` não a implementa, então quem exercita é o
+      nível D com um modelo real
+Verificação: `pytest -q && ruff check . && mypy` — 364 testes
 
 ## Grupo 4 - Medir os ecossistemas com o scanner ✅
 <!-- Só deste repositório: a skill entregue não depende de harness-score.
@@ -32,8 +39,10 @@ Verificação: `python tests/medir.py` — 8 ecossistemas, +64 a +67 pontos
 
 ## Grupo 5 - Fechar as recomendações do grupo B (depende: Grupo 3)
 - [ ] 5.1 Fixture de monorepo com o script raiz já aplicado, para provar
-      que a recomendação vale os 6 pontos de SNS-01 sem intervenção manual
-- [ ] 5.2 Teste de que a skill NÃO gera `package.json` em repo .NET
+      que a recomendação funciona sem intervenção manual
+- [x] 5.2 Teste de que a skill NÃO gera artefato estranho à stack — cobre o
+      `package.json` em .NET pedido aqui, mais 7 combinações (Gemfile em PHP,
+      composer.json em Ruby, requirements.txt em .NET...). Regra inviolável 8
 Verificação: `pytest -q && python tests/medir.py`
 
 <!-- Grupos 6-10: revisão completa da skill (2026-07-27). Cada um fecha um

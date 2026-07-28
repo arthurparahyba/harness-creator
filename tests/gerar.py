@@ -162,7 +162,64 @@ STACKS: dict[str, Stack] = {
         formatavel="apps/web/src/formata.ts",
         nao_formatavel="package.json",
     ),
+    # Os quatro abaixo estavam só documentados em `ecossistemas.md`. Sem
+    # fixture, a linha da tabela era uma promessa que nada exercitava.
+    "python": Stack(
+        dod="pytest && ruff check . && mypy",
+        file_glob="*.py",
+        formatter_bin="ruff",
+        dir_escopo="cobranca",
+        setup_steps=('      - uses: actions/setup-python@v5\n      - run: pip install -e ".[dev]"'),
+        pre_commit="ruff check .",
+        formatavel="cobranca/juros.py",
+        nao_formatavel="pyproject.toml",
+    ),
+    "rust": Stack(
+        dod="cargo test && cargo clippy -- -D warnings && cargo fmt --check",
+        file_glob="*.rs",
+        formatter_bin="rustfmt",
+        dir_escopo="src",
+        setup_steps="      - run: rustup toolchain install stable --profile minimal",
+        pre_commit="cargo clippy -- -D warnings",
+        formatavel="src/lib.rs",
+        nao_formatavel="Cargo.toml",
+    ),
+    "ruby": Stack(
+        dod="rspec && rubocop",
+        file_glob="*.rb",
+        formatter_bin="rubocop",
+        dir_escopo="lib",
+        setup_steps=("      - uses: ruby/setup-ruby@v1\n      - run: bundle install"),
+        pre_commit="rubocop",
+        formatavel="lib/comissao.rb",
+        nao_formatavel="Gemfile",
+    ),
+    "php": Stack(
+        dod="phpunit && phpcs src && phpstan analyse src",
+        file_glob="*.php",
+        formatter_bin="php-cs-fixer",
+        dir_escopo="src",
+        setup_steps=("      - uses: shivammathur/setup-php@v2\n      - run: composer install"),
+        pre_commit="phpcs src",
+        formatavel="src/Imposto.php",
+        nao_formatavel="composer.json",
+    ),
+    # Repo Python sem test runner nem linter. A DoD vazia é o ponto: é ela que
+    # desliga o enforcement. Não entra nas parametrizações que exigem DoD.
+    "sem-sensores": Stack(
+        dod="",
+        file_glob="*.py",
+        formatter_bin="formatter-nao-definido",
+        dir_escopo="relatorios",
+        setup_steps="      - uses: actions/setup-python@v5",
+        pre_commit="",
+        formatavel="relatorios/calculos.py",
+        nao_formatavel="pyproject.toml",
+    ),
 }
+
+COM_SENSORES = [n for n, s in STACKS.items() if s.dod]
+"""Ecossistemas cujo harness inclui enforcement — os que têm DoD real."""
 
 PRE_COMMIT_HOOK = """      - id: lint
         name: lint
@@ -278,26 +335,31 @@ def gerar(nome: str, destino: Path) -> Stack:
             },
         ),
     )
-    _grava(
-        destino,
-        ".pre-commit-config.yaml",
-        _preenche(
-            "pre-commit-config.yaml",
-            {"<pre-commit-hooks>": PRE_COMMIT_HOOK.format(cmd=stack.pre_commit)},
-        ),
-    )
-    _grava(
-        destino,
-        ".github/workflows/harness-dod.yml",
-        _preenche(
-            "ci-workflow.yml",
-            {
-                "<runner>": "ubuntu-latest",
-                "<setup-steps>": stack.setup_steps,
-                "<dod-steps>": stack.dod_steps,
-            },
-        ),
-    )
+    # Regra de honestidade da FASE 2: sem sensores, a DoD fica vazia e o
+    # enforcement NÃO é gerado. Pre-commit sem hook e CI que passa sem rodar
+    # nada dão ao agente um verde que ele não mereceu — pior que não ter
+    # enforcement, porque parece ter.
+    if stack.dod:
+        _grava(
+            destino,
+            ".pre-commit-config.yaml",
+            _preenche(
+                "pre-commit-config.yaml",
+                {"<pre-commit-hooks>": PRE_COMMIT_HOOK.format(cmd=stack.pre_commit)},
+            ),
+        )
+        _grava(
+            destino,
+            ".github/workflows/harness-dod.yml",
+            _preenche(
+                "ci-workflow.yml",
+                {
+                    "<runner>": "ubuntu-latest",
+                    "<setup-steps>": stack.setup_steps,
+                    "<dod-steps>": stack.dod_steps,
+                },
+            ),
+        )
     _grava(
         destino,
         "init.sh",
