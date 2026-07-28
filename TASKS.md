@@ -299,15 +299,15 @@ registrados em `evals/README.md`
       ponteiro para o relatório
 Verificação: `pytest -q && ruff check . && mypy`
 
-## Grupo 22 - Bateria executável (depende: Grupo 21)
-- [ ] 22.1 `eval/nivel-c/tarefas.json`: T1–T4 com prompt literal, benefício
+## Grupo 22 - Bateria executável (depende: Grupo 21) ✅
+- [x] 22.1 `eval/nivel-c/tarefas.json`: T1–T4 com prompt literal, benefício
       medido e o patch do bug plantado — hoje só existem no transcript
-- [ ] 22.2 `eval/nivel-c/roda.sh`: executa uma célula (condição × tarefa) com
+- [x] 22.2 `eval/nivel-c/roda.sh`: executa uma célula (condição × tarefa) com
       `claude -p` a partir do repo alvo, com `--resume` para tarefa na mesma
       sessão. O `cd` para o repo alvo é requisito de validade, não conforto
-- [ ] 22.3 `eval/nivel-c/preparar.sh`: clona o repo alvo, cria as cópias
+- [x] 22.3 `eval/nivel-c/preparar.sh`: clona o repo alvo, cria as cópias
       `control/` e `harness/` e roda o baseline antes de qualquer sessão
-- [ ] 22.4 `tests/test_nivel_c.py`: tarefas.json parseia, todo prompt não é
+- [x] 22.4 `tests/test_nivel_c.py`: tarefas.json parseia, todo prompt não é
       vazio, scripts sem CRLF e executáveis, patch do bug aplica limpo
 Verificação: `pytest -q && ruff check . && mypy`
 
