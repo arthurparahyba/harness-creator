@@ -3,8 +3,9 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `09e8e2e` (Grupo 21), branch `feature/bateria-nivel-c`,
-  criada da `main` em `0cc6f7c`. Branch **não publicada**.
+- Commit verificado: `f0566bb` na `main` — merge da `feature/bateria-nivel-c`
+  (Grupos 21 a 24). DoD verde depois do merge. **Nada publicado ainda**: a
+  `main` local está à frente da `origin/main`.
 - Testes: 406/406 (`pytest -q`); ruff e mypy strict limpos; `mede.py --autoteste` OK.
 - Change/plano ativo: `TASKS.md` na raiz — **nenhuma task aberta**
   (Grupos 21, 22, 23 e 24 concluídos).
@@ -54,6 +55,6 @@ dentro de cada repo alvo.
   Grupo 17 por escrever; o `AGENTS.md` deste repo ainda manda
   `git checkout develop` (só existe `main`) e citar `/opsx:propose` (não há
   `openspec/`).
-- Próxima ação: abrir PR da `feature/bateria-nivel-c`. Depois, a rodada com
-  n=3 usando o `/exp-nivel-c`, ou o grupo de correção do `format-on-edit.sh`
-  em Java.
+- Próxima ação: `git push origin main` (não feito — ninguém pediu para
+  publicar). Depois, a rodada com n=3 usando o `/exp-nivel-c`, ou o grupo de
+  correção do `format-on-edit.sh` em Java.
