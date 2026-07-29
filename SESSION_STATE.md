@@ -3,12 +3,13 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `daca5e3` na `main`, publicado, CI verde — Grupo 27.
-- Testes: 566/566 (`pytest -q`); ruff e mypy strict limpos; score da geração
+- Commit verificado: Grupo 34 na `main`, publicado. Depois dele, só commits
+  de plano (propostas dos Grupos 35 e 36).
+- Testes: 579/579 (`pytest -q`); ruff e mypy strict limpos; score da geração
   **+67** em todos os ecossistemas (+52 no `sem-sensores`).
-- Change/plano ativo: `TASKS.md` na raiz — **só o Grupo 26 aberto, e
-  BLOQUEADO** (ver pendências). Grupos 25, 27, 28, 29, 30, 31, 32 e 33
-  concluídos e publicados.
+- Change/plano ativo: `TASKS.md` na raiz — **Grupos 35 e 36 abertos** (achados
+  ao rodar a skill no PetClinic) e **26 aberto e BLOQUEADO**. Grupos 25, 27,
+  28, 29, 30, 31, 32, 33 e 34 concluídos e publicados.
 - Em andamento: nada — fronteira limpa.
 - Não commitado: só o `-c` na raiz, lixo de execução manual antiga.
 - Execução em série foi autorizada pelo usuário nesta sessão: a regra "PARE
@@ -76,6 +77,23 @@ dentro de cada repo alvo.
 - O `README.md` da raiz ganhou a seção "Isso funciona?" com o placar da
   rodada, e um teste que reprova se algum número dela não existir no
   relatório — a vitrine não anda sozinha.
+
+## Execução real da skill no Spring PetClinic (2026-07-29)
+Rodada de validação a pedido do usuário, num clone de
+`spring-projects/spring-petclinic` (`f182358`, Java 17, Maven+Gradle).
+
+- Resultado: **L0 · 39/108 -> L4 · 89/108**. Verificador 11/11, check-arch
+  5/5, gate provado (exit 2 no destrutivo, 0 na DoD).
+- Executada pelo próprio agente da sessão, não headless: o
+  `claude -p --permission-mode bypassPermissions` foi bloqueado pelo
+  classificador. **A medição é fraca** — quem executou escreveu a skill nesta
+  mesma sessão, que é exatamente o viés que o `evals/README.md` alerta.
+- A geração legítima ali é SEM `format-on-edit.sh`: o PetClinic usa
+  `spring-javaformat`, que não escopa por arquivo.
+- Três defeitos da skill apareceram. Um virou o Grupo 34 (já entregue); os
+  outros dois viraram os Grupos 35 e 36.
+- Alvo em `<scratchpad>/javatest/alvo` — some com a sessão; a rodada é
+  reproduzível pelos passos acima.
 
 ## Pendências
 - **BLOQUEADOR: o instrumento do nível E não detecta disparo nenhum.** Teste
