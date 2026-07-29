@@ -5,6 +5,17 @@
 
 ---
 
+## Conteúdo
+
+- REGRA CRÍTICA
+- Passo 0 — Existe `.claude/harness.json`?
+- Passo 0.1 — O que esta fase produz
+- Ordem de investigação
+- Formato do Relatório de Descoberta
+- ➡️ Fase 1 concluída — siga direto para a Fase 2
+
+---
+
 ## REGRA CRÍTICA
 
 Toda informação deve vir de evidência em arquivos do repo — cite o

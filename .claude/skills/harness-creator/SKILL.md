@@ -12,6 +12,17 @@ description: >
   arquiteturais executaveis e verificador do harness, adaptados a stack
   descoberta no repositorio.
 license: MIT
+# A FASE 5 executa o que acabou de gravar: o verificador, o gate hook (para
+# provar exit 2 no destrutivo e 0 no seguro) e o check-arch. Sem isto a skill
+# promete rodar "inteiro e sem perguntar nada" e para num prompt de permissao
+# que ela mesma causou. Vale so pelo turno que invoca a skill.
+allowed-tools: >
+  Bash(bash .claude/verificar-harness.sh*) Bash(bash .claude/check-arch.sh*)
+  Bash(bash .claude/hooks/gate-destructive.sh*) Read Grep Glob
+compatibility: >
+  Gera harness para Claude Code, Devin CLI e Cursor. Requer git e shell POSIX
+  no repositorio alvo. A camada de instrucao e os hooks valem para os tres;
+  skills e subagentes gerados valem so para o Claude Code.
 metadata:
   author: squad-harness
   version: "2.5"
@@ -94,7 +105,7 @@ provar que devolve exit 2 num comando destrutivo e 0 num seguro. A skill
 cobra evidencia de comando do agente que usa o harness; ela mesma nao
 declara sucesso sem executar o que gerou.
 
-## Regras invioláveis
+## Regras inviolaveis
 
 Valem em todas as fases. Cada uma vem com o modo de falhar que a originou —
 sem ele voce nao tem como julgar os casos que a regra nao previu:

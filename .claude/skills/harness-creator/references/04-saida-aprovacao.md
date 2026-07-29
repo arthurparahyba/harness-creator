@@ -7,6 +7,16 @@ aguardar aprovação explícita antes de gravar.
 ---
 
 
+## Conteúdo
+
+- Regra arquitetural proposta entra como item do Plano
+- Fluxo de branches inferido — confirme antes de gravar
+- Ordem de apresentação
+- Ação após aprovação
+- ⏸️ ÚNICA PAUSA DO FLUXO — aguarde aqui
+
+---
+
 ## Regra arquitetural proposta entra como item do Plano
 
 Quando o agente `propor-regra-arch` devolver rascunhos, cada um vira um item

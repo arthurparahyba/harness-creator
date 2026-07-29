@@ -6,6 +6,17 @@ skill já passou por ali.
 
 ---
 
+## Conteúdo
+
+- Por que gerar de novo não serve
+- O que ler no manifesto, antes de qualquer outra coisa
+- Classificação de cada arquivo
+- Descoberta reduzida
+- Apresentação na FASE 4
+- Ao final
+
+---
+
 ## Por que gerar de novo não serve
 
 Um repositório com manifesto já tomou decisões. Rodar o fluxo do zero em

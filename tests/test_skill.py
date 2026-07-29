@@ -845,7 +845,7 @@ def test_toda_regra_inviolavel_traz_o_modo_de_falhar() -> None:
     modelo não tem como julgar a situação que ela não previu, e o resultado é
     obediência literal onde era preciso critério."""
     corpo = SKILL.joinpath("SKILL.md").read_text().split("---", 2)[-1]
-    bloco = corpo.split("## Regras invioláveis")[1].split("\n## ")[0]
+    bloco = corpo.split("## Regras inviolaveis")[1].split("\n## ")[0]
     regras = re.split(r"\n(?=\d+\. )", bloco.strip())[1:]
     curtas = [r.split("\n")[0][:50] for r in regras if len(r.split()) < 20]
     assert curtas == [], f"regra sem modo de falhar declarado: {curtas}"
@@ -961,3 +961,67 @@ def test_fase_4_confirma_o_fluxo_com_a_evidencia() -> None:
         "default apresentado como descoberta é pior que pergunta: o usuário "
         "aprova achando que a skill viu algo que ela não viu"
     )
+
+
+# Só o que o modelo lê SOB DEMANDA. `SKILL.md` fica de fora porque é carregado
+# inteiro quando a skill dispara — sua própria lista de fases já é o índice —
+# e `README.md` é documentação para humano, não material que o agente
+# pré-visualiza no meio de uma fase.
+_LONGOS_SOB_DEMANDA = sorted(
+    p.relative_to(SKILL).as_posix()
+    for p in SKILL.rglob("*.md")
+    if "resources" not in p.parts
+    and p.name not in {"SKILL.md", "README.md"}
+    and len(p.read_text().splitlines()) > 100
+)
+
+
+@pytest.mark.parametrize("caminho", _LONGOS_SOB_DEMANDA)
+def test_arquivo_longo_tem_indice(caminho: str) -> None:
+    """Arquivo de referência com mais de 100 linhas precisa de índice no topo.
+
+    Ao encontrar uma referência, o modelo às vezes pré-visualiza o arquivo em
+    vez de lê-lo inteiro (`head -100`). Sem índice ele não tem como saber que
+    existe conteúdo depois do corte — e age com informação parcial achando
+    que viu tudo. `02-preenchimento-templates.md` tem mais de 300 linhas: uma
+    leitura parcial esconde dois terços dele.
+
+    A regra vale só se um sensor a cobrar; senão o próximo arquivo longo
+    nasce sem.
+    """
+    corpo = (SKILL / caminho).read_text()
+    assert "## Conteúdo" in corpo, (
+        f"{caminho} tem mais de 100 linhas e não tem índice — leitura parcial "
+        "esconde o resto sem avisar"
+    )
+
+
+def test_frontmatter_pre_aprova_o_que_a_fase_5_executa() -> None:
+    """A skill promete rodar "inteiro e sem perguntar nada, com uma parada só".
+
+    A FASE 5 executa o verificador, o gate (para provar exit 2/0) e o
+    check-arch. Sem pré-aprovação, cada um vira um prompt de permissão no meio
+    do fluxo — a skill interrompendo a si mesma, contra a própria Regra 1.
+    """
+    m = re.match(r"^---\n(.*?)\n---", SKILL.joinpath("SKILL.md").read_text(), re.S)
+    assert m is not None
+    fm = yaml.safe_load(m.group(1))
+    permitidas = fm.get("allowed-tools", "")
+    for script in ("verificar-harness.sh", "check-arch.sh", "gate-destructive.sh"):
+        assert script in permitidas, (
+            f"a FASE 5 executa `{script}` e ele não está em allowed-tools"
+        )
+
+
+def test_frontmatter_declara_compatibilidade() -> None:
+    """A skill tem requisito de ambiente real: três agentes-alvo, git, shell.
+
+    O campo é opcional na spec e a maioria das skills não precisa dele — esta
+    precisa, porque o que ela gera vale diferente em cada agente.
+    """
+    m = re.match(r"^---\n(.*?)\n---", SKILL.joinpath("SKILL.md").read_text(), re.S)
+    assert m is not None
+    compat = yaml.safe_load(m.group(1)).get("compatibility", "")
+    assert len(compat) <= 500, "compatibility passa do limite de 500 chars da spec"
+    for agente in ("Claude Code", "Devin", "Cursor"):
+        assert agente in compat, f"compatibility não menciona {agente}"

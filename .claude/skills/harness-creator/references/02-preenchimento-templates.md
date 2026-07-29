@@ -6,6 +6,17 @@ de destino exatamente como está no template.
 
 ---
 
+## Conteúdo
+
+- REGRA PRINCIPAL
+- REGRA DE HONESTIDADE (enforcement vazio não se gera)
+- REGRA DE GRAVAÇÃO
+- Camada de instrução
+- Camada de enforcement
+- ➡️ Fase 2 concluída — siga direto para a Fase 3
+
+---
+
 ## REGRA PRINCIPAL
 
 Não parafraseie, não resuma, não reordene, não "melhore" o texto do
