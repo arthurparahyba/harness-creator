@@ -19,7 +19,7 @@ ferramentas do walkinglabs.
 | Transição de estado por verificação (L08) | `scripts/verify-feature.sh` + `make verify-feature` | linha `Verificação:` do grupo + regra "saída de comando é evidência" | EQUIV mais fraco |
 | Comando único de verificação | `make check` | DoD encadeada em `AGENTS.md` + `/dod` + `init.sh` | EQUIV |
 | Enforcement | CI | hooks de agent loop + pre-commit + workflow de CI + `.devin/hooks.v1.json` | mais forte |
-| Regras arquiteturais (L10) | `.harness/arch-rules.json` + `scripts/check-arch.sh` | **sem equivalente** | SEM COBERTURA |
+| Regras arquiteturais (L10) | `.harness/arch-rules.json` + `scripts/check-arch.sh` | `.harness/arch-rules.json` + `.claude/check-arch.sh` na DoD | idêntico |
 | Observabilidade (L11) | `scripts/session-trace.sh`, `.harness/traces/*.jsonl` | histórico em `SESSION_STATE.md` por checkpoint | EQUIV mais fraco |
 | Rubrica de avaliação (L11) | `templates/evaluator-rubric.md` | `/dod` | EQUIV mais fraco |
 | Estado limpo (L12) | `templates/clean-state-checklist.md` + `make clean-check` | regra "fronteira limpa" + "nunca commitar com verificação falhando" | EQUIV |
@@ -32,9 +32,10 @@ julgamento de outro agente**:
 
 - `verify-feature.sh` → linha `Verificação:` — o curso torna impossível marcar
   passing sem rodar o comando; a skill pede que o agente rode e não minta.
-- `arch-rules.json` → **nada** — desde a remoção do subagente `code-reviewer`
-  (Grupo 28) o harness gerado não cobre regra arquitetural de forma alguma.
-  V6 passou de `eq` para `fail` no scanner. É perda conhecida, não descuido.
+- `arch-rules.json` → **idêntico** desde o Grupo 31: a skill passou a gerar o
+  registro e o runner, ligados à cadeia da DoD. V6 saiu de `fail` para `pass` —
+  cobertura melhor do que a de antes do Grupo 28, quando o subagente revisor
+  contava só como `eq`: revisor julga caso a caso e esquece, registro acumula.
 - `session-trace.jsonl` → `SESSION_STATE.md` — sinal estruturado por evento vs.
   resumo em prosa por checkpoint.
 - `evaluator-rubric.md` → `/dod` — critério fixo vs. os comandos da DoD, que

@@ -41,6 +41,16 @@ Go, .NET e Java que a skill precisa atender.
 
 ---
 
+
+## 1.1 As regras arquiteturais aprovam o harness recém-gerado
+
+Rode `bash .claude/check-arch.sh` e **cole a saída**. Numa geração limpa ele
+tem de terminar em `nenhuma violada` e exit 0.
+
+Se a semente reprovar aqui, o primeiro contato do usuário com o registro de
+regras é um vermelho que ele não causou — e a reação natural a isso é apagar
+o arquivo, que mata a catraca antes de ela girar uma vez.
+
 ## 2. O que o script não decide
 
 Os itens abaixo dependem de julgamento ou de rodar comandos do projeto, então

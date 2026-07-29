@@ -141,7 +141,7 @@ def test_manifesto_lista_arquivos_que_existem(repo: tuple[Path, Stack, str]) -> 
     """
     destino, stack, _ = repo
     manifesto = json.loads((destino / ".claude/harness.json").read_text())["harness"]
-    assert manifesto["dod"] == stack.dod, "manifesto com DoD diferente da gerada"
+    assert manifesto["dod"] == stack.dod_gerada, "manifesto com DoD diferente da gerada"
     assert manifesto["versao"], "manifesto sem versão da skill"
     ausentes = [a for a in manifesto["arquivos"] if not (destino / a).is_file()]
     assert ausentes == [], f"manifesto lista arquivo inexistente: {ausentes}"
@@ -337,3 +337,70 @@ def test_hook_gerado_nao_anexa_o_caminho_no_fim(repo: tuple[Path, Stack, str]) -
     assert f'{stack.formatter_command} "$FILE_PATH"' not in corpo, (
         f"{nome}: o hook anexa o caminho depois do comando, que já o contém."
     )
+
+
+def test_check_arch_gerado_roda_e_aprova_o_harness_recem_gerado(
+    repo: tuple[Path, Stack, str],
+) -> None:
+    """O harness que a skill acabou de gerar tem de passar nas próprias regras.
+
+    Se a semente reprovasse numa geração limpa, o primeiro contato do usuário
+    com o registro de regras seria um vermelho que ele não causou — e a
+    reação natural a isso é apagar o arquivo.
+    """
+    destino, _, nome = repo
+    r = subprocess.run(
+        ["bash", str(destino / ".claude/check-arch.sh"), str(destino)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert r.returncode == 0, f"{nome}: check-arch reprovou o harness recém-gerado:\n{r.stdout}"
+    assert "nenhuma violada" in r.stdout
+
+
+def test_check_arch_gerado_detecta_violacao(repo: tuple[Path, Stack, str]) -> None:
+    """E precisa reprovar de verdade quando a regra é violada.
+
+    Sensor que só sabe dizer "ok" é pior que sensor nenhum: dá um verde que
+    ninguém conferiu. Aqui o gate é corrompido de propósito.
+    """
+    destino, _, nome = repo
+    (destino / ".claude/hooks/gate-destructive.sh").write_text("if [ 1\n")
+    r = subprocess.run(
+        ["bash", str(destino / ".claude/check-arch.sh"), str(destino)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert r.returncode == 1, f"{nome}: check-arch não reprovou um gate quebrado"
+    assert "WHAT:" in r.stdout and "WHY:" in r.stdout and "FIX:" in r.stdout, (
+        "a mensagem precisa dos três campos: sem WHY o agente 'conserta' "
+        f"apagando a regra. Saída:\n{r.stdout}"
+    )
+
+
+def test_dod_gerada_executa_o_check_arch(repo: tuple[Path, Stack, str]) -> None:
+    """A regra só vale se algo a executar sem ninguém pedir.
+
+    Registro fora da cadeia de verificação é documento com sintaxe de JSON —
+    o degrau 3, não o 4.
+    """
+    destino, _, nome = repo
+    for rel in ("AGENTS.md", ".claude/commands/dod.md"):
+        assert "check-arch.sh" in (destino / rel).read_text(), (
+            f"{nome}: {rel} não roda o check-arch — as regras não têm cabo"
+        )
+
+
+def test_arch_rules_tem_os_tres_campos_acionaveis(repo: tuple[Path, Stack, str]) -> None:
+    """`what`, `why` e `fix` em toda regra, e o `fix` precisa ser específico."""
+    destino, _, nome = repo
+    regras = json.loads((destino / ".harness/arch-rules.json").read_text())
+    assert regras, f"{nome}: registro de regras vazio"
+    for regra in regras:
+        for campo in ("id", "description", "check", "what", "why", "fix"):
+            assert regra.get(campo), f"{nome}: regra {regra.get('id')} sem `{campo}`"
+        assert len(regra["fix"]) > 30, (
+            f"{nome}: fix de {regra['id']} curto demais para ser acionável: {regra['fix']!r}"
+        )

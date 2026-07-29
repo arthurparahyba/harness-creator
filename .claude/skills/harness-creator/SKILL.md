@@ -89,8 +89,12 @@ O harness tem duas camadas, ambas geradas por esta skill:
    request. A ponte CLAUDE.md nao e redundancia: sem ela o protocolo nao
    entra no contexto do Claude Code, que so carrega CLAUDE.md.
 2. **Enforcement** — hooks de agent loop (gate destrutivo + auto-format),
-   pre-commit portatil, comando /dod, workflow de CI. Sem esta camada, a
-   DoD e so um texto que o agente pode ignorar.
+   pre-commit portatil, comando /dod, workflow de CI, e o registro de regras
+   arquiteturais (`.harness/arch-rules.json` + `.claude/check-arch.sh`) na
+   cadeia da DoD. Sem esta camada, a DoD e so um texto que o agente pode
+   ignorar. O registro de regras e o degrau que falta a uma revisao: revisor
+   julga caso a caso e esquece; regra fica, e cada classe de erro e cometida
+   uma vez so.
 
 A geracao e **verificada**: a FASE 5 confere cada artefato gravado —
 JSON e YAML que parseiam, scripts executaveis com LF, a DoD equivalente

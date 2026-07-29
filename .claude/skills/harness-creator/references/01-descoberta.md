@@ -131,12 +131,28 @@ genérica ("escreva testes") não é acionável.
 16. **Skills**: `.claude/skills/*/SKILL.md`, `.cursor/skills/`,
     `.agents/skills/` — o repo já empacota algum procedimento como skill?
     Se não, gerar `executar-grupo` do template.
-17. **Contexto com escopo**: existe `AGENTS.md`/`CLAUDE.md` aninhado em
+17. **Regras arquiteturais candidatas**: existe `.harness/arch-rules.json`?
+    Se existir, é do usuário e **não se toca** (FASE 3). Se não, além da
+    semente do template, procure invariantes que já estejam escritos em
+    algum lugar do repositório e que se verifiquem com **um comando**:
+    seção de arquitetura ou de camadas no README/`ARCHITECTURE.md`/
+    `CONTRIBUTING.md`, `.editorconfig` ou config de linter com regra de
+    import entre pastas, e a própria estrutura de diretórios quando ela
+    separa domínio de infraestrutura.
+    - Regra só entra com **evidência** e só se for verificável por comando.
+      "O código deve ser limpo" é desejo; "nenhum arquivo em `domain/`
+      importa o driver do banco" é regra. Mesma exigência dos `MUST NOT`.
+    - Cada regra precisa de `what`, `why` e `fix` acionáveis, nomeando
+      arquivo, função ou comando. O `why` é o que impede o agente de
+      "consertar" a violação apagando a regra.
+    - O que não couber em comando vira item do Plano de Remediação, não
+      regra silenciosamente fraca.
+18. **Contexto com escopo**: existe `AGENTS.md`/`CLAUDE.md` aninhado em
     subdiretório, ou arquivo de rule com escopo (`.cursor/rules/*.mdc`,
     `.windsurf/rules/`, `.clinerules/`, `.github/instructions/`)? Sem
     nenhum deles, todo o conhecimento vive na raiz e é carregado em todo
     request. Se não houver, gerar o AGENTS.md com escopo na FASE 2.
-18. **Branch base do fluxo**: de qual branch as features saem? Fonte, nesta
+19. **Branch base do fluxo**: de qual branch as features saem? Fonte, nesta
     ordem: `git symbolic-ref refs/remotes/origin/HEAD` (o default do
     remoto), `git branch -r` (existe `origin/develop`?), a documentação de
     contribuição, e por último `git branch --show-current`. Nunca assumir
@@ -145,7 +161,7 @@ genérica ("escreva testes") não é acionável.
     com o nome errado isso falha na primeira execução, antes de o agente
     escrever uma linha. Repo sem git: registrar NÃO ENCONTRADO e tratar na
     FASE 4 como pendência do usuário.
-19. **Ponte para o Claude Code**: existe `CLAUDE.md` (raiz ou junto de cada
+20. **Ponte para o Claude Code**: existe `CLAUDE.md` (raiz ou junto de cada
     AGENTS.md com escopo)? Se existir, ele importa (`@AGENTS.md`), é
     symlink, ou já contém o protocolo? O Claude Code carrega `CLAUDE.md` e
     **não** carrega `AGENTS.md`; sem a ponte, o harness existe no disco e
