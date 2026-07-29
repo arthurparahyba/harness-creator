@@ -61,22 +61,26 @@ Reproduza com `python tests/medir.py` (requer Node; grava
 [harness-score](https://paladini.io/harness-score/) para acompanhar a
 eficácia da geração — **a skill entregue não depende dele**.
 
-| Ecossistema | Antes | Depois | Depois (antes do Grupo 28) |
-|---|---|---|---|
-| `node` | L0 · 36/108 | **L4 · 98/108** | L4 · 103/108 |
-| `react` | L0 · 36/108 | **L4 · 98/108** | L4 · 103/108 |
-| `angular` | L0 · 36/108 | **L4 · 98/108** | L4 · 103/108 |
-| `java-maven` | L0 · 36/108 | **L4 · 98/108** | L4 · 103/108 |
-| `go` | L0 · 36/108 | **L4 · 98/108** | L4 · 103/108 |
-| `monorepo` | L0 · 30/108 | L4 · 92/108 | L4 · 97/108 |
-| `java-gradle` | L0 · 27/108 | L2 · 89/108 | L2 · 94/108 |
-| `dotnet` | L0 · 22/108 | L2 · 81/108 | L2 · 86/108 |
+| Ecossistema | Antes | Depois |
+|---|---|---|
+| `node` | L0 · 36/108 | **L4 · 103/108** |
+| `react` | L0 · 36/108 | **L4 · 103/108** |
+| `angular` | L0 · 36/108 | **L4 · 103/108** |
+| `java-maven` | L0 · 36/108 | **L4 · 103/108** |
+| `go` | L0 · 36/108 | **L4 · 103/108** |
+| `monorepo` | L0 · 30/108 | L4 · 97/108 |
+| `java-gradle` | L0 · 27/108 | L2 · 94/108 |
+| `dotnet` | L0 · 22/108 | L2 · 86/108 |
 
-A última coluna é o que a geração pontuava **antes de o Grupo 28 remover o
-subagente `code-reviewer`**. A queda de 5 pontos em toda linha é conhecida e
-esperada: `V6 — Regras arquiteturais` usava `.claude/agents/code-reviewer.md`
-como equivalência e, sem ele, passou de `eq` para `fail`. O harness gerado
-deixou de cobrir regra arquitetural — ver `eval/mapa-equivalencias.md`.
+**Histórico desta linha, porque ela oscilou de propósito.** O Grupo 28
+removeu o subagente `code-reviewer` a pedido do usuário e o score caiu 5
+pontos em toda linha (para 98/108 no `node`), com `V6 — Regras
+arquiteturais` indo de `eq` para `fail`. O Grupo 31 gerou
+`.harness/arch-rules.json` + `check-arch.sh` e V6 voltou — agora como
+`pass`, não `eq`. O Grupo 32 acrescentou o agente `propor-regra-arch` e os 5
+pontos voltaram também. O resultado final é melhor que o ponto de partida:
+mesma pontuação, com a cobertura de regra arquitetural feita por sensor
+determinístico em vez de julgamento de LLM.
 
 Os 5 pontos que faltam em toda linha são `LICENSE` (escolha do usuário, a
 skill oferece mas não decide) e interpolação de env em config MCP

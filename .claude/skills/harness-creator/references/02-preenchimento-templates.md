@@ -275,6 +275,15 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
     Regra sem cabo para execução automática é documento, não sensor. Repo sem
     sensores mantém a DoD vazia: os arquivos são gerados, mas inventar uma DoD
     que só roda o check-arch daria um verde que o repositório não merece.
+- **Agente propositor** (`resources/agents/propor-regra-arch.md` →
+  `.claude/agents/propor-regra-arch.md`): preencher `<branch-base>` no comando
+  de diff. VERBATIM no resto — inclusive a seção "O que você NÃO faz", que é
+  a trava do desenho: o agente propõe regra, não veredito, e não tem
+  ferramenta de escrita. Agente que pode editar as regras pode enfraquecê-las,
+  e uma catraca que gira para os dois lados não é catraca.
+  - Só Claude Code, como `executar-grupo`. Registrar na FASE 4 quando o
+    usuário usar Devin ou Cursor: a cobertura de regra arquitetural desses
+    dois vem do `check-arch.sh`, que é shell e roda em qualquer lugar.
 - **Manifesto** (`resources/harness-manifest.json` → `.claude/harness.json`):
   preencher `<versao-da-skill>` com a `metadata.version` do `SKILL.md`,
   `<data-iso>` com a data da geração, `<ecossistema>` com a linha detectada

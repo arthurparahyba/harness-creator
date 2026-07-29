@@ -41,6 +41,7 @@ cópia, o conteúdo continua vivendo num lugar só.
 | harness-manifest.json | `.claude/harness.json` | sempre (sobrescrever se já existir) |
 | arch-rules.json | `.harness/arch-rules.json` | sempre (**se não existir** — ver FASE 3) |
 | check-arch.sh | `.claude/check-arch.sh` (chmod +x) | sempre |
+| agents/propor-regra-arch.md | `.claude/agents/propor-regra-arch.md` | sempre (se não existir) — **só Claude Code** |
 
 ### O manifesto (`.claude/harness.json`)
 
@@ -77,12 +78,14 @@ no topo do JSON e os outros dois em `tool_input` — os scripts leem os dois
 formatos. `failClosed` existe porque o padrão do Cursor para hook que falha
 é **prosseguir**: sem essa chave, um gate quebrado libera o comando.
 
-**Limite conhecido:** a skill não gera skills para o Devin CLI. A
-documentação dele descreve `.devin/` com hooks e skills, mas não publica o
-path de skills; inventar um path geraria arquivo que nenhuma ferramenta lê.
-`executar-grupo` vale hoje só para o Claude Code — a camada de instrução
-(`AGENTS.md`), essa sim, os três leem. Registrar isso na FASE 4 quando o
-usuário usar Devin.
+**Limite conhecido:** a skill não gera skills nem subagentes para o Devin
+CLI. A documentação dele descreve `.devin/` com hooks, skills e agents, mas
+não publica os paths; inventar um geraria arquivo que nenhuma ferramenta lê.
+`executar-grupo` e `propor-regra-arch` valem hoje só para o Claude Code — a
+camada de instrução (`AGENTS.md`) e o `check-arch.sh`, que é shell, esses os
+três leem e executam. É por isso que a cobertura de regra arquitetural mora
+no runner e não no agente: o runner é portátil, o agente é um incremento.
+Registrar isso na FASE 4 quando o usuário usar Devin.
 
 ## Camada de enforcement (condicional)
 

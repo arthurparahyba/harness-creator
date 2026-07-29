@@ -437,6 +437,14 @@ def gerar(nome: str, destino: Path) -> Stack:
     ]:
         _grava(destino, alvo, (RESOURCES / origem).read_text())
 
+    # O agente cita a branch base no comando de diff, então não é cópia crua:
+    # marcador não preenchido aqui é marcador sobrevivente, e a FASE 5 o acusa.
+    _grava(
+        destino,
+        ".claude/agents/propor-regra-arch.md",
+        _preenche("agents/propor-regra-arch.md", {"<branch-base>": "main"}),
+    )
+
     scripts = (
         "init.sh",
         ".claude/hooks/gate-destructive.sh",
