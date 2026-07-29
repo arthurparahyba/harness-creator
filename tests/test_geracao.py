@@ -435,3 +435,40 @@ def test_politica_de_entrega_presente_e_honesta(repo: tuple[Path, Stack, str]) -
         f"{nome}: sem evidência de fluxo, a política tem de dizer que não foi "
         f"encontrada em vez de inventar uma. Seção Commits:\n{commits}"
     )
+
+
+def test_agente_propositor_nao_pode_escrever(repo: tuple[Path, Stack, str]) -> None:
+    """O agente propõe regra; não edita o registro.
+
+    Um agente com permissão de escrita em `arch-rules.json` tem, em toda
+    violação, o caminho curto de reescrever a regra em vez de corrigir o
+    código — e a catraca passa a girar para os dois lados.
+    """
+    destino, _, nome = repo
+    corpo = (destino / ".claude/agents/propor-regra-arch.md").read_text()
+    m = re.search(r"^tools:\s*(.+)$", corpo, re.M)
+    assert m, f"{nome}: agente sem campo `tools` — herda o conjunto completo"
+    ferramentas = {x.strip() for x in m.group(1).split(",")}
+    proibidas = {"Write", "Edit", "MultiEdit", "NotebookEdit"}
+    assert not (ferramentas & proibidas), (
+        f"{nome}: agente propositor com ferramenta de escrita: "
+        f"{sorted(ferramentas & proibidas)}"
+    )
+
+
+def test_agente_propositor_devolve_regra_e_nao_veredito(
+    repo: tuple[Path, Stack, str],
+) -> None:
+    """Veredito evapora no commit; regra fica.
+
+    Foi essa a diferença que justificou reintroduzir um subagente depois de o
+    Grupo 28 remover o revisor: a saída é durável, não descartável.
+    """
+    destino, _, nome = repo
+    corpo = (destino / ".claude/agents/propor-regra-arch.md").read_text()
+    assert "APPROVED" not in corpo.split("## O que você NÃO faz")[1].split("##")[1], (
+        f"{nome}: o agente voltou a emitir veredito"
+    )
+    for campo in ('"check"', '"what"', '"why"', '"fix"'):
+        assert campo in corpo, f"{nome}: rascunho sem o campo {campo}"
+    assert "<branch-base>" not in corpo, f"{nome}: marcador sobreviveu no agente"

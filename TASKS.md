@@ -512,7 +512,7 @@ no scanner do curso: cobertura melhor do que antes do Grupo 28, quando o
 subagente revisor contava só como `eq`. O `harness-score` externo não pontua
 arch-rules, então os +62 por ecossistema não mudaram.
 
-## Grupo 32 - Agente que PROPÕE regra arquitetural (depende: Grupo 31)
+## Grupo 32 - Agente que PROPÕE regra arquitetural (depende: Grupo 31) ✅
 <!-- A promoção review→regra automatizada: em vez de depender de alguém
      lembrar de escrever a regra depois de achar o problema, o agente redige
      o rascunho. Diferente do subagente removido no Grupo 28 — aquele
@@ -525,17 +525,21 @@ arch-rules, então os +62 por ecossistema não mudaram.
      é catraca. Propõe, não grava.
 
      Só Claude Code (subagente). Por isso é incremento e não fundação. -->
-- [ ] 32.1 Template do agente: lê o diff do grupo, compara com as camadas
+- [x] 32.1 Template do agente: lê o diff do grupo, compara com as camadas
       declaradas, e devolve rascunho de regra no formato de `arch-rules.json`
       (id, description, check, expect, what, why, fix) — nunca um veredito
-- [ ] 32.2 A regra proposta entra pelo caminho que já existe para decisão do
+- [x] 32.2 A regra proposta entra pelo caminho que já existe para decisão do
       usuário: item do Plano de Remediação, com o `check` exato e o impacto,
       aceito um a um. O agente não escreve no arquivo
-- [ ] 32.3 Registrar na FASE 4 e em `arquivos-gerados.md` que é Claude-Code-
+- [x] 32.3 Registrar na FASE 4 e em `arquivos-gerados.md` que é Claude-Code-
       only, como já se faz com `executar-grupo`
-- [ ] 32.4 Teste de que o agente gerado não tem permissão de escrita em
+- [x] 32.4 Teste de que o agente gerado não tem permissão de escrita em
       `arch-rules.json` e de que o formato do rascunho é o do arquivo
-Verificação: `pytest -q && ruff check . && mypy`
+Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py` —
+556 testes (+26). Score voltou de +62 para **+67**, o mesmo de antes do
+Grupo 28: `.claude/agents/` de volta recupera os 5 pontos. Mas agora a
+cobertura de regra arquitetural é `pass` por sensor determinístico, não `eq`
+por julgamento de LLM — mesma nota, cobertura melhor.
 
 ## Grupo 33 - format-on-edit.sh inerte em Java/Maven e Java/Gradle ✅
 <!-- Pendência antiga, promovida a grupo. Investigando, são TRÊS defeitos

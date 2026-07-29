@@ -7,6 +7,16 @@ aguardar aprovação explícita antes de gravar.
 ---
 
 
+## Regra arquitetural proposta entra como item do Plano
+
+Quando o agente `propor-regra-arch` devolver rascunhos, cada um vira um item
+do Plano de Remediação, com o `check` exato e a evidência do diff que o
+motivou — para o usuário aceitar um a um.
+
+O agente nunca escreve em `.harness/arch-rules.json`, e isso não é excesso de
+cuidado: um agente com permissão de editar as regras tem, em toda violação,
+o caminho curto de reescrever a regra em vez de corrigir o código.
+
 ## Fluxo de branches inferido — confirme antes de gravar
 
 Apresente, em três linhas, o que a FASE 1 concluiu sobre o fluxo, **com a
