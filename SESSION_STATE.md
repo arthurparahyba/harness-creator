@@ -3,16 +3,14 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `86114cb` na `feature/remover-code-reviewer` — Grupo 28.
-  Branch **não publicada** e **não mergeada** na `main`. A `main` está em
-  sincronia com a `origin/main`.
-- Testes: 404/404 (`pytest -q`); ruff e mypy strict limpos. Caiu de 406 porque
-  os dois sensores do marcador `<checks-do-repo>` saíram com ele.
+- Commit verificado: Grupos 28 e 30, entregues na `main` e publicados.
+- Testes: 404/404 (`pytest -q`); ruff e mypy strict limpos; `harness-score`
+  em L4 (100/108, era 105 antes do Grupo 30). Caiu de 406 testes porque os
+  dois sensores do marcador `<checks-do-repo>` saíram com ele.
 - Change/plano ativo: `TASKS.md` na raiz — **Grupos 25, 26, 27 e 29 abertos**,
-  propostos e não iniciados. Grupo 28 concluído e commitado.
+  propostos e não iniciados. Grupos 28 e 30 concluídos.
 - Em andamento: nada — fronteira limpa.
-- Não commitado: `TASKS.md` (proposta do Grupo 29) e este arquivo; mais o `-c`
-  na raiz, lixo de execução manual antiga.
+- Não commitado: só o `-c` na raiz, lixo de execução manual antiga.
 
 ## O que mudou nesta sessão (Grupo 28)
 A skill deixou de gerar o subagente `code-reviewer`, a pedido do usuário. A
@@ -68,15 +66,15 @@ dentro de cada repo alvo.
   `mvn` falso no PATH que aceita qualquer argumento).
 - O nível C ficou em **n=1 por célula**; o protocolo pede 3. Subir para 3 é o
   próximo passo antes de tratar qualquer número como estável.
-- **O `AGENTS.md` deste repo está desatualizado em três pontos, e a causa é
+- **O `AGENTS.md` deste repo está desatualizado em dois pontos, e a causa é
   uma só: ele foi escrito à mão e nunca regenerado.** Manda
   `git checkout develop` (a skill corrigiu isso no Grupo 7.1 com
-  `<branch-base>` descoberto por git); cita `/opsx:propose` sem haver
-  `openspec/` (corrigido no 7.2 com `<como-propor-mudanca-de-plano>`); e deixa
-  `.claude/agents/code-reviewer.md` órfão, sem nenhuma regra que o alcance.
-  Os três cabem num grupo só. A correção mais barata talvez não seja editar à
-  mão de novo, e sim rodar a própria skill neste repositório — que é também o
-  teste real do catálogo `atualizacao.md`, hoje exercitado só por fixture.
+  `<branch-base>` descoberto por git) e cita `/opsx:propose` sem haver
+  `openspec/` (corrigido no 7.2 com `<como-propor-mudanca-de-plano>`). O
+  terceiro item, o `code-reviewer` órfão, saiu no Grupo 30. A correção mais
+  barata talvez não seja editar à mão de novo, e sim rodar a própria skill
+  neste repositório — que é também o teste real do catálogo `atualizacao.md`,
+  hoje exercitado só por fixture.
 - **Descoberta da FASE 1 como script bundled — decisão de design em aberto.**
   O `skill-creator` oficial manda procurar trabalho que se repete a cada
   invocação e empacotá-lo em `scripts/`; a FASE 1 refaz a investigação de

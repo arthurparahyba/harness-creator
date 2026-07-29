@@ -450,3 +450,14 @@ queda de 5 pontos do V6, registrada em `tests/fixtures/README.md`
 - [ ] 29.5 Testes: marcadores documentados na fase que os preenche, geração
       sem marcador sobrevivente, e caso de fixture com prefixo não-`feature/`
 Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
+
+## Grupo 30 - Remover o code-reviewer órfão deste repositório ✅
+<!-- O Grupo 28 tirou o subagente do produto e deixou de fora, de propósito,
+     o arquivo órfão deste repo. O usuário pediu a remoção também. Órfão
+     porque o `AGENTS.md` da raiz nunca o citou: nenhuma regra mandava
+     revisar antes de commitar, então ele não estava sendo usado aqui. -->
+- [x] 30.1 Apagar `.claude/agents/code-reviewer.md` e o diretório vazio
+- [x] 30.2 Confirmar que o gate `--min-level 4` do `harness-dod.yml` continua
+      passando: medido antes (L4 · 105/108) e depois (L4 · 100/108). Os 5
+      pontos saem de "Skills & Commands"; o nível não cai
+Verificação: `pytest -q && ruff check . && mypy && npx -y harness-score --min-level 4 --quiet`
