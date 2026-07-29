@@ -3,12 +3,13 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: Grupos 28 e 30, entregues na `main` e publicados.
-- Testes: 404/404 (`pytest -q`); ruff e mypy strict limpos; `harness-score`
-  em L4 (100/108, era 105 antes do Grupo 30). Caiu de 406 testes porque os
-  dois sensores do marcador `<checks-do-repo>` saíram com ele.
+- Commit verificado: `d630d45` na `main`, publicado, CI verde — Grupo 33.
+- Testes: 443/443 (`pytest -q`); ruff e mypy strict limpos; `harness-score`
+  em L4; score da geração +62 em todos os ecossistemas.
 - Change/plano ativo: `TASKS.md` na raiz — **Grupos 25, 26, 27, 29, 31 e 32
-  abertos**, propostos e não iniciados. Grupos 28 e 30 concluídos.
+  abertos**. Grupos 28, 30 e 33 concluídos.
+- Execução em série autorizada pelo usuário: a regra "PARE após o grupo" do
+  AGENTS.md está suspensa nesta sessão, com push e relatório por grupo.
 - Em andamento: nada — fronteira limpa.
 - Não commitado: `TASKS.md` (propostas dos Grupos 31 e 32) e este arquivo;
   mais o `-c` na raiz, lixo de execução manual antiga.
@@ -56,15 +57,6 @@ dentro de cada repo alvo.
   relatório — a vitrine não anda sozinha.
 
 ## Pendências
-- **`format-on-edit.sh` é inerte em Java/Maven e em Java/Gradle.** O template
-  faz `<formatter_command> "$FILE_PATH"`, e formatter de plugin
-  (`spotless:apply`, `spring-javaformat:apply`, `spotlessApply`) não aceita
-  caminho de arquivo — o Maven lê como fase de ciclo de vida e aborta, e o
-  `2>/dev/null || true` engole o erro. Reproduzido com Maven real. Não
-  corrigido: precisa de grupo próprio, e a correção tem duas partes — o
-  comando certo por ecossistema e um teste que não use stub de binário, que é
-  o que deixou isso passar (`test_formatter_alcanca_o_codigo_da_stack` põe um
-  `mvn` falso no PATH que aceita qualquer argumento).
 - O nível C ficou em **n=1 por célula**; o protocolo pede 3. Subir para 3 é o
   próximo passo antes de tratar qualquer número como estável.
 - **O `AGENTS.md` deste repo está desatualizado em dois pontos, e a causa é
