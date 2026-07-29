@@ -25,6 +25,7 @@ que a exercita.
 | Fixture | Ecossistema | Detectado por |
 |---|---|---|
 | `node/` | Node + TypeScript | `package.json` com `scripts.test` |
+| `node-openspec/` | Mesma árvore do `node`, com `openspec/` | `openspec/project.md` (forma legada) + change ativa |
 | `react/` | React + Vite | `react` em `dependencies`, `.tsx` |
 | `angular/` | Angular | `angular.json`, `.spec.ts`, `strictTemplates` |
 | `java-maven/` | Java com Maven | `pom.xml`, `checkstyle.xml`, spotless |

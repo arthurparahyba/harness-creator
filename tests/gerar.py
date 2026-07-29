@@ -118,6 +118,19 @@ STACKS: dict[str, Stack] = {
         formatavel="src/total.ts",
         nao_formatavel="package.json",
     ),
+    # Mesma stack do `node`; o que muda e a arvore: esta fixture tem
+    # `openspec/`, e e a unica que exercita o ramo com OpenSpec.
+    "node-openspec": Stack(
+        dod="npm test && npm run lint && npx tsc --noEmit",
+        file_glob="*.js|*.ts|*.mjs|*.cjs",
+        formatter_bin="npx",
+        formatter_command='npx prettier --write "$FILE_PATH"',
+        dir_escopo="src",
+        setup_steps="      - uses: actions/setup-node@v4\n      - run: npm ci",
+        pre_commit="npm run lint",
+        formatavel="src/total.ts",
+        nao_formatavel="package.json",
+    ),
     "react": Stack(
         dod="npm test && npm run lint && npx tsc --noEmit",
         file_glob="*.js|*.jsx|*.ts|*.tsx",
@@ -333,6 +346,12 @@ def gerar(nome: str, destino: Path) -> Stack:
     stack = STACKS[nome]
     shutil.copytree(FIXTURES / nome, destino, dirs_exist_ok=True)
 
+    # Condicao do catalogo (`arquivos-gerados.md`): `openspec/config.yaml`
+    # somente se `openspec/` existir; `TASKS.md` somente se NAO existir. Sao
+    # exclusivos — duas fontes de trabalho no mesmo repo e o agente escolhendo
+    # a errada em metade das sessoes.
+    usa_openspec = (destino / "openspec").is_dir()
+
     _grava(
         destino,
         "AGENTS.md",
@@ -344,9 +363,15 @@ def gerar(nome: str, destino: Path) -> Stack:
                 "<comandos reais do repo, encadeados com &&, "
                 "priorizando o que o CI exige>": stack.dod_gerada,
                 "<branch-base>": "main",
-                # Fixture sem `openspec/`: a variante correta é a do TASKS.md.
+                # A variante depende do repo: mandar usar `/opsx:propose` num
+                # repo sem OpenSpec instrui o agente a chamar um comando que
+                # nao existe, e a sessao morre no primeiro pedido novo.
                 "<como-propor-mudanca-de-plano>": (
-                    "Para criar ou modificar o plano, acrescente o grupo ao `TASKS.md` no\n"
+                    "Para criar ou modificar planos (proposals, specs, tasks), use os\n"
+                    "comandos OpenSpec (`/opsx:propose`, `/opsx:apply`) — nunca edite\n"
+                    "artefatos de `openspec/` manualmente."
+                    if usa_openspec
+                    else "Para criar ou modificar o plano, acrescente o grupo ao `TASKS.md` no\n"
                     "formato descrito abaixo e confirme com o usuário antes de executá-lo."
                 ),
                 # Fixtures não têm histórico git: o prefixo cai no default
@@ -461,7 +486,7 @@ def gerar(nome: str, destino: Path) -> Stack:
     )
     for origem, alvo in [
         ("SESSION_STATE.md", "SESSION_STATE.md"),
-        ("TASKS.md", "TASKS.md"),
+        *(() if usa_openspec else (("TASKS.md", "TASKS.md"),)),
         ("editorconfig-base", ".editorconfig"),
         ("hooks/gate-destructive.sh", ".claude/hooks/gate-destructive.sh"),
         ("verificar-harness.sh", ".claude/verificar-harness.sh"),
@@ -484,6 +509,23 @@ def gerar(nome: str, destino: Path) -> Stack:
         if not stack.escopa_por_arquivo:
             cfg = _sem_format_hook(cfg)
         _grava(destino, alvo, json.dumps(cfg, indent=2, ensure_ascii=False) + "\n")
+
+    if usa_openspec:
+        _grava(
+            destino,
+            "openspec/config.yaml",
+            _preenche(
+                "openspec-config.yaml",
+                {
+                    "<stack e ferramentas de teste/lint/types descobertas — 2-3 linhas>":
+                        f"Fixture {nome}. Verificação: {stack.dod_gerada}.",
+                    "<comandos reais do repo encadeados com && — idênticos ao AGENTS.md>":
+                        stack.dod_gerada,
+                    "<3-6 restrições — idênticas às do AGENTS.md, derivadas do repo real>":
+                        "- Não editar artefato de build\n  - Não alterar o lockfile à mão",
+                },
+            ),
+        )
 
     # O agente cita a branch base no comando de diff, então não é cópia crua:
     # marcador não preenchido aqui é marcador sobrevivente, e a FASE 5 o acusa.

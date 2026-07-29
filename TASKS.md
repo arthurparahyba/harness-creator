@@ -675,3 +675,31 @@ dos outros: não gerar o hook não custa pontuação.
 Verificação: `pytest -q && ruff check . && mypy` — 623 testes (+1). O teste
 do Grupo 24 continua exigindo lastro no relatório para cada número, e a seção
 de evidência segue sob ele mesmo tendo subido para o topo.
+
+## Grupo 38 - Ramo OpenSpec exercitado, não só especificado ✅
+<!-- Achado ao testar a integração a pedido do usuário. A capacidade está
+     inteira no papel — template `openspec-config.yaml`, destino no catálogo,
+     item 8 da FASE 1 (inclusive o caso legado `project.md`), e a bifurcação
+     do `<como-propor-mudanca-de-plano>` na FASE 2. Mas NENHUMA fixture tem
+     `openspec/`, então `gerar.py` só executa a variante `TASKS.md`: o ramo
+     "com OpenSpec" é prosa sem sensor. Mesma classe do `code-reviewer`
+     órfão, que só apareceu quando alguém foi olhar.
+
+     E há um buraco específico: o template usa placeholders em PROSA
+     (`<stack e ferramentas...>`, `<comandos reais do repo...>`), que não
+     estão em `PREENCHIVEIS`. Se o modelo não os preencher, o
+     `config.yaml` gerado sai com o placeholder e nenhuma checagem acusa —
+     o mesmo modo de falha do `<ferramentas-do-harness>` vazio. -->
+- [x] 38.1 Fixture `node-openspec`: mesma árvore do `node` com `openspec/` e
+      uma change ativa, para a bifurcação ter os dois lados exercitados
+- [x] 38.2 `gerar.py` respeita a condição do catálogo: com `openspec/`, grava
+      `openspec/config.yaml` e NÃO grava `TASKS.md`; sem, o inverso
+- [x] 38.3 Sensor de placeholder em prosa: `config.yaml` gerado não pode
+      conter `<...>` com espaços dentro (o `<objetivo>` do formato de grupo é
+      texto do protocolo e fica)
+- [x] 38.4 Teste da bifurcação: com OpenSpec o AGENTS.md manda usar
+      `/opsx:propose`; sem, manda editar `TASKS.md`. Instrução trocada faz o
+      agente chamar um comando que não existe
+Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py` —
+686 testes (+63: a fixture nova entra em todas as parametrizações de geração).
+`node-openspec` marca **+67**, igual ao `node`.
