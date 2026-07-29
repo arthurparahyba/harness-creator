@@ -581,3 +581,18 @@ Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py` —
 hook checava `command -v gradle` mas rodava `./gradlew`, então em projeto com
 wrapper (a maioria) era no-op. `formatter_bin` do Gradle passou a ser o
 wrapper. Score por ecossistema inalterado.
+
+## Grupo 34 - Semente de arch-rules tolerante a harness parcial ✅
+<!-- Achado por rodar a skill num repo Java real (spring-petclinic). A regra
+     A02 da semente faz `bash -n .claude/hooks/format-on-edit.sh` sem checar
+     se o arquivo existe. O petclinic usa `spring-javaformat`, que NÃO escopa
+     por arquivo: rodá-lo a cada edit formataria o módulo inteiro, e a própria
+     skill manda não gerar enforcement que atrapalha. Sem o hook, A02 reprova.
+
+     O efeito é o que a FASE 5 alerta: o primeiro contato do usuário com o
+     registro de regras é um vermelho que ele não causou — e a reação natural
+     a isso é apagar o arquivo, matando a catraca antes de ela girar. -->
+- [x] 34.1 A01 e A02 passam a tolerar ausência do hook: `test ! -f X || bash -n X`
+- [x] 34.2 Teste que gera um harness SEM o hook de formatação e exige que o
+      check-arch continue aprovando
+Verificação: `pytest -q && ruff check . && mypy`
