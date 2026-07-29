@@ -52,6 +52,17 @@ Go, .NET e Java que a skill precisa atender.
 ---
 
 
+### O que o verificador NÃO conta
+
+Se a skill estiver instalada no repositório alvo (`.claude/skills/`), o
+verificador ignora o conteúdo dela: templates de `resources/` têm marcador por
+construção, e o `AGENTS.md` interno da skill documenta a skill, sem ponte
+porque não precisa de uma.
+
+Sem essa exclusão, uma geração correta reprovava em quatro checagens — e a
+mensagem que o verificador imprime ("falha aqui é defeito da geração, não
+pendência do usuário") mandava o usuário caçar um problema inexistente.
+
 ## 1.1 As regras arquiteturais aprovam o harness recém-gerado
 
 Rode `bash .claude/check-arch.sh` e **cole a saída**. Numa geração limpa ele

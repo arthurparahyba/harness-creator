@@ -597,7 +597,7 @@ wrapper. Score por ecossistema inalterado.
       check-arch continue aprovando
 Verificação: `pytest -q && ruff check . && mypy`
 
-## Grupo 35 - Verificador cega para a própria skill instalada no alvo
+## Grupo 35 - Verificador cega para a própria skill instalada no alvo ✅
 <!-- Achado ao rodar a skill no spring-petclinic. O `verificar-harness.sh`
      varre o repositório inteiro procurando marcador sobrevivente e AGENTS.md
      sem ponte CLAUDE.md. Quando a skill está instalada como skill de projeto
@@ -611,13 +611,15 @@ Verificação: `pytest -q && ruff check . && mypy`
 
      Não é artefato do teste: instalar a skill no repo é como um time a
      compartilha via git. -->
-- [ ] 35.1 O verificador exclui `.claude/skills/*/resources/` e o `AGENTS.md`
+- [x] 35.1 O verificador exclui `.claude/skills/*/resources/` e o `AGENTS.md`
       interno de skills instaladas das varreduras de marcador e de ponte
-- [ ] 35.2 Teste que instala a skill dentro de uma fixture gerada e exige
+- [x] 35.2 Teste que instala a skill dentro de uma fixture gerada e exige
       11/11 — hoje daria 7/11
-- [ ] 35.3 A mesma exclusão vale para a FASE 5: o item que manda colar a
+- [x] 35.3 A mesma exclusão vale para a FASE 5: o item que manda colar a
       saída precisa dizer o que NÃO conta
-Verificação: `pytest -q && ruff check . && mypy`
+Verificação: `pytest -q && ruff check . && mypy` — 592 testes (+13). O teste
+novo instala a skill inteira dentro de cada fixture gerada e exige 11/11;
+sem a correção dava 7/11.
 
 ## Grupo 36 - Java/Maven não é só spotless
 <!-- A coluna Formatter de `ecossistemas.md` dá `mvn -q spotless:apply

@@ -11,12 +11,15 @@ from __future__ import annotations
 import json
 import os
 import re
+import shutil
 import subprocess
 from pathlib import Path
 
 import pytest
 import yaml
 from gerar import COM_SENSORES, PREENCHIVEIS, Stack, entrada_do_hook, gerar
+
+RAIZ = Path(__file__).resolve().parent.parent
 
 MARCADORES = re.compile("|".join(re.escape(m) for m in PREENCHIVEIS))
 
@@ -497,4 +500,33 @@ def test_check_arch_aprova_harness_sem_hook_de_formatacao(
     assert r.returncode == 0, (
         f"{nome}: check-arch reprovou um harness sem o hook de formatação, "
         f"que é uma geração legítima:\n{r.stdout}"
+    )
+
+
+def test_verificador_ignora_a_propria_skill_instalada_no_alvo(
+    repo: tuple[Path, Stack, str],
+) -> None:
+    """Skill instalada no repositório é conteúdo DELA, não harness gerado.
+
+    Instalar a skill em `.claude/skills/` é caminho legítimo — é como um time
+    a compartilha via git. Mas os templates em `resources/` têm marcador por
+    construção e o `AGENTS.md` interno documenta a skill, sem ponte porque não
+    precisa de uma. Varrer isso fazia uma geração correta reprovar em 4
+    checagens, e o verificador imprime "falha aqui é defeito da geração, não
+    pendência do usuário" — mandando o usuário caçar um problema inexistente.
+    """
+    destino, _, nome = repo
+    skill = destino / ".claude/skills/harness-creator"
+    shutil.copytree(RAIZ / ".claude/skills/harness-creator", skill)
+
+    r = subprocess.run(
+        ["bash", ".claude/verificar-harness.sh"],
+        cwd=destino,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert r.returncode == 0, (
+        f"{nome}: verificador reprovou por causa da skill instalada no alvo:\n"
+        f"{r.stdout}"
     )
