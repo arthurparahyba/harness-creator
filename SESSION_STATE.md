@@ -3,11 +3,11 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `7d26069` na `main`, publicado, CI verde — Grupo 38.
+- Commit verificado: `c9bf6e2` na `main`, publicado, CI verde — Grupo 39.
 - Testes: 686/686 + 4 skips explícitos; ruff e mypy strict limpos; score da
   geração **+67** em todos os ecossistemas (+52 no `sem-sensores`).
 - Change/plano ativo: `TASKS.md` na raiz — **só o Grupo 26 aberto, e
-  BLOQUEADO** (ver pendências). Grupos 25, 27 a 38 concluídos e publicados.
+  BLOQUEADO** (ver pendências). Grupos 25, 27 a 39 concluídos e publicados.
 - Os três defeitos achados na rodada do PetClinic viraram os Grupos 34, 35 e
   36 — todos entregues. Rodar a skill num repo real pagou por si.
 - Em andamento: nada — fronteira limpa.
@@ -94,6 +94,18 @@ Rodada de validação a pedido do usuário, num clone de
   outros dois viraram os Grupos 35 e 36.
 - Alvo em `<scratchpad>/javatest/alvo` — some com a sessão; a rodada é
   reproduzível pelos passos acima.
+
+## Integração com OpenSpec — provada de ponta a ponta (2026-07-29)
+Verificada contra o CLI real: `npx @fission-ai/openspec@latest`, versão 1.7.0
+([Fission-AI/OpenSpec](https://github.com/Fission-AI/OpenSpec)).
+
+- A ferramenta LÊ o `openspec/config.yaml` gerado: corrompendo-o de propósito,
+  o `doctor` avisa `could not parse ...; ignoring it`; com o gerado, silêncio.
+- `openspec validate --all` na fixture: `1 passed, 0 failed`.
+- O validador exige estrutura em INGLÊS (`## Why`, `## What Changes`,
+  `MUST`/`SHALL`) mesmo com conteúdo em português — registrado na FASE 1.
+- Instalação global do CLI falhou por permissão nesta máquina; tudo foi feito
+  via `npx`. Se quiser o binário fixo: `npm install -g @fission-ai/openspec`.
 
 ## Pendências
 - **BLOQUEADOR: o instrumento do nível E não detecta disparo nenhum.** Teste
