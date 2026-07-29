@@ -97,6 +97,14 @@ genérica ("escreva testes") não é acionável.
    Confirme contra o que o repositório já usa: config de lint,
    `.prettierrc`, `[tool.ruff]`, `[tool.black]`, hook de pre-commit
    existente. O que está commitado ganha da tabela.
+   - **Identifique QUAL plugin, não só que existe um.** Em Java a diferença
+     decide se haverá hook: `spotless-maven-plugin` escopa por arquivo,
+     `spring-javaformat-maven-plugin` (toda a família Spring) formata o
+     módulo inteiro. Procure o `artifactId` no `pom.xml` / `build.gradle`.
+   - Se o formatter **não escopa por arquivo**, registre no relatório
+     `SEM HOOK DE FORMATAÇÃO` com o motivo. A FASE 2 não gera o hook, e o
+     item vai para o Plano de Remediação — hook ausente sem explicação
+     parece esquecimento da skill.
 10. **Lockfile**: qual gerenciador de deps? Tem lockfile commitado?
     Usar **apenas nomes convencionais do ecossistema** — um arquivo com
     nome inventado (ex: `requirements.lock`) não é instalado por nenhuma

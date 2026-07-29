@@ -621,7 +621,7 @@ Verificação: `pytest -q && ruff check . && mypy` — 592 testes (+13). O teste
 novo instala a skill inteira dentro de cada fixture gerada e exige 11/11;
 sem a correção dava 7/11.
 
-## Grupo 36 - Java/Maven não é só spotless
+## Grupo 36 - Java/Maven não é só spotless ✅
 <!-- A coluna Formatter de `ecossistemas.md` dá `mvn -q spotless:apply
      -DspotlessFiles=` como resposta única para Java/Maven. Toda a família
      Spring usa `spring-javaformat-maven-plugin`, e o PetClinic é o exemplo
@@ -634,15 +634,18 @@ sem a correção dava 7/11.
      formataria o módulo inteiro a cada tecla — enforcement que atrapalha, que
      a skill manda não gerar. A resposta certa para esse caso não é um comando
      na tabela, é "não gere o hook; mande para o pre-commit e o CI". -->
-- [ ] 36.1 Linha de Java/Maven vira duas, escolhidas por evidência no
+- [x] 36.1 Linha de Java/Maven vira duas, escolhidas por evidência no
       `pom.xml`: `spotless-maven-plugin` -> comando escopado;
       `spring-javaformat-maven-plugin` -> SEM hook de edição
-- [ ] 36.2 Coluna ou nota nova em `ecossistemas.md` para "formatter que não
+- [x] 36.2 Coluna ou nota nova em `ecossistemas.md` para "formatter que não
       escopa por arquivo", com a regra de não gerar o hook e mandar o item
       para o Plano de Remediação
-- [ ] 36.3 Item da FASE 1 passa a inspecionar QUAL plugin de formatação o
+- [x] 36.3 Item da FASE 1 passa a inspecionar QUAL plugin de formatação o
       manifesto declara, não só se existe algum
-- [ ] 36.4 Fixture `java-spring` (pom com spring-javaformat) e teste de que a
+- [x] 36.4 Fixture `java-spring` (pom com spring-javaformat) e teste de que a
       geração NÃO produz `format-on-edit.sh` nela — o Grupo 34 tornou o
       check-arch tolerante a isso, falta o gerador respeitar
-Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
+Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py` —
+622 testes (+29) e 4 skips explícitos (os testes de forma do comando não se
+aplicam onde não há comando). Fixture `java-spring` marca **+67**, o mesmo
+dos outros: não gerar o hook não custa pontuação.

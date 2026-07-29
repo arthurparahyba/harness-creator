@@ -268,6 +268,13 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
     `main` (`gh pr create`) — `CODEOWNERS` exige revisão." ou "Merges são
     diretos na `main`; não abrir PR." Sem evidência, escreva a linha que
     pede a decisão ao usuário em vez de inventar uma política.
+- **Hook de formatação**: só gere `format-on-edit.sh` se a FASE 1 achou um
+  formatter que **escopa por arquivo**. Quando ela registrou
+  `SEM HOOK DE FORMATAÇÃO`, não gere o script E remova o registro dele dos
+  três configs de hook (`claude-settings.json`, `devin-hooks.json`,
+  `cursor-hooks.json`) — registro apontando para script inexistente é falha
+  silenciosa, e no Cursor com `failClosed` derruba o shell do agente inteiro.
+  A formatação vai para o pre-commit e o CI.
 - **Regras arquiteturais** (`resources/arch-rules.json` →
   `.harness/arch-rules.json`, e `resources/check-arch.sh` →
   `.claude/check-arch.sh`, `chmod +x`): a semente vai VERBATIM, e as regras

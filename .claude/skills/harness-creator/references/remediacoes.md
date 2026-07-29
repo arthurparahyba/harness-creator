@@ -48,6 +48,22 @@ Ver [arquivos-gerados.md](arquivos-gerados.md).
 
 ---
 
+
+### Formatação sem hook de edição
+
+Quando o formatter do projeto não escopa por arquivo (`spring-javaformat`,
+`ktlint` sem `--file`), a skill **não gera** o `format-on-edit.sh`. Rodar o
+módulo inteiro a cada tecla é enforcement que atrapalha, e enforcement que
+atrapalha é desligado — levando o resto junto.
+
+Item para o Plano: *"O hook de formatação não foi gerado porque o plugin de
+formatação declarado no manifesto formata o módulo inteiro. A formatação está coberta pelo
+pre-commit e pelo CI. Para ter formatação a cada edição, seria preciso
+adicionar um formatter que aceite caminho de arquivo (ex.:
+`google-java-format`) como ferramenta de desenvolvimento."*
+
+Sem esse item o usuário vê um hook faltando e conclui que a skill esqueceu.
+
 ## Grupo B — recomendado, com confirmação
 
 ### Sensores — a lacuna mais cara

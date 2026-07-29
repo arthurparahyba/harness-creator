@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Fixture do caso Spring: o formatter e o spring-javaformat-maven-plugin,
+     que formata o MODULO inteiro e nao aceita caminho de arquivo. E o perfil
+     do Spring PetClinic e de boa parte do ecossistema Spring. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.exemplo</groupId>
+  <artifactId>pedidos</artifactId>
+  <version>1.0.0</version>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>io.spring.javaformat</groupId>
+        <artifactId>spring-javaformat-maven-plugin</artifactId>
+        <version>0.0.43</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>3.6.0</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>

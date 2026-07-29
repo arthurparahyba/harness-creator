@@ -24,6 +24,11 @@
     "depois": "L4 103/108",
     "delta": 67
   },
+  "java-spring": {
+    "antes": "L0 26/108",
+    "depois": "L2 93/108",
+    "delta": 67
+  },
   "monorepo": {
     "antes": "L0 30/108",
     "depois": "L4 97/108",

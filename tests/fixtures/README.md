@@ -29,6 +29,7 @@ que a exercita.
 | `angular/` | Angular | `angular.json`, `.spec.ts`, `strictTemplates` |
 | `java-maven/` | Java com Maven | `pom.xml`, `checkstyle.xml`, spotless |
 | `java-gradle/` | Java com Gradle | `build.gradle`, `config/checkstyle/` |
+| `java-spring/` | Java/Maven com spring-javaformat | `spring-javaformat-maven-plugin` no `pom.xml` |
 | `dotnet/` | .NET / C# | `.sln` + dois `.csproj`, xunit |
 | `go/` | Go | `go.mod`, `_test.go`, `.golangci.yml` |
 | `monorepo/` | Workspaces JS | `workspaces` na raiz, scripts nos pacotes |
@@ -70,6 +71,7 @@ eficácia da geração — **a skill entregue não depende dele**.
 | `go` | L0 · 36/108 | **L4 · 103/108** |
 | `monorepo` | L0 · 30/108 | L4 · 97/108 |
 | `java-gradle` | L0 · 27/108 | L2 · 94/108 |
+| `java-spring` | L0 · 26/108 | L2 · 93/108 |
 | `dotnet` | L0 · 22/108 | L2 · 86/108 |
 
 **Histórico desta linha, porque ela oscilou de propósito.** O Grupo 28
