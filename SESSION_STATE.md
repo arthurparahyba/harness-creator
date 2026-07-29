@@ -3,13 +3,13 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: Grupo 34 na `main`, publicado. Depois dele, só commits
-  de plano (propostas dos Grupos 35 e 36).
-- Testes: 579/579 (`pytest -q`); ruff e mypy strict limpos; score da geração
-  **+67** em todos os ecossistemas (+52 no `sem-sensores`).
-- Change/plano ativo: `TASKS.md` na raiz — **Grupos 35 e 36 abertos** (achados
-  ao rodar a skill no PetClinic) e **26 aberto e BLOQUEADO**. Grupos 25, 27,
-  28, 29, 30, 31, 32, 33 e 34 concluídos e publicados.
+- Commit verificado: `ef188c3` na `main`, publicado, CI verde — Grupo 36.
+- Testes: 622/622 + 4 skips explícitos; ruff e mypy strict limpos; score da
+  geração **+67** em todos os ecossistemas (+52 no `sem-sensores`).
+- Change/plano ativo: `TASKS.md` na raiz — **só o Grupo 26 aberto, e
+  BLOQUEADO** (ver pendências). Grupos 25, 27 a 36 concluídos e publicados.
+- Os três defeitos achados na rodada do PetClinic viraram os Grupos 34, 35 e
+  36 — todos entregues. Rodar a skill num repo real pagou por si.
 - Em andamento: nada — fronteira limpa.
 - Não commitado: só o `-c` na raiz, lixo de execução manual antiga.
 - Execução em série foi autorizada pelo usuário nesta sessão: a regra "PARE
