@@ -3,16 +3,37 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `d630d45` na `main`, publicado, CI verde — Grupo 33.
-- Testes: 443/443 (`pytest -q`); ruff e mypy strict limpos; `harness-score`
-  em L4; score da geração +62 em todos os ecossistemas.
-- Change/plano ativo: `TASKS.md` na raiz — **Grupos 25, 26, 27, 29, 31 e 32
-  abertos**. Grupos 28, 30 e 33 concluídos.
-- Execução em série autorizada pelo usuário: a regra "PARE após o grupo" do
-  AGENTS.md está suspensa nesta sessão, com push e relatório por grupo.
+- Commit verificado: `daca5e3` na `main`, publicado, CI verde — Grupo 27.
+- Testes: 566/566 (`pytest -q`); ruff e mypy strict limpos; score da geração
+  **+67** em todos os ecossistemas (+52 no `sem-sensores`).
+- Change/plano ativo: `TASKS.md` na raiz — **só o Grupo 26 aberto, e
+  BLOQUEADO** (ver pendências). Grupos 25, 27, 28, 29, 30, 31, 32 e 33
+  concluídos e publicados.
 - Em andamento: nada — fronteira limpa.
-- Não commitado: `TASKS.md` (propostas dos Grupos 31 e 32) e este arquivo;
-  mais o `-c` na raiz, lixo de execução manual antiga.
+- Não commitado: só o `-c` na raiz, lixo de execução manual antiga.
+- Execução em série foi autorizada pelo usuário nesta sessão: a regra "PARE
+  após o grupo" do AGENTS.md ficou suspensa, com push e relatório por grupo.
+
+## O que mudou nesta sessão (Grupos 33, 31, 25, 29, 32 e 27)
+Seis grupos entregues na `main`, CI verde em todos. Testes: 406 → 566.
+
+- **33** — `format-on-edit.sh` era inerte em Java/Maven e Java/Gradle. Eram
+  QUATRO defeitos encadeados: o template anexava `"$FILE_PATH"` no fim
+  (Maven lê como fase de ciclo de vida e aborta); `gerar.py` preenchia
+  `<formatter_command>` só com o binário, então nenhum teste exercitava o
+  comando real; cabeçalho do hook e `ecossistemas.md` divergiam; e o stub
+  rigoroso revelou que o hook checava `command -v gradle` mas rodava
+  `./gradlew` — no-op em todo projeto com wrapper.
+- **31** — a skill passou a gerar `.harness/arch-rules.json` e
+  `.claude/check-arch.sh` na cadeia da DoD. `V6` saiu de `fail` para `pass`.
+- **25** — gatilhos da `description` saíram de 47% para 10% do texto; TL;DR e
+  duas duplicações removidas do corpo.
+- **29** — FASE 1 passou a descobrir prefixo de branch e política de entrega
+  por evidência (`git branch -r`, `git log --merges`, PULL_REQUEST_TEMPLATE,
+  CODEOWNERS), não mais presumidos.
+- **32** — agente `propor-regra-arch`, sem ferramenta de escrita: propõe
+  regra, não veredito. Score voltou a +67.
+- **27** — índice nos 8 arquivos longos, `compatibility`, `allowed-tools`.
 
 ## O que mudou nesta sessão (Grupo 28)
 A skill deixou de gerar o subagente `code-reviewer`, a pedido do usuário. A
@@ -57,6 +78,15 @@ dentro de cada repo alvo.
   relatório — a vitrine não anda sozinha.
 
 ## Pendências
+- **BLOQUEADOR: o instrumento do nível E não detecta disparo nenhum.** Teste
+  de sanidade: skill `deploy-producao`, description "Use SEMPRE que o usuario
+  pedir para rodar o deploy de producao", query "roda o deploy de producao
+  pra mim agora" → `trigger_rate 0.00`. O `run_eval.py` cria o command file e
+  o `claude -p` responde; a detecção é que nunca acende, provavelmente por
+  formato de evento do `stream-json` que mudou de versão. **Consequência:** o
+  "subdisparo" medido no nível E pode ser artefato, e a conclusão de que ele
+  "não se resolve reescrevendo a description" precisa ser reaberta. O Grupo
+  26 está bloqueado por isto. Registrado em `evals/README.md`.
 - O nível C ficou em **n=1 por célula**; o protocolo pede 3. Subir para 3 é o
   próximo passo antes de tratar qualquer número como estável.
 - **O `AGENTS.md` deste repo está desatualizado em dois pontos, e a causa é
