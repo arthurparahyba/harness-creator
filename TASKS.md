@@ -596,3 +596,51 @@ wrapper. Score por ecossistema inalterado.
 - [x] 34.2 Teste que gera um harness SEM o hook de formatação e exige que o
       check-arch continue aprovando
 Verificação: `pytest -q && ruff check . && mypy`
+
+## Grupo 35 - Verificador cega para a própria skill instalada no alvo
+<!-- Achado ao rodar a skill no spring-petclinic. O `verificar-harness.sh`
+     varre o repositório inteiro procurando marcador sobrevivente e AGENTS.md
+     sem ponte CLAUDE.md. Quando a skill está instalada como skill de projeto
+     em `.claude/skills/harness-creator/` — que é um caminho de instalação
+     legítimo e documentado — ele varre os próprios TEMPLATES da skill, que
+     contêm marcadores por construção, e o `AGENTS.md` interno dela.
+
+     Resultado: 4 falhas numa geração correta. O usuário lê "falha aqui é
+     defeito da geração, não pendência do usuário" — que é o que o próprio
+     verificador imprime — e vai caçar um defeito que não existe.
+
+     Não é artefato do teste: instalar a skill no repo é como um time a
+     compartilha via git. -->
+- [ ] 35.1 O verificador exclui `.claude/skills/*/resources/` e o `AGENTS.md`
+      interno de skills instaladas das varreduras de marcador e de ponte
+- [ ] 35.2 Teste que instala a skill dentro de uma fixture gerada e exige
+      11/11 — hoje daria 7/11
+- [ ] 35.3 A mesma exclusão vale para a FASE 5: o item que manda colar a
+      saída precisa dizer o que NÃO conta
+Verificação: `pytest -q && ruff check . && mypy`
+
+## Grupo 36 - Java/Maven não é só spotless
+<!-- A coluna Formatter de `ecossistemas.md` dá `mvn -q spotless:apply
+     -DspotlessFiles=` como resposta única para Java/Maven. Toda a família
+     Spring usa `spring-javaformat-maven-plugin`, e o PetClinic é o exemplo
+     canônico. A FASE 1 manda confirmar contra o que está commitado ("o que
+     está commitado ganha da tabela") e foi isso que salvou a geração — mas
+     depender da regra geral para corrigir a tabela específica é frágil.
+
+     E há um agravante que a tabela não tem como expressar hoje:
+     `spring-javaformat` NÃO escopa por arquivo. Rodá-lo no hook de edição
+     formataria o módulo inteiro a cada tecla — enforcement que atrapalha, que
+     a skill manda não gerar. A resposta certa para esse caso não é um comando
+     na tabela, é "não gere o hook; mande para o pre-commit e o CI". -->
+- [ ] 36.1 Linha de Java/Maven vira duas, escolhidas por evidência no
+      `pom.xml`: `spotless-maven-plugin` -> comando escopado;
+      `spring-javaformat-maven-plugin` -> SEM hook de edição
+- [ ] 36.2 Coluna ou nota nova em `ecossistemas.md` para "formatter que não
+      escopa por arquivo", com a regra de não gerar o hook e mandar o item
+      para o Plano de Remediação
+- [ ] 36.3 Item da FASE 1 passa a inspecionar QUAL plugin de formatação o
+      manifesto declara, não só se existe algum
+- [ ] 36.4 Fixture `java-spring` (pom com spring-javaformat) e teste de que a
+      geração NÃO produz `format-on-edit.sh` nela — o Grupo 34 tornou o
+      check-arch tolerante a isso, falta o gerador respeitar
+Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
