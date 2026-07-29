@@ -11,7 +11,12 @@
 - Os três defeitos achados na rodada do PetClinic viraram os Grupos 34, 35 e
   36 — todos entregues. Rodar a skill num repo real pagou por si.
 - Em andamento: nada — fronteira limpa.
-- Não commitado: só o `-c` na raiz, lixo de execução manual antiga.
+- Não commitado: nada. O `-c` da raiz (lixo de execução manual antiga) foi
+  apagado nesta sessão.
+- Pendência achada e NÃO consertada (fora do escopo): o README da skill, em
+  "O que você ganha concretamente", ainda anuncia "Review automatizado:
+  subagente de code review" — o Grupo 28 removeu esse subagente, e
+  `grep -r code-review .claude/skills/harness-creator/` não retorna nada.
 - Execução em série foi autorizada pelo usuário nesta sessão: a regra "PARE
   após o grupo" do AGENTS.md ficou suspensa, com push e relatório por grupo.
 
