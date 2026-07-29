@@ -7,10 +7,11 @@
 - Testes: 404/404 (`pytest -q`); ruff e mypy strict limpos; `harness-score`
   em L4 (100/108, era 105 antes do Grupo 30). Caiu de 406 testes porque os
   dois sensores do marcador `<checks-do-repo>` saíram com ele.
-- Change/plano ativo: `TASKS.md` na raiz — **Grupos 25, 26, 27 e 29 abertos**,
-  propostos e não iniciados. Grupos 28 e 30 concluídos.
+- Change/plano ativo: `TASKS.md` na raiz — **Grupos 25, 26, 27, 29, 31 e 32
+  abertos**, propostos e não iniciados. Grupos 28 e 30 concluídos.
 - Em andamento: nada — fronteira limpa.
-- Não commitado: só o `-c` na raiz, lixo de execução manual antiga.
+- Não commitado: `TASKS.md` (propostas dos Grupos 31 e 32) e este arquivo;
+  mais o `-c` na raiz, lixo de execução manual antiga.
 
 ## O que mudou nesta sessão (Grupo 28)
 A skill deixou de gerar o subagente `code-reviewer`, a pedido do usuário. A

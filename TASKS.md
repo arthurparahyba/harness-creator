@@ -461,3 +461,60 @@ Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
       passando: medido antes (L4 · 105/108) e depois (L4 · 100/108). Os 5
       pontos saem de "Skills & Commands"; o nível não cai
 Verificação: `pytest -q && ruff check . && mypy && npx -y harness-score --min-level 4 --quiet`
+
+## Grupo 31 - Regras arquiteturais executáveis no harness gerado
+<!-- Lacuna estrutural, exposta (não criada) pelo Grupo 28. A skill nunca
+     cobriu regra arquitetural com sensor: o que existia era o subagente
+     revisor, que produzia veredito descartável em vez de regra durável.
+
+     O que entra aqui é a parte DETERMINÍSTICA, de propósito. A DoD só
+     significa algo porque é reprodutível — "saída de comando é evidência".
+     Um LLM nessa cadeia a tornaria não-reprodutível, cara e flaky no CI, e
+     reintroduziria o modo de falha que o nível C mediu (3 de 4 sessões sem
+     harness declararam "pronto" falsamente). Além disso `check-arch.sh` é
+     shell e roda nos três agentes-alvo; subagente só roda no Claude Code.
+
+     O agente propositor é o Grupo 32, e é incremento — não fundação. -->
+- [ ] 31.1 `resources/arch-rules.json` (semente de 3-5 invariantes derivados
+      da stack detectada) e `resources/check-arch.sh`, o runner portátil que
+      percorre as regras e imprime WHAT/WHY/FIX nas que falham. Os três
+      campos existem para o agente não "consertar" apagando a regra
+- [ ] 31.2 Item na FASE 1: derivar as regras candidatas de evidência real do
+      repo — camada onde vive o domínio, padrão de acesso a dados, artefatos
+      que quebram em silêncio. Sem evidência, não entra: mesma regra dos
+      `MUST NOT`
+- [ ] 31.3 Engate nos três pontos de verificação que já existem:
+      `<dod-command>`, `<dod-steps>` do CI e `.pre-commit-config.yaml`. Regra
+      sem cabo para execução automática é documento, não sensor
+- [ ] 31.4 Regra de conflito na FASE 3: `arch-rules.json` existente NUNCA é
+      sobrescrito — é do usuário, como o `.gitignore`. Sobrescrever apagaria
+      exatamente o que o arquivo existe para acumular
+- [ ] 31.5 Testes: geração por ecossistema, `check-arch.sh` executado de
+      verdade (falha quando a regra é violada, passa quando não), e o teste
+      de não-sobrescrita da FASE 3
+Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
+
+## Grupo 32 - Agente que PROPÕE regra arquitetural (depende: Grupo 31)
+<!-- A promoção review→regra automatizada: em vez de depender de alguém
+     lembrar de escrever a regra depois de achar o problema, o agente redige
+     o rascunho. Diferente do subagente removido no Grupo 28 — aquele
+     produzia veredito (APPROVED/CHANGES REQUESTED) que evaporava no commit;
+     este produz regra, que fica.
+
+     A trava não é opcional: agente que pode EDITAR as regras pode
+     ENFRAQUECÊ-LAS. Bloqueado pela regra A07, o caminho mais curto para o
+     verde é reescrever a A07 — uma catraca que gira para os dois lados não
+     é catraca. Propõe, não grava.
+
+     Só Claude Code (subagente). Por isso é incremento e não fundação. -->
+- [ ] 32.1 Template do agente: lê o diff do grupo, compara com as camadas
+      declaradas, e devolve rascunho de regra no formato de `arch-rules.json`
+      (id, description, check, expect, what, why, fix) — nunca um veredito
+- [ ] 32.2 A regra proposta entra pelo caminho que já existe para decisão do
+      usuário: item do Plano de Remediação, com o `check` exato e o impacto,
+      aceito um a um. O agente não escreve no arquivo
+- [ ] 32.3 Registrar na FASE 4 e em `arquivos-gerados.md` que é Claude-Code-
+      only, como já se faz com `executar-grupo`
+- [ ] 32.4 Teste de que o agente gerado não tem permissão de escrita em
+      `arch-rules.json` e de que o formato do rascunho é o do arquivo
+Verificação: `pytest -q && ruff check . && mypy`
