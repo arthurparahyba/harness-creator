@@ -649,3 +649,29 @@ Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py` —
 622 testes (+29) e 4 skips explícitos (os testes de forma do comando não se
 aplicam onde não há comando). Fixture `java-spring` marca **+67**, o mesmo
 dos outros: não gerar o hook não custa pontuação.
+
+## Grupo 37 - README que lidera com a evidência, não com a definição ✅
+<!-- O README tem 76 linhas e a prova começa na 37. Antes dela: o que o repo
+     é, onde a skill vive, links para dois documentos, e como rodar os testes
+     DESTE repositório. Quem abre está decidindo "isso resolve um problema
+     meu?" e as primeiras 36 linhas respondem "como contribuo com este
+     projeto?".
+
+     É a mesma inversão que o Grupo 25 corrigiu na `description`: o que faz
+     alguém agir fica abaixo do que a coisa é.
+
+     A seção de evidência sobe para o topo — e continua sendo a seção que o
+     teste do Grupo 24 vigia, então os números seguem com lastro obrigatório
+     no relatório. -->
+- [x] 37.1 `## Isso funciona?` vira a primeira seção, abrindo com o caso do
+      javadoc (cena concreta) antes da tabela. O custo de +65% e o n=1 ficam
+      onde estão, ditos por nós: é o que torna o resto crível
+- [x] 37.2 As features viram consequências. "AGENTS.md com protocolo" não diz
+      nada a quem decide; "o agente para de inventar tarefa fora do plano",
+      sim. Regra: se a linha descreve um arquivo, é feature; se descreve algo
+      que deixa de dar errado, é benefício
+- [x] 37.3 "Trabalhar neste repositório" desce para o fim — é outra audiência
+- [x] 37.4 Teste que reprova README cuja primeira seção não seja a evidência
+Verificação: `pytest -q && ruff check . && mypy` — 623 testes (+1). O teste
+do Grupo 24 continua exigindo lastro no relatório para cada número, e a seção
+de evidência segue sob ele mesmo tendo subido para o topo.
