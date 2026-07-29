@@ -455,10 +455,14 @@ a regra** — ele vê um comando falhando e quer fazê-lo parar de falhar.
 
 ## FASE 2 — Preenchimento VERBATIM dos templates
 
-**O que acontece aqui:** a skill abre cada template de `resources/` e
-preenche **somente** os trechos marcados com `<>`. Não parafraseia, não
-resume, não reordena, não "melhora" o texto. Os arquivos ficam prontos em
-memória — nada é gravado ainda.
+> **"Verbatim"** é latim para *palavra por palavra* — copiar um texto ao pé
+> da letra, sem alterar nada. É o nome da regra desta fase.
+
+**O que acontece aqui:** a skill abre cada template de `resources/` e o copia
+**caractere a caractere** para o repositório alvo, preenchendo **somente** os
+trechos marcados com `<>`. Não parafraseia, não resume, não reordena, não
+"melhora" o texto. Os arquivos ficam prontos em memória — nada é gravado
+ainda.
 
 > **Por que essa rigidez:** o princípio central da skill é que *o que precisa
 > ser consistente não se deixa para o modelo redigir — se transcreve do
