@@ -44,6 +44,11 @@
     "depois": "L4 103/108",
     "delta": 67
   },
+  "node-openspec": {
+    "antes": "L0 36/108",
+    "depois": "L4 103/108",
+    "delta": 67
+  },
   "php": {
     "antes": "L0 18/108",
     "depois": "L2 85/108",

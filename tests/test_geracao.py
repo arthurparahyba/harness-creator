@@ -574,3 +574,70 @@ def test_formatter_de_modulo_inteiro_nao_vira_hook_de_edicao() -> None:
     # O gate continua lá: a ausência é do hook de formatação, não do enforcement.
     assert (destino / ".claude/hooks/gate-destructive.sh").exists()
     assert "gate-destructive" in (destino / ".claude/settings.json").read_text()
+
+
+def test_fonte_de_trabalho_e_exclusiva(repo: tuple[Path, Stack, str]) -> None:
+    """`openspec/config.yaml` e `TASKS.md` não coexistem.
+
+    O catálogo (`arquivos-gerados.md`) declara os dois como exclusivos, e a
+    razão é operacional: duas fontes de trabalho no mesmo repositório fazem o
+    agente escolher a errada em metade das sessões, e o plano que ele lê não
+    é o que o humano atualiza.
+    """
+    destino, _, nome = repo
+    tem_openspec = (destino / "openspec").is_dir()
+    config = destino / "openspec/config.yaml"
+    tasks = destino / "TASKS.md"
+
+    if tem_openspec:
+        assert config.is_file(), f"{nome}: tem openspec/ e não recebeu config.yaml"
+        assert not tasks.exists(), f"{nome}: recebeu TASKS.md tendo openspec/"
+    else:
+        assert tasks.is_file(), f"{nome}: sem openspec/ e sem TASKS.md — sem plano"
+        assert not config.exists(), f"{nome}: config.yaml sem openspec/"
+
+
+def test_config_do_openspec_nao_tem_placeholder_em_prosa() -> None:
+    """Placeholder em prosa não está em `PREENCHIVEIS` — nada o cobra.
+
+    O template usa `<stack e ferramentas...>`, `<comandos reais do repo...>`
+    e `<3-6 restrições...>`: instruções para o modelo escrever, não
+    marcadores substituíveis. Se ele não as preencher, o `config.yaml` sai
+    com a instrução no lugar do conteúdo e o OpenSpec injeta isso em toda
+    requisição — o mesmo modo de falha do `<ferramentas-do-harness>` vazio.
+    """
+    import tempfile
+
+    destino = Path(tempfile.mkdtemp()) / "node-openspec"
+    gerar("node-openspec", destino)
+    corpo = (destino / "openspec/config.yaml").read_text()
+
+    # Dois `<...>` são texto do PROTOCOLO, não placeholder a preencher: o
+    # formato do header de grupo e o da mensagem de commit. Eles têm de
+    # sobreviver — a FASE 2 transcreve o protocolo VERBATIM.
+    PROTOCOLO = {"<objetivo>", "<nome do grupo>"}
+    sobreviventes = [
+        m for m in re.findall(r"<[^>\n]{4,}>", corpo) if m not in PROTOCOLO
+    ]
+    assert sobreviventes == [], (
+        f"placeholder em prosa sobreviveu no config.yaml: {sobreviventes}"
+    )
+    assert yaml.safe_load(corpo)["schema"] == "spec-driven"
+
+
+def test_agents_md_manda_o_comando_de_plano_certo(repo: tuple[Path, Stack, str]) -> None:
+    """Com OpenSpec, `/opsx:propose`; sem, editar o `TASKS.md`.
+
+    Instrução trocada manda o agente chamar um comando que não existe, e a
+    sessão morre no primeiro pedido fora do plano — que é exatamente o momento
+    em que o protocolo mais importa.
+    """
+    destino, _, nome = repo
+    agents = (destino / "AGENTS.md").read_text()
+    if (destino / "openspec").is_dir():
+        assert "/opsx:propose" in agents, f"{nome}: tem OpenSpec e não o usa"
+    else:
+        assert "/opsx:propose" not in agents, (
+            f"{nome}: manda usar /opsx:propose sem openspec/ — comando inexistente"
+        )
+        assert "TASKS.md" in agents
