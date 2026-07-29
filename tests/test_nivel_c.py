@@ -231,3 +231,26 @@ def test_todo_numero_do_readme_existe_no_relatorio() -> None:
     assert afirmacoes, "a seção perdeu os números: virou texto de marketing"
     orfas = [a for a in afirmacoes if a not in relatorio]
     assert orfas == [], f"número no README sem lastro no relatório: {orfas}"
+
+
+def test_evidencia_e_a_primeira_secao_do_readme() -> None:
+    """Quem abre o README está decidindo "isso resolve um problema meu?".
+
+    A versão anterior gastava 36 das suas 76 linhas antes da prova: dizia o
+    que o repositório é, onde a skill vive, e como rodar os testes DESTE
+    projeto — respondendo "como contribuo?" para quem perguntava "adoto?".
+
+    É a mesma inversão que o Grupo 25 corrigiu na `description` da skill, e
+    pelo mesmo motivo: o que faz alguém agir não pode ficar abaixo do que a
+    coisa é.
+    """
+    texto = (RAIZ / "README.md").read_text()
+    secoes = [ln for ln in texto.splitlines() if ln.startswith("## ")]
+    assert secoes, "README sem seções"
+    assert secoes[0] == "## Isso funciona?", (
+        f"a primeira seção do README é {secoes[0]!r}, não a evidência. "
+        "Prova antes de feature, feature antes de contribuição."
+    )
+    assert secoes[-1] == "## Trabalhar neste repositório", (
+        "a seção de contribuidor não está no fim — é outra audiência"
+    )
