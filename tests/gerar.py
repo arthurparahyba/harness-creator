@@ -67,7 +67,21 @@ class Stack:
 
     @property
     def comandos(self) -> list[str]:
-        return [c.strip() for c in self.dod.split("&&")]
+        return [c.strip() for c in self.dod_gerada.split("&&")] if self.dod else []
+
+    @property
+    def dod_gerada(self) -> str:
+        """A DoD que vai para os arquivos: comandos da stack + check-arch.
+
+        Regra arquitetural so vale se algo a executar sem ninguem pedir — na
+        cadeia da DoD ela vira parte de "concluido", que e o unico ponto que
+        o agente sempre consulta. Repo sem sensores continua com DoD vazia
+        (regra de honestidade da FASE 2): inventar uma DoD que so roda o
+        check-arch daria um verde que o repositorio nao merece.
+        """
+        if not self.dod:
+            return ""
+        return f"{self.dod} && bash .claude/check-arch.sh"
 
     @property
     def dod_steps(self) -> str:
@@ -294,7 +308,7 @@ def gerar(nome: str, destino: Path) -> Stack:
                 "<2-3 linhas: o que é a aplicação, stack com versões exatas>": f"Fixture {nome}.",
                 "<Preencher via descoberta — nunca de memória. Fontes: manifestos, CI>": "",
                 "<comandos reais do repo, encadeados com &&, "
-                "priorizando o que o CI exige>": stack.dod,
+                "priorizando o que o CI exige>": stack.dod_gerada,
                 "<branch-base>": "main",
                 # Fixture sem `openspec/`: a variante correta é a do TASKS.md.
                 "<como-propor-mudanca-de-plano>": (
@@ -350,8 +364,16 @@ def gerar(nome: str, destino: Path) -> Stack:
     _grava(
         destino,
         ".claude/commands/dod.md",
-        _preenche("dod-command.md", {"<dod-command>": stack.dod}),
+        _preenche("dod-command.md", {"<dod-command>": stack.dod_gerada}),
     )
+    # Registro de regras arquiteturais + runner. Vão SEMPRE, inclusive em repo
+    # sem sensores: as regras da semente checam invariantes do próprio harness
+    # (hooks que parseiam, manifesto válido, marcador sobrevivente), que não
+    # dependem de test runner nenhum. O que não vai, sem sensores, é a DoD que
+    # os executa — ver `dod_gerada`.
+    _grava(destino, ".harness/arch-rules.json", (RESOURCES / "arch-rules.json").read_text())
+    _grava(destino, ".claude/check-arch.sh", (RESOURCES / "check-arch.sh").read_text())
+    (destino / ".claude/check-arch.sh").chmod(0o755)
     # Regra de honestidade da FASE 2: sem sensores, a DoD fica vazia e o
     # enforcement NÃO é gerado. Pre-commit sem hook e CI que passa sem rodar
     # nada dão ao agente um verde que ele não mereceu — pior que não ter
@@ -459,7 +481,7 @@ def _grava_manifesto(destino: Path, nome: str, stack: Stack) -> None:
                 "<versao-da-skill>": _versao_da_skill(),
                 "<data-iso>": "2026-07-27",
                 "<ecossistema>": nome,
-                "<dod-command>": stack.dod,
+                "<dod-command>": stack.dod_gerada,
                 '"<lista de caminhos gerados, um por linha, relativos à raiz>"': ",\n      ".join(
                     json.dumps(g) for g in gerados
                 ),

@@ -1,0 +1,47 @@
+[
+  {
+    "id": "A01",
+    "description": "O gate de comandos destrutivos e bash valido",
+    "check": "bash -n .claude/hooks/gate-destructive.sh",
+    "expect": "exit-0",
+    "what": ".claude/hooks/gate-destructive.sh tem erro de sintaxe",
+    "why": "Gate quebrado nao bloqueia nada e falha em silencio: o agente executa rm -rf e git push --force como se o harness nao existisse",
+    "fix": "Rode 'bash -n .claude/hooks/gate-destructive.sh' e corrija o erro na linha indicada"
+  },
+  {
+    "id": "A02",
+    "description": "O hook de formatacao e bash valido",
+    "check": "bash -n .claude/hooks/format-on-edit.sh",
+    "expect": "exit-0",
+    "what": ".claude/hooks/format-on-edit.sh tem erro de sintaxe",
+    "why": "O hook roda a cada edicao de arquivo; quebrado, ele morre em toda edicao sem que nada acuse, e a formatacao para de acontecer",
+    "fix": "Rode 'bash -n .claude/hooks/format-on-edit.sh' e corrija o erro na linha indicada"
+  },
+  {
+    "id": "A03",
+    "description": "O manifesto do harness e JSON valido",
+    "check": "jq empty .claude/harness.json 2>/dev/null || python3 -c 'import json;json.load(open(\".claude/harness.json\"))' 2>/dev/null || node -e 'require(\"./.claude/harness.json\")'",
+    "expect": "exit-0",
+    "what": ".claude/harness.json nao parseia",
+    "why": "O manifesto e o que torna o harness atualizavel: sem ele a proxima execucao da skill nao sabe o que gerou e trata arquivo do usuario como seu",
+    "fix": "Rode 'jq . .claude/harness.json' (ou 'python3 -m json.tool .claude/harness.json') para ver o erro de parse e corrija o JSON na linha indicada"
+  },
+  {
+    "id": "A04",
+    "description": "Nenhum marcador de template sobreviveu na geracao",
+    "check": "grep -rlE '<(dod-command|branch-base|file_glob|formatter_bin|formatter_command|ferramentas-do-harness)>' AGENTS.md .claude/",
+    "expect": "exit-nonzero",
+    "what": "Sobrou marcador <...> nao preenchido em AGENTS.md ou em .claude/",
+    "why": "Marcador sobrevivente vira texto literal: a DoD deixa de ser um comando executavel e o hook deixa de casar com os arquivos do projeto, ambos sem erro visivel",
+    "fix": "Rode o grep do campo check para achar os arquivos e substitua cada marcador pelo valor real da stack"
+  },
+  {
+    "id": "A05",
+    "description": "A fonte de trabalho existe e nao esta vazia",
+    "check": "test -s TASKS.md || test -d openspec/changes",
+    "expect": "exit-0",
+    "what": "Nao ha TASKS.md com conteudo nem openspec/changes/",
+    "why": "Sem fonte de trabalho o agente inventa tarefas, que e exatamente o que o protocolo do AGENTS.md proibe — e nao ha onde registrar o proximo grupo",
+    "fix": "Crie TASKS.md com ao menos um grupo no formato '## Grupo N - <objetivo>' seguido de tasks e da linha 'Verificacao:'"
+  }
+]

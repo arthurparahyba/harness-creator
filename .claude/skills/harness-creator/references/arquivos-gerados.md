@@ -39,6 +39,8 @@ cópia, o conteúdo continua vivendo num lugar só.
 | pre-commit-config.yaml | `.pre-commit-config.yaml` | se não existir **e houver comandos reais de lint/format/types** |
 | dod-command.md | `.claude/commands/dod.md` | sempre (se não existir) |
 | harness-manifest.json | `.claude/harness.json` | sempre (sobrescrever se já existir) |
+| arch-rules.json | `.harness/arch-rules.json` | sempre (**se não existir** — ver FASE 3) |
+| check-arch.sh | `.claude/check-arch.sh` (chmod +x) | sempre |
 
 ### O manifesto (`.claude/harness.json`)
 

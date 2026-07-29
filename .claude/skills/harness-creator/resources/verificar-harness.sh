@@ -98,7 +98,7 @@ json_parseia() {
 }
 
 # ---------------------------------------------------------------- JSON valido
-JSONS=".claude/settings.json .devin/hooks.v1.json .cursor/hooks.json .mcp.json .claude/harness.json"
+JSONS=".claude/settings.json .devin/hooks.v1.json .cursor/hooks.json .mcp.json .claude/harness.json .harness/arch-rules.json"
 _ruins=""
 _vistos=0
 for f in $JSONS; do
@@ -115,6 +115,7 @@ fi
 
 # ------------------------------------------------- scripts: LF e executaveis
 SCRIPTS="init.sh"
+[ -f .claude/check-arch.sh ] && SCRIPTS="$SCRIPTS .claude/check-arch.sh"
 for f in .claude/hooks/*.sh; do
   [ -f "$f" ] && SCRIPTS="$SCRIPTS $f"
 done

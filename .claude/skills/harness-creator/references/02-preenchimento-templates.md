@@ -246,6 +246,24 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
   !.env.example
   ```
   NUNCA sobrescrever o `.gitignore` existente — sempre append.
+- **Regras arquiteturais** (`resources/arch-rules.json` →
+  `.harness/arch-rules.json`, e `resources/check-arch.sh` →
+  `.claude/check-arch.sh`, `chmod +x`): a semente vai VERBATIM, e as regras
+  candidatas achadas na FASE 1 entram como itens novos da lista, cada uma com
+  `id`, `description`, `check`, `expect`, `what`, `why` e `fix`.
+  - `check` é um comando de shell; `expect` é `exit-0` (padrão) ou
+    `exit-nonzero`, este último para a regra que afirma a AUSÊNCIA de algo.
+  - `what`/`why`/`fix` nomeiam arquivo, função ou comando. Um `grep` sozinho
+    bastaria para um humano; para um agente, não: ele vê comando falhando e
+    quer fazê-lo parar de falhar, e sem o `why` o caminho mais curto é apagar
+    a regra.
+  - Se `.harness/arch-rules.json` já existir, **não toque** — ver
+    [FASE 3](03-resolucao-conflitos.md). Regra nova vira item do Plano de
+    Remediação.
+  - `bash .claude/check-arch.sh` entra na DoD, ao lado dos outros comandos.
+    Regra sem cabo para execução automática é documento, não sensor. Repo sem
+    sensores mantém a DoD vazia: os arquivos são gerados, mas inventar uma DoD
+    que só roda o check-arch daria um verde que o repositório não merece.
 - **Manifesto** (`resources/harness-manifest.json` → `.claude/harness.json`):
   preencher `<versao-da-skill>` com a `metadata.version` do `SKILL.md`,
   `<data-iso>` com a data da geração, `<ecossistema>` com a linha detectada

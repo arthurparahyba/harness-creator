@@ -462,7 +462,7 @@ Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
       pontos saem de "Skills & Commands"; o nível não cai
 Verificação: `pytest -q && ruff check . && mypy && npx -y harness-score --min-level 4 --quiet`
 
-## Grupo 31 - Regras arquiteturais executáveis no harness gerado
+## Grupo 31 - Regras arquiteturais executáveis no harness gerado ✅
 <!-- Lacuna estrutural, exposta (não criada) pelo Grupo 28. A skill nunca
      cobriu regra arquitetural com sensor: o que existia era o subagente
      revisor, que produzia veredito descartável em vez de regra durável.
@@ -475,24 +475,28 @@ Verificação: `pytest -q && ruff check . && mypy && npx -y harness-score --min-
      shell e roda nos três agentes-alvo; subagente só roda no Claude Code.
 
      O agente propositor é o Grupo 32, e é incremento — não fundação. -->
-- [ ] 31.1 `resources/arch-rules.json` (semente de 3-5 invariantes derivados
+- [x] 31.1 `resources/arch-rules.json` (semente de 3-5 invariantes derivados
       da stack detectada) e `resources/check-arch.sh`, o runner portátil que
       percorre as regras e imprime WHAT/WHY/FIX nas que falham. Os três
       campos existem para o agente não "consertar" apagando a regra
-- [ ] 31.2 Item na FASE 1: derivar as regras candidatas de evidência real do
+- [x] 31.2 Item na FASE 1: derivar as regras candidatas de evidência real do
       repo — camada onde vive o domínio, padrão de acesso a dados, artefatos
       que quebram em silêncio. Sem evidência, não entra: mesma regra dos
       `MUST NOT`
-- [ ] 31.3 Engate nos três pontos de verificação que já existem:
+- [x] 31.3 Engate nos três pontos de verificação que já existem:
       `<dod-command>`, `<dod-steps>` do CI e `.pre-commit-config.yaml`. Regra
       sem cabo para execução automática é documento, não sensor
-- [ ] 31.4 Regra de conflito na FASE 3: `arch-rules.json` existente NUNCA é
+- [x] 31.4 Regra de conflito na FASE 3: `arch-rules.json` existente NUNCA é
       sobrescrito — é do usuário, como o `.gitignore`. Sobrescrever apagaria
       exatamente o que o arquivo existe para acumular
-- [ ] 31.5 Testes: geração por ecossistema, `check-arch.sh` executado de
+- [x] 31.5 Testes: geração por ecossistema, `check-arch.sh` executado de
       verdade (falha quando a regra é violada, passa quando não), e o teste
       de não-sobrescrita da FASE 3
-Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
+Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py` —
+495 testes (+52). `V6 — Regras arquiteturais` saiu de `fail` para **`pass`**
+no scanner do curso: cobertura melhor do que antes do Grupo 28, quando o
+subagente revisor contava só como `eq`. O `harness-score` externo não pontua
+arch-rules, então os +62 por ecossistema não mudaram.
 
 ## Grupo 32 - Agente que PROPÕE regra arquitetural (depende: Grupo 31)
 <!-- A promoção review→regra automatizada: em vez de depender de alguém

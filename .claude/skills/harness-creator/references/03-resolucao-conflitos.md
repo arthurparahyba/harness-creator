@@ -52,6 +52,13 @@ template onde houver sobreposição.
   como sugestão de regras adicionais e deixar o usuário decidir.
 - **`.gitignore` já existe**: nunca sobrescrever. Só fazer append das
   linhas `.env` se faltarem.
+- **`.harness/arch-rules.json` já existe**: **NUNCA sobrescrever**, nem
+  quando o manifesto o lista como gerado pela skill. O arquivo é uma catraca:
+  cada regra nova nasce de um problema real que alguém encontrou, e o registro
+  só faz sentido porque cresce. Regerar por cima apagaria exatamente o
+  aprendizado que ele existe para acumular — a skill destruindo, a cada
+  atualização de harness, o que o repositório aprendeu desde a última. Regra
+  nova vai como item do Plano de Remediação, para o usuário aceitar.
 - **`LICENSE` já existe**: não sobrescrever.
 - **`.claude/harness.json` já existe**: o repositório já recebeu um harness
   desta skill, e as regras acima não se aplicam sozinhas — a de não
