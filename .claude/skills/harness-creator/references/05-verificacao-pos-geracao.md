@@ -6,6 +6,16 @@ depois de gravar os arquivos.
 
 ---
 
+## Conteúdo
+
+- 1. Rode o verificador
+- 1.1 As regras arquiteturais aprovam o harness recém-gerado
+- 2. O que o script não decide
+- Relatório final
+- ➡️ Fase 5 concluída — siga direto para a Fase 6
+
+---
+
 ## 1. Rode o verificador
 
 As checagens mecânicas estão em `.claude/verificar-harness.sh`, gravado junto

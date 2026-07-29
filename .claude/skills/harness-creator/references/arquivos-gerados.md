@@ -5,6 +5,14 @@ repositório alvo.
 
 ---
 
+## Conteúdo
+
+- Camada de instrução (sempre)
+- Camada de enforcement (sempre, a menos que já exista)
+- Camada de enforcement (condicional)
+
+---
+
 ## Camada de instrução (sempre)
 
 | Template (em `resources/`) | Destino no repo | Condição |

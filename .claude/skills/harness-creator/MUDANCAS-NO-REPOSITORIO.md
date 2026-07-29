@@ -9,6 +9,18 @@ fronteiras e como verificar o próprio trabalho.
 
 ---
 
+## Conteúdo
+
+- As duas coisas que ela faz
+- O que ela CRIA
+- O que ela MODIFICA (sem sobrescrever)
+- O que ela PROPÕE (você decide item a item)
+- O que ela NUNCA faz
+- O que muda na prática
+- O que você precisa fazer
+
+---
+
 ## As duas coisas que ela faz
 
 | | O que é | Quando acontece |

@@ -10,6 +10,16 @@ investigação do repositório realmente mostrou.
 
 ---
 
+## Conteúdo
+
+- Os três grupos
+- Grupo A — gerado pela skill (não precisa recomendar)
+- Grupo B — recomendado, com confirmação
+- Grupo C — só reportar
+- Formato do Plano de Remediação (apresentar na FASE 4)
+
+---
+
 ## Os três grupos
 
 | Grupo | O que é | Decisão |

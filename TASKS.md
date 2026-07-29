@@ -386,24 +386,27 @@ quebrado (ver 25.5).
       elimina a hipótese e é o que impede a próxima sessão de repeti-la
 Verificação: `pytest -q && ruff check . && mypy` + tabela de triggering antes/depois
 
-## Grupo 27 - Itens mecânicos de conformidade (depende: Grupo 25)
+## Grupo 27 - Itens mecânicos de conformidade (depende: Grupo 25) ✅
 <!-- Separados do 25 de propósito: são reais e baratos, mas nenhum deles muda
      a eficácia da skill. O que tem efeito é o índice — a doc manda pôr em
      arquivo de referência com mais de 100 linhas porque, em leitura parcial,
      o agente perde o resto sem saber que perdeu, e
      `02-preenchimento-templates.md` tem 285 linhas. -->
-- [ ] 27.1 Índice no topo dos 7 arquivos com mais de 100 linhas
+- [x] 27.1 Índice no topo dos 7 arquivos com mais de 100 linhas
       (`references/`: 01, 02, 05, `atualizacao.md`, `remediacoes.md`,
       `arquivos-gerados.md`; e `MUDANCAS-NO-REPOSITORIO.md`)
-- [ ] 27.2 Teste que reprova `.md` da skill com mais de 100 linhas sem índice:
+- [x] 27.2 Teste que reprova `.md` da skill com mais de 100 linhas sem índice:
       a regra só vale se um sensor a cobrar, senão o próximo nasce sem
-- [ ] 27.3 `compatibility` no frontmatter (três agentes-alvo, git, shell
+- [x] 27.3 `compatibility` no frontmatter (três agentes-alvo, git, shell
       POSIX) e `invioláveis` → `inviolaveis` na linha 112, único acento de
       uma SKILL.md que no resto não usa nenhum
-- [ ] 27.4 `allowed-tools` cobrindo o que a FASE 5 executa
+- [x] 27.4 `allowed-tools` cobrindo o que a FASE 5 executa
       (`verificar-harness.sh` e o gate hook): hoje a skill promete rodar
       "sem perguntar nada" e para num prompt de permissão que ela mesma causou
-Verificação: `pytest -q && ruff check . && mypy`
+Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py` —
+566 testes (+10). O sensor de índice nasceu largo demais e pegou `SKILL.md` e
+`README.md`; foi escopado ao que o modelo lê SOB DEMANDA. Tirar o acento de
+`invioláveis` quebrou um teste que ancorava no título — o harness pegou.
 
 ## Grupo 28 - Remover o subagente code-reviewer do produto ✅
 <!-- Decisão do usuário: a skill deixa de gerar o subagente. A ressalva foi
