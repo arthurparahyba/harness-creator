@@ -332,7 +332,7 @@ Verificação: `pytest -q && ruff check . && mypy && python3 eval/nivel-c/mede.p
       e a evidência é pior do que não ter vitrine
 Verificação: `pytest -q && ruff check . && mypy`
 
-## Grupo 25 - Ordem da description e custo permanente do corpo
+## Grupo 25 - Ordem da description e custo permanente do corpo ⚠
 <!-- Achado nº1 da auditoria contra as best practices oficiais. A doc do
      Claude Code manda pôr o caso de uso principal PRIMEIRO, porque o listing
      trunca pelo fim. A description gasta 323 dos seus 694 chars (47%) antes
@@ -341,21 +341,34 @@ Verificação: `pytest -q && ruff check . && mypy`
      SESSION_STATE.md". Sob qualquer truncamento, o que se perde primeiro é
      exatamente a lista de gatilhos. Isso é candidato a causa do subdisparo
      do nível E, junto com a hipótese do orçamento (Grupo 26). -->
-- [ ] 25.1 Reordenar a `description`: o que faz + gatilhos primeiro, a
+- [x] 25.1 Reordenar a `description`: o que faz + gatilhos primeiro, a
       enumeração de artefatos por último, onde o corte a atinge antes de
       atingir o que faz a skill disparar
-- [ ] 25.2 Mover os gatilhos para `when_to_use`, o campo que o Claude Code
-      dedica a isso — torna a ordem irrelevante em vez de só melhor
-- [ ] 25.3 Cortar as duas duplicações que sobreviveram ao Grupo 18: a ponte
+- [~] 25.2 **NÃO feito, deliberadamente.** `when_to_use` não existe no padrão
+      aberto (agentskills.io define só `name`, `description`, `license`,
+      `compatibility`, `metadata` e `allowed-tools`) — é extensão do Claude
+      Code. Mover os gatilhos para lá os tornaria invisíveis em qualquer
+      cliente que siga a spec, e este projeto tem compatibilidade com três
+      agentes como requisito. O ganho já veio da reordenação (25.1); o custo
+      seria portabilidade. Revertido do plano original com base na spec.
+- [x] 25.3 Cortar as duas duplicações que sobreviveram ao Grupo 18: a ponte
       `CLAUDE.md` (linhas 89-90 vs Regra 9) e o Plano de Remediação (102-110
       vs Regra 6). A regra numerada é a forma acionável; a prosa paga custo
       em todo request e não instrui nada a mais. A terceira cópia da ponte,
       na tabela de diagnóstico, FICA — é outro caso de uso
-- [ ] 25.4 Remover o TL;DR (22-28): quando ele entra em contexto a decisão de
+- [x] 25.4 Remover o TL;DR (22-28): quando ele entra em contexto a decisão de
       usar a skill já foi tomada, e ele não muda nenhuma ação seguinte
-- [ ] 25.5 Rodar a bateria de triggering antes e depois; sem o número, 25.1 e
-      25.2 são preferência estética
-Verificação: `pytest -q && ruff check . && mypy` + triggering antes/depois
+- [!] 25.5 **BLOQUEADO: o instrumento não mede.** Teste de sanidade decisivo:
+      skill `deploy-producao`, description dizendo "Use SEMPRE que o usuario
+      pedir para rodar o deploy de producao", query "roda o deploy de producao
+      pra mim agora" -> `trigger_rate 0.00`. Descrição não fica melhor que
+      essa. A detecção de disparo do `run_eval.py` nunca acende. Registrado em
+      `evals/README.md`; reabre a conclusão de que o subdisparo não é da
+      description, e bloqueia o Grupo 26
+Verificação: `pytest -q && ruff check . && mypy` — 498 testes (+3 sensores).
+Gatilhos saíram de 47% para **10%** da description (char 323 -> 69), medido e
+travado por teste. O antes/depois de triggering NÃO foi obtido: instrumento
+quebrado (ver 25.5).
 
 ## Grupo 26 - Testar o orçamento do listing como causa do subdisparo
 <!-- O nível E mediu subdisparo e as sessões anteriores concluíram que

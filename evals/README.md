@@ -169,6 +169,27 @@ Duas execuções inválidas ficaram em `triggering-runs/` de propósito
 `2026-07-27_195733`, feita da raiz deste repo). Servem de contraexemplo: um
 resultado de eval só vale junto com o diretório de onde foi medido.
 
+### ⚠ O instrumento não detecta disparo nenhum (2026-07-29)
+
+**Nenhum número deste nível deve ser tratado como válido até isto ser
+resolvido.** Um teste de sanidade decisivo: skill chamada `deploy-producao`,
+description dizendo literalmente "Use SEMPRE que o usuario pedir para rodar o
+deploy de producao", query "roda o deploy de producao pra mim agora" →
+`trigger_rate 0.00`.
+
+Descrição não tem como ficar melhor que essa. O `run_eval.py` cria o command
+file corretamente, o `claude -p` roda e responde, e a detecção de disparo
+simplesmente nunca acende — provavelmente porque ela procura um formato de
+evento no `--output-format stream-json` que mudou de versão do Claude Code.
+
+**Consequência para as conclusões anteriores:** o "subdisparo" medido neste
+nível pode ser artefato do instrumento, não propriedade da skill. Isso
+explicaria por que reescrever a `description` nunca moveu o número — não
+havia número a mover, era zero por construção. A conclusão registrada
+("subdisparo não se resolve reescrevendo a description") precisa ser
+reaberta, e o Grupo 26 (orçamento do listing) só faz sentido depois de o
+instrumento voltar a medir.
+
 ### O que este nível NÃO mede
 
 Se a skill, uma vez consultada, faz um bom trabalho — isso é o nível D. Uma

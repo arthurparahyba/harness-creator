@@ -880,3 +880,55 @@ def test_plano_de_remediacao_nao_fala_em_pontuacao() -> None:
     texto = (REFERENCES / "04-saida-aprovacao.md").read_text()
     assert "vocabulário de pontuação" in texto
     assert "pontos depois" not in texto, "ordenação por pontuação voltou à FASE 4"
+
+
+def test_gatilhos_vem_antes_da_enumeracao_de_artefatos() -> None:
+    """O listing de skills trunca pelo FIM, então o que vem por último é o
+    primeiro a sumir.
+
+    A `description` gastava 323 dos seus 694 chars (47%) antes do primeiro
+    gatilho, e 148 deles eram a lista de artefatos entre parênteses — que não
+    dispara nada: ninguém pede "me gera um SESSION_STATE.md". Sob truncamento,
+    o que se perdia era exatamente a lista de gatilhos, que é o único
+    mecanismo de disparo da skill. A enumeração fica no fim, onde o corte a
+    atinge antes de atingir o que faz a skill ser encontrada.
+    """
+    m = re.match(r"^---\n(.*?)\n---", SKILL.joinpath("SKILL.md").read_text(), re.S)
+    assert m is not None
+    d = " ".join(yaml.safe_load(m.group(1))["description"].split())
+    inicio_dos_gatilhos = d.find("Use esta skill")
+    assert inicio_dos_gatilhos > 0, "a description não tem lista de gatilhos"
+    proporcao = inicio_dos_gatilhos / len(d)
+    assert proporcao < 0.25, (
+        f"os gatilhos começam a {proporcao:.0%} da description "
+        f"(char {inicio_dos_gatilhos} de {len(d)}). Ponha o caso de uso "
+        "principal primeiro: o listing corta pelo fim."
+    )
+
+
+def test_corpo_nao_repete_o_que_as_regras_ja_dizem() -> None:
+    """O corpo fica em contexto o resto da sessão — cada linha é custo
+    recorrente.
+
+    Duas explicações em prosa diziam o mesmo que as Regras 6 e 9, de forma
+    menos acionável: a ponte `CLAUDE.md` e o Plano de Remediação. A cópia na
+    tabela de diagnóstico FICA — é outro caso de uso (harness já instalado
+    que falha em silêncio), não repetição.
+    """
+    corpo = SKILL.joinpath("SKILL.md").read_text().split("## Regras")[0]
+    assert "nao e redundancia" not in corpo, (
+        "a explicação da ponte CLAUDE.md voltou ao corpo; ela é a Regra 9"
+    )
+    assert "Plano de Remediacao" not in corpo, (
+        "a explicação do Plano de Remediação voltou ao corpo; ela é a Regra 6"
+    )
+
+
+def test_skill_md_nao_tem_secao_de_resumo_de_si_mesma() -> None:
+    """Quando o corpo entra em contexto, a decisão de usar a skill já foi
+    tomada — um resumo do que a skill faz não muda nenhuma ação seguinte.
+    """
+    corpo = SKILL.joinpath("SKILL.md").read_text()
+    assert "## TL;DR" not in corpo, (
+        "TL;DR de volta: descreve a skill para quem já a carregou"
+    )

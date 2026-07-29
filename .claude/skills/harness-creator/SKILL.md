@@ -1,31 +1,23 @@
 ---
 name: harness-creator
 description: >
-  Gera um harness completo para agentes de codigo (AGENTS.md com protocolo
-  de sessao, config.yaml do OpenSpec, init.sh, SESSION_STATE.md, TASKS.md,
-  hooks de agent loop, pre-commit, comando /dod, verificador do harness)
-  adaptado ao repositorio atual, via descoberta de stack/comandos/convencoes
-  + templates de protocolo fixo. Use esta skill sempre que o usuario pedir
-  para configurar um harness, criar ou melhorar um AGENTS.md, preparar um
-  repositorio para agentes de IA, configurar OpenSpec com regras de
-  execucao, criar init.sh ou protocolo de sessao, ou mencionar harness
-  engineering, checkpoints por grupos de tasks, WIP=1 ou continuidade
-  entre sessoes - mesmo que nao use a palavra "harness".
+  Gera ou atualiza o harness de um repositorio para agentes de codigo.
+  Use esta skill sempre que o usuario pedir para configurar um harness,
+  criar ou melhorar um AGENTS.md, preparar um repositorio para agentes de
+  IA, criar init.sh ou protocolo de sessao, configurar OpenSpec com regras
+  de execucao, ou mencionar harness engineering, checkpoints por grupos de
+  tasks, WIP=1 ou continuidade entre sessoes - mesmo que nao use a palavra
+  "harness". Gera AGENTS.md com protocolo de sessao, SESSION_STATE.md,
+  TASKS.md, init.sh, hooks de agent loop, pre-commit, comando /dod, regras
+  arquiteturais executaveis e verificador do harness, adaptados a stack
+  descoberta no repositorio.
 license: MIT
 metadata:
   author: squad-harness
-  version: "2.4"
+  version: "2.5"
 ---
 
 # Harness Creator
-
-## TL;DR
-
-Gera o harness de um repositorio combinando **descoberta** (o que varia
-por repo: stack, comandos, convencoes) com **templates de protocolo fixo**
-(o que deve ser identico sempre: grupos/checkpoints, WIP=1, DoD, handoff).
-Resultado: duas camadas (instrucao + enforcement) gravadas no repo alvo,
-validadas e prontas para uso por agentes de IA.
 
 ## O fluxo — e o passo 0, que decide se ele se aplica
 
@@ -86,8 +78,7 @@ O harness tem duas camadas, ambas geradas por esta skill:
    skill `executar-grupo` (procedimento sob demanda), init.sh,
    SESSION_STATE.md, config.yaml, TASKS.md. O protocolo fica so na raiz;
    escopo e procedimento saem dela para nao pesar o contexto de todo
-   request. A ponte CLAUDE.md nao e redundancia: sem ela o protocolo nao
-   entra no contexto do Claude Code, que so carrega CLAUDE.md.
+   request.
 2. **Enforcement** — hooks de agent loop (gate destrutivo + auto-format),
    pre-commit portatil, comando /dod, workflow de CI, e o registro de regras
    arquiteturais (`.harness/arch-rules.json` + `.claude/check-arch.sh`) na
@@ -102,16 +93,6 @@ entre os arquivos que a declaram, e o gate hook executado de verdade para
 provar que devolve exit 2 num comando destrutivo e 0 num seguro. A skill
 cobra evidencia de comando do agente que usa o harness; ela mesma nao
 declara sucesso sem executar o que gerou.
-
-E o que a skill nao gera, ela **recomenda**. Nem toda lacuna se resolve
-com arquivo de harness: num repo sem test runner o agente nao tem como
-verificar o proprio trabalho, por mais AGENTS.md que exista. O mesmo vale
-para o que exige rede, como o lockfile — resolver dependencias fixa
-versoes para o time inteiro. Esses casos viram um Plano de Remediacao, com
-comando exato e impacto declarado, apresentado na FASE 4 para o usuario
-aceitar item a item, porque muda o contrato do projeto e a decisao e dele.
-Diagnosticar sem receita devolve ao usuario o trabalho que a skill existe
-para fazer. Ver [references/remediacoes.md](references/remediacoes.md).
 
 ## Regras invioláveis
 
