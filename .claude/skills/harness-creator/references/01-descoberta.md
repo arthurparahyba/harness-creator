@@ -87,9 +87,17 @@ genérica ("escreva testes") não é acionável.
 6. **Banco/migrations**: ferramenta, ORM, padrão de acesso a dados
 7. **Tipo de aplicação**: API, frontend, CLI, lib, monorepo → implicações
    para verificação
-8. **OpenSpec**: o diretório `openspec/` existe? Tem `config.yaml` ou
+8. **OpenSpec** ([Fission-AI/OpenSpec](https://github.com/Fission-AI/OpenSpec),
+   CLI `npx @fission-ai/openspec`): o diretório `openspec/` existe? Tem
+   `config.yaml` ou
    `project.md` (legado)? Se `project.md`: avisar que `openspec update`
    faz a migração; não gerar config.yaml por cima sem avisar.
+   - **O validador exige estrutura em inglês**, mesmo com o conteúdo em outro
+     idioma: `## Why` e `## What Changes` no proposal, e `MUST`/`SHALL` em
+     toda requirement. Verificado com o CLI 1.7.0 — `## Por que` e `DEVE`
+     reprovam. Se o repositório escreve specs em português, registre isso na
+     FASE 4: é a diferença entre um `openspec validate` verde e vermelho, e
+     não é óbvio para quem escreve.
 9. **Formatter da linguagem**: qual formatter rodar no `format-on-edit.sh`?
    A resposta por ecossistema está na coluna "Formatter" de
    [ecossistemas.md](ecossistemas.md) — **fonte única**, para o mesmo repo

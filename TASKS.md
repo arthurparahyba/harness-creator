@@ -703,3 +703,23 @@ de evidência segue sob ele mesmo tendo subido para o topo.
 Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py` —
 686 testes (+63: a fixture nova entra em todas as parametrizações de geração).
 `node-openspec` marca **+67**, igual ao `node`.
+
+## Grupo 39 - OpenSpec provado contra o CLI real ✅
+<!-- O Grupo 38 provou que a skill gera o arquivo; faltava provar que a
+     ferramenta o lê. Feito com o CLI 1.7.0
+     (`npx @fission-ai/openspec@latest`). -->
+- [x] 39.1 Prova de leitura: com o `config.yaml` corrompido de propósito, o
+      `openspec doctor` emite `could not parse .../openspec/config.yaml;
+      ignoring it`. Com o gerado, silêncio. A ferramenta lê o nosso arquivo
+- [x] 39.2 A change da fixture passou a ser válida (`validate --all` →
+      `1 passed, 0 failed`). Antes era inválida e seria uma armadilha: quem
+      rodasse o validador acharia que a skill produz artefato quebrado
+- [x] 39.3 Achado registrado na FASE 1: o validador exige **estrutura em
+      inglês** — `## Why`, `## What Changes`, `MUST`/`SHALL` — mesmo com o
+      conteúdo em português. `## Por que` e `DEVE` reprovam
+- [x] 39.4 A skill passou a IDENTIFICAR a ferramenta (link e comando do CLI)
+      na FASE 1 e no MUDANCAS-NO-REPOSITORIO: gerava config para uma
+      ferramenta que nunca nomeava
+Verificação: `pytest -q && ruff check . && mypy` — 686 testes; a validação
+com o CLI é documentada em `tests/fixtures/README.md` e não é teste do
+pytest porque depende de rede, mesma razão do `medir.py`.

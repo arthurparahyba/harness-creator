@@ -83,7 +83,9 @@ explorar nada.
 testes passando, o que ficou pendente, qual a próxima ação. É o que evita
 o agente recomeçar do zero quando o contexto é reiniciado.
 
-**`TASKS.md`** (ou `openspec/config.yaml`, se você usa OpenSpec). O plano
+**`TASKS.md`** (ou `openspec/config.yaml`, se você usa o
+[OpenSpec](https://github.com/Fission-AI/OpenSpec) — CLI
+`npx @fission-ai/openspec`). O plano
 de trabalho em grupos de 2 a 5 tarefas, cada grupo terminando com um
 comando que o valida. O grupo — não a tarefa — é a fronteira de
 verificação, de commit e de reinício de sessão.

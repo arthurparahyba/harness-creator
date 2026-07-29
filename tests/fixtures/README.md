@@ -26,6 +26,19 @@ que a exercita.
 |---|---|---|
 | `node/` | Node + TypeScript | `package.json` com `scripts.test` |
 | `node-openspec/` | Mesma árvore do `node`, com `openspec/` | `openspec/project.md` (forma legada) + change ativa |
+
+A change da `node-openspec` é válida perante o CLI real, e isso é verificável:
+
+```bash
+python3 -c "import sys;sys.path.insert(0,'tests');from gerar import gerar;from pathlib import Path;gerar('node-openspec',Path('/tmp/os-check'))"
+cd /tmp/os-check && npx -y @fission-ai/openspec@latest validate --all
+```
+
+Não é um teste do `pytest` porque depende de rede (`npx`) — mesma razão do
+`medir.py`. Rodado em 2026-07-29 contra o CLI 1.7.0: `1 passed, 0 failed`, e
+o `doctor` não emite aviso sobre o `config.yaml` gerado (com o arquivo
+corrompido de propósito, ele emite — é assim que se sabe que a ferramenta o
+lê de verdade).
 | `react/` | React + Vite | `react` em `dependencies`, `.tsx` |
 | `angular/` | Angular | `angular.json`, `.spec.ts`, `strictTemplates` |
 | `java-maven/` | Java com Maven | `pom.xml`, `checkstyle.xml`, spotless |
