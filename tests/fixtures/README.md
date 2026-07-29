@@ -61,16 +61,22 @@ Reproduza com `python tests/medir.py` (requer Node; grava
 [harness-score](https://paladini.io/harness-score/) para acompanhar a
 eficácia da geração — **a skill entregue não depende dele**.
 
-| Ecossistema | Antes | Depois |
-|---|---|---|
-| `node` | L0 · 36/108 | **L4 · 103/108** |
-| `react` | L0 · 36/108 | **L4 · 103/108** |
-| `angular` | L0 · 36/108 | **L4 · 103/108** |
-| `java-maven` | L0 · 36/108 | **L4 · 103/108** |
-| `go` | L0 · 36/108 | **L4 · 103/108** |
-| `monorepo` | L0 · 30/108 | L4 · 97/108 |
-| `java-gradle` | L0 · 27/108 | L2 · 94/108 |
-| `dotnet` | L0 · 22/108 | L2 · 86/108 |
+| Ecossistema | Antes | Depois | Depois (antes do Grupo 28) |
+|---|---|---|---|
+| `node` | L0 · 36/108 | **L4 · 98/108** | L4 · 103/108 |
+| `react` | L0 · 36/108 | **L4 · 98/108** | L4 · 103/108 |
+| `angular` | L0 · 36/108 | **L4 · 98/108** | L4 · 103/108 |
+| `java-maven` | L0 · 36/108 | **L4 · 98/108** | L4 · 103/108 |
+| `go` | L0 · 36/108 | **L4 · 98/108** | L4 · 103/108 |
+| `monorepo` | L0 · 30/108 | L4 · 92/108 | L4 · 97/108 |
+| `java-gradle` | L0 · 27/108 | L2 · 89/108 | L2 · 94/108 |
+| `dotnet` | L0 · 22/108 | L2 · 81/108 | L2 · 86/108 |
+
+A última coluna é o que a geração pontuava **antes de o Grupo 28 remover o
+subagente `code-reviewer`**. A queda de 5 pontos em toda linha é conhecida e
+esperada: `V6 — Regras arquiteturais` usava `.claude/agents/code-reviewer.md`
+como equivalência e, sem ele, passou de `eq` para `fail`. O harness gerado
+deixou de cobrir regra arquitetural — ver `eval/mapa-equivalencias.md`.
 
 Os 5 pontos que faltam em toda linha são `LICENSE` (escolha do usuário, a
 skill oferece mas não decide) e interpolação de env em config MCP
@@ -78,13 +84,13 @@ skill oferece mas não decide) e interpolação de env em config MCP
 
 O `monorepo` fica em 97 porque o script de teste na raiz é uma
 **recomendação**, não algo que a skill gere: `gerar.py` não a aplica.
-Aplicando-a, o repositório vai a 103 — os 6 pontos de `SNS-01` são
+Aplicando-a, o repositório vai a 98 — os 6 pontos de `SNS-01` são
 exatamente o que a recomendação vale.
 
 `java-gradle` e `dotnet` param em L2 por limitação do medidor, não do
 harness: o scanner exige `pom.xml` para reconhecer teste em Java e não
 reconhece `dotnet test`, `dotnet format` nem analyzers Roslyn. Repare que
-a pontuação bruta chega a 94 e 86, e que o ganho é o mesmo +67 e +64 das
+a pontuação bruta chega a 89 e 81, e que o ganho é o mesmo +62 das
 demais — o harness gerado é igualmente completo.
 
 ## Como adicionar um ecossistema

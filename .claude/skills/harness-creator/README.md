@@ -142,7 +142,6 @@ destinos e condições está em
 | **Mesmos hooks nos três agentes** | Um registro por agente (Claude Code, Devin CLI e Cursor) apontando para os mesmos scripts, que leem os dois formatos de entrada e não dependem de Python instalado | A proteção não fica valendo só no agente que o autor do harness usava; trocar de ferramenta não desliga o gate |
 | **Pre-commit portátil** | `.pre-commit-config.yaml` com lint/format/build da linguagem detectada | Sensores baratos rodam antes do commit existir — feedback mais cedo possível |
 | **Comando `/dod`** | `.claude/commands/dod.md` com o mesmo comando da DoD | Agente verifica conclusão com um comando, sem relembrar os passos |
-| **Subagente code-reviewer** | `.claude/agents/code-reviewer.md` com checklist SOLID/Clean Code/DDD | Review automatizado antes de commitar grupo |
 | **OpenSpec config** | `openspec/config.yaml` com regras de execução (se `openspec/` existir) | Spec-Driven Development com workflow integrado ao harness |
 | **Lockfile** | Geração do lockfile apropriado à linguagem detectada, se não existir | Instalações reproduzíveis — sensores testam a mesma árvore de deps em todo lugar |
 | **`.editorconfig`** (universal) | `editorconfig-base` com regras universais + mescla de regras específicas (ex: .NET analyzers) | Linter e formatter configurados via um arquivo, para qualquer linguagem |

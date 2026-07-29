@@ -19,9 +19,9 @@ ferramentas do walkinglabs.
 | Transição de estado por verificação (L08) | `scripts/verify-feature.sh` + `make verify-feature` | linha `Verificação:` do grupo + regra "saída de comando é evidência" | EQUIV mais fraco |
 | Comando único de verificação | `make check` | DoD encadeada em `AGENTS.md` + `/dod` + `init.sh` | EQUIV |
 | Enforcement | CI | hooks de agent loop + pre-commit + workflow de CI + `.devin/hooks.v1.json` | mais forte |
-| Regras arquiteturais (L10) | `.harness/arch-rules.json` + `scripts/check-arch.sh` | agente `code-reviewer` | EQUIV mais fraco |
+| Regras arquiteturais (L10) | `.harness/arch-rules.json` + `scripts/check-arch.sh` | **sem equivalente** | SEM COBERTURA |
 | Observabilidade (L11) | `scripts/session-trace.sh`, `.harness/traces/*.jsonl` | histórico em `SESSION_STATE.md` por checkpoint | EQUIV mais fraco |
-| Rubrica de avaliação (L11) | `templates/evaluator-rubric.md` | agente `code-reviewer` + `/dod` | EQUIV mais fraco |
+| Rubrica de avaliação (L11) | `templates/evaluator-rubric.md` | `/dod` | EQUIV mais fraco |
 | Estado limpo (L12) | `templates/clean-state-checklist.md` + `make clean-check` | regra "fronteira limpa" + "nunca commitar com verificação falhando" | EQUIV |
 | Parada limpa (L05/L12) | aviso de context anxiety | "PARE. Contexto pode ser reiniciado." | idêntico em efeito |
 
@@ -32,10 +32,13 @@ julgamento de outro agente**:
 
 - `verify-feature.sh` → linha `Verificação:` — o curso torna impossível marcar
   passing sem rodar o comando; a skill pede que o agente rode e não minta.
-- `arch-rules.json` → `code-reviewer` — regra determinística vs. revisão por LLM.
+- `arch-rules.json` → **nada** — desde a remoção do subagente `code-reviewer`
+  (Grupo 28) o harness gerado não cobre regra arquitetural de forma alguma.
+  V6 passou de `eq` para `fail` no scanner. É perda conhecida, não descuido.
 - `session-trace.jsonl` → `SESSION_STATE.md` — sinal estruturado por evento vs.
   resumo em prosa por checkpoint.
-- `evaluator-rubric.md` → agente revisor — critério fixo vs. critério implícito.
+- `evaluator-rubric.md` → `/dod` — critério fixo vs. os comandos da DoD, que
+  não avaliam qualidade, só passam ou falham.
 
 Nos quatro, o scorer dá o ponto (a capacidade existe) mas registra a
 divergência. Se o objetivo for atingir o nível 4 do curso de verdade, é

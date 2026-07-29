@@ -270,7 +270,7 @@ fi
 # ------------------------------------------------- marcadores nao preenchidos
 # Os nomes sao montados com os delimitadores em runtime: escritos por extenso,
 # a propria FASE 2 os substituiria dentro deste arquivo na hora de gerar.
-MARCADORES="branch-base caminho checks-do-repo como-propor-mudanca-de-plano
+MARCADORES="branch-base caminho como-propor-mudanca-de-plano
 data-iso dod-command ecossistema ferramentas-do-harness dod-steps file_glob
 formatter_bin formatter_command pre-commit-hooks runner setup-steps sln
 versao-da-skill"

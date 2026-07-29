@@ -39,7 +39,6 @@ cópia, o conteúdo continua vivendo num lugar só.
 | pre-commit-config.yaml | `.pre-commit-config.yaml` | se não existir **e houver comandos reais de lint/format/types** |
 | dod-command.md | `.claude/commands/dod.md` | sempre (se não existir) |
 | harness-manifest.json | `.claude/harness.json` | sempre (sobrescrever se já existir) |
-| agents/code-reviewer.md | `.claude/agents/code-reviewer.md` | sempre (se não existir `.claude/agents/`) |
 
 ### O manifesto (`.claude/harness.json`)
 
@@ -76,12 +75,12 @@ no topo do JSON e os outros dois em `tool_input` — os scripts leem os dois
 formatos. `failClosed` existe porque o padrão do Cursor para hook que falha
 é **prosseguir**: sem essa chave, um gate quebrado libera o comando.
 
-**Limite conhecido:** a skill não gera skills nem subagentes para o Devin
-CLI. A documentação dele descreve `.devin/` com hooks, skills e agents, mas
-não publica os paths de skills e agents; inventar um path geraria arquivo
-que nenhuma ferramenta lê. `executar-grupo` e `code-reviewer` valem hoje só
-para o Claude Code — a camada de instrução (`AGENTS.md`), essa sim, os três
-leem. Registrar isso na FASE 4 quando o usuário usar Devin.
+**Limite conhecido:** a skill não gera skills para o Devin CLI. A
+documentação dele descreve `.devin/` com hooks e skills, mas não publica o
+path de skills; inventar um path geraria arquivo que nenhuma ferramenta lê.
+`executar-grupo` vale hoje só para o Claude Code — a camada de instrução
+(`AGENTS.md`), essa sim, os três leem. Registrar isso na FASE 4 quando o
+usuário usar Devin.
 
 ## Camada de enforcement (condicional)
 

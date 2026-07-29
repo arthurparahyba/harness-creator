@@ -1,72 +1,72 @@
 {
   "angular": {
     "antes": "L0 36/108",
-    "depois": "L4 103/108",
-    "delta": 67
+    "depois": "L4 98/108",
+    "delta": 62
   },
   "dotnet": {
     "antes": "L0 22/108",
-    "depois": "L2 86/108",
-    "delta": 64
+    "depois": "L2 81/108",
+    "delta": 59
   },
   "go": {
     "antes": "L0 36/108",
-    "depois": "L4 103/108",
-    "delta": 67
+    "depois": "L4 98/108",
+    "delta": 62
   },
   "java-gradle": {
     "antes": "L0 27/108",
-    "depois": "L2 94/108",
-    "delta": 67
+    "depois": "L2 89/108",
+    "delta": 62
   },
   "java-maven": {
     "antes": "L0 36/108",
-    "depois": "L4 103/108",
-    "delta": 67
+    "depois": "L4 98/108",
+    "delta": 62
   },
   "monorepo": {
     "antes": "L0 30/108",
-    "depois": "L4 97/108",
-    "delta": 67
+    "depois": "L4 92/108",
+    "delta": 62
   },
   "monorepo-com-raiz": {
     "antes": "L0 36/108",
-    "depois": "L4 103/108",
-    "delta": 67
+    "depois": "L4 98/108",
+    "delta": 62
   },
   "node": {
     "antes": "L0 36/108",
-    "depois": "L4 103/108",
-    "delta": 67
+    "depois": "L4 98/108",
+    "delta": 62
   },
   "php": {
     "antes": "L0 18/108",
-    "depois": "L2 85/108",
-    "delta": 67
+    "depois": "L2 80/108",
+    "delta": 62
   },
   "python": {
     "antes": "L0 27/108",
-    "depois": "L4 94/108",
-    "delta": 67
+    "depois": "L4 89/108",
+    "delta": 62
   },
   "react": {
     "antes": "L0 36/108",
-    "depois": "L4 103/108",
-    "delta": 67
+    "depois": "L4 98/108",
+    "delta": 62
   },
   "ruby": {
     "antes": "L0 23/108",
-    "depois": "L2 90/108",
-    "delta": 67
+    "depois": "L2 85/108",
+    "delta": 62
   },
   "rust": {
     "antes": "L0 23/108",
-    "depois": "L2 90/108",
-    "delta": 67
+    "depois": "L2 85/108",
+    "delta": 62
   },
   "sem-sensores": {
     "antes": "L0 14/108",
-    "depois": "L2 66/108",
-    "delta": 52
+    "depois": "L2 61/108",
+    "delta": 47
   }
 }

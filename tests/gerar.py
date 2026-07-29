@@ -28,7 +28,6 @@ FIXTURES = Path(__file__).resolve().parent / "fixtures"
 PREENCHIVEIS = [
     "<branch-base>",
     "<caminho>",
-    "<checks-do-repo>",
     "<como-propor-mudanca-de-plano>",
     "<data-iso>",
     "<dod-command>",
@@ -288,8 +287,6 @@ def gerar(nome: str, destino: Path) -> Stack:
                 "<ferramentas-do-harness>": (
                     "- Para fechar um grupo do plano: skill `executar-grupo` (passo a passo).\n"
                     "- Para verificar a Definition of Done: comando `/dod`.\n"
-                    "- Antes de commitar um grupo: delegue a revisão ao subagente "
-                    "`code-reviewer`.\n"
                     "- Hooks de agent loop ativos: gate de comandos destrutivos e formatação\n"
                     "  automática a cada edição."
                 ),
@@ -335,19 +332,6 @@ def gerar(nome: str, destino: Path) -> Stack:
         destino,
         ".claude/commands/dod.md",
         _preenche("dod-command.md", {"<dod-command>": stack.dod}),
-    )
-    _grava(
-        destino,
-        ".claude/agents/code-reviewer.md",
-        _preenche(
-            "agents/code-reviewer.md",
-            {
-                "<checks-do-repo>": (
-                    f"5. **Camadas**: domain logic stays out of `{stack.dir_escopo}/infra`.\n"
-                    "6. **Testes**: novos testes ficam ao lado do código que exercitam."
-                )
-            },
-        ),
     )
     # Regra de honestidade da FASE 2: sem sensores, a DoD fica vazia e o
     # enforcement NÃO é gerado. Pre-commit sem hook e CI que passa sem rodar

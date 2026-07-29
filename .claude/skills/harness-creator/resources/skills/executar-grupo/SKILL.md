@@ -37,13 +37,11 @@ este arquivo é só a sequência de execução.
 5. **Verificar**: rode a linha `Verificação:` do grupo e depois a
    Definition of Done completa (comando `/dod`). Saída de comando é a
    evidência; "parece funcionar" não é.
-6. **Revisar**: delegue ao subagente `code-reviewer`. Trate CHANGES
-   REQUESTED antes de commitar.
-7. **Commitar**: um commit por grupo — `checkpoint: <nome do grupo>`.
+6. **Commitar**: um commit por grupo — `checkpoint: <nome do grupo>`.
    Nunca commite com verificação falhando.
-8. **Handoff**: atualize `SESSION_STATE.md` (hash do commit, testes X/Y,
+7. **Handoff**: atualize `SESSION_STATE.md` (hash do commit, testes X/Y,
    bloqueios, próxima ação).
-9. **PARAR**: informe "Grupo N concluído. Contexto pode ser reiniciado."
+8. **PARAR**: informe "Grupo N concluído. Contexto pode ser reiniciado."
    Não avance para o próximo grupo automaticamente.
 
 ## Falhas comuns

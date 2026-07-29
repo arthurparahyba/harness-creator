@@ -52,8 +52,6 @@ template onde houver sobreposição.
   como sugestão de regras adicionais e deixar o usuário decidir.
 - **`.gitignore` já existe**: nunca sobrescrever. Só fazer append das
   linhas `.env` se faltarem.
-- **`.claude/agents/` já existe**: não sobrescrever subagentes existentes.
-  Adicionar `code-reviewer.md` apenas se não houver nenhum subagente.
 - **`LICENSE` já existe**: não sobrescrever.
 - **`.claude/harness.json` já existe**: o repositório já recebeu um harness
   desta skill, e as regras acima não se aplicam sozinhas — a de não

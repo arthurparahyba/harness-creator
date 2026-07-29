@@ -7,10 +7,12 @@
   (Grupos 21 a 24). DoD verde depois do merge. **Nada publicado ainda**: a
   `main` local está à frente da `origin/main`.
 - Testes: 406/406 (`pytest -q`); ruff e mypy strict limpos; `mede.py --autoteste` OK.
-- Change/plano ativo: `TASKS.md` na raiz — **nenhuma task aberta**
-  (Grupos 21, 22, 23 e 24 concluídos).
-- Em andamento: nada — Grupo 24 commitado, fronteira limpa.
-- Não commitado: só o arquivo `-c` na raiz, lixo de execução manual antiga.
+- Change/plano ativo: `TASKS.md` na raiz — **Grupos 25 e 26 abertos**,
+  propostos e ainda não iniciados (Grupos 21 a 24 concluídos).
+- Em andamento: nada — Grupo 24 commitado, fronteira limpa. Os Grupos 25 e 26
+  são plano, nenhum arquivo da skill foi tocado.
+- Não commitado: `TASKS.md` (proposta dos Grupos 25/26) e este arquivo; mais
+  o `-c` na raiz, lixo de execução manual antiga.
 
 ## O que mudou nesta sessão (Grupos 21, 22, 23 e 24)
 Primeira execução do **nível C**, que existia só como protocolo em prosa
@@ -50,6 +52,22 @@ dentro de cada repo alvo.
   `mvn` falso no PATH que aceita qualquer argumento).
 - O nível C ficou em **n=1 por célula**; o protocolo pede 3. Subir para 3 é o
   próximo passo antes de tratar qualquer número como estável.
+- **O `code-reviewer` é órfão NESTE repo.** `.claude/agents/code-reviewer.md`
+  existe, mas o `AGENTS.md` da raiz não o cita — nenhuma regra manda revisar
+  antes de commitar um grupo. É o sintoma que a própria tabela de diagnóstico
+  da SKILL.md descreve (ponteiro ausente no arquivo que é lido sempre). No
+  harness GERADO ele funciona: a rodada do nível C tem o agente delegando por
+  conta própria em T1 e T2, e em T1 a revisão mudou o código. O defeito é só
+  do `AGENTS.md` deste repo, que foi escrito à mão. Junta-se às outras duas
+  incoerências dele (`git checkout develop` e `/opsx:propose`) — os três
+  cabem num grupo só de correção do harness próprio.
+- **Descoberta da FASE 1 como script bundled — decisão de design em aberto.**
+  O `skill-creator` oficial manda procurar trabalho que se repete a cada
+  invocação e empacotá-lo em `scripts/`; a FASE 1 refaz a investigação de
+  stack/comandos/lockfile à mão toda vez, e este repo já tem o código que faz
+  isso programaticamente (`tests/gerar.py`). Não virou task: trocar raciocínio
+  por script muda o que a skill é, e o ganho precisa ser medido (custo e
+  variância entre execuções) antes de valer um grupo.
 - Herdadas das sessões anteriores: subdisparo da skill (nível E) não se
   resolve reescrevendo a `description`; iteração 2 do nível D por fazer;
   Grupo 17 por escrever; o `AGENTS.md` deste repo ainda manda
