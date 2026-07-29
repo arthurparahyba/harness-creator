@@ -205,9 +205,16 @@ else
 fi
 
 # ------------------------------------------------------- ponte CLAUDE.md
+# Skill instalada no repositorio e conteudo DELA, nao harness gerado: os
+# templates em `resources/` tem marcador por construcao e o `AGENTS.md`
+# interno documenta a skill, sem ponte porque nao precisa de uma. Varrer isso
+# fazia uma geracao correta reprovar em 4 checagens, e o usuario lia
+# "defeito da geracao" e ia cacar um problema que nao existe. Instalar a
+# skill no repo e caminho legitimo — e como um time a compartilha via git.
 _sem_ponte=""
 _agents=0
-for agents in $(find . -name AGENTS.md -not -path './.git/*' -not -path '*/node_modules/*' 2>/dev/null); do
+for agents in $(find . -name AGENTS.md -not -path './.git/*' -not -path '*/node_modules/*' \
+                  -not -path './.claude/skills/*' 2>/dev/null); do
   _agents=$((_agents + 1))
   # Expansao de parametro em vez de `dirname`: menos um binario exigido.
   dir="${agents%/*}"
@@ -283,7 +290,8 @@ for m in $MARCADORES; do
   alvo="${ABRE}${m}${FECHA}"
   achados=$(grep -rl -- "$alvo" . \
             --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=__pycache__ \
-            2>/dev/null | grep -v 'verificar-harness.sh' | head -2)
+            2>/dev/null | grep -v 'verificar-harness.sh' \
+            | grep -v '^\./\.claude/skills/[^/]*/' | head -2)
   [ -n "$achados" ] && _sobrou="$_sobrou $m"
 done
 if [ -n "$_sobrou" ]; then
