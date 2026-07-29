@@ -33,13 +33,25 @@ def _repo(request: pytest.FixtureRequest, tmp_path: Path) -> tuple[Path, Stack, 
 
 
 def _roda_hook(
-    script: Path, entrada: str, extra_path: Path | None = None
+    script: Path,
+    entrada: str,
+    extra_path: Path | None = None,
+    cwd: Path | None = None,
+    extra_env: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess[str]:
     env = dict(os.environ)
     if extra_path is not None:
         env["PATH"] = f"{extra_path}{os.pathsep}{env['PATH']}"
+    if extra_env is not None:
+        env.update(extra_env)
     return subprocess.run(
-        ["bash", str(script)], input=entrada, capture_output=True, text=True, env=env, check=False
+        ["bash", str(script)],
+        input=entrada,
+        capture_output=True,
+        text=True,
+        env=env,
+        cwd=None if cwd is None else str(cwd),
+        check=False,
     )
 
 
@@ -204,39 +216,124 @@ def test_gate_gerado_libera_a_dod_da_stack(repo: tuple[Path, Stack, str]) -> Non
     assert r.returncode == 0, f"o gate bloqueou a própria DoD: {primeiro}"
 
 
-def test_formatter_alcanca_o_codigo_da_stack(repo: tuple[Path, Stack, str], tmp_path: Path) -> None:
-    destino, stack, nome = repo
-    fake = tmp_path / f"bin-{nome}"
-    fake.mkdir()
-    (fake / stack.formatter_bin).write_text('#!/bin/bash\nprintf "FORMATADO" >> "$1"\n')
-    (fake / stack.formatter_bin).chmod(0o755)
+# Stub que VALIDA o argv em vez de aceitar qualquer coisa.
+#
+# O stub anterior fazia `printf FORMATADO >> "$1"` — escrevia no primeiro
+# argumento, fosse ele qual fosse. Com o gerador preenchendo
+# `<formatter_command>` só com o binário, o hook gerado era `mvn "$ARQUIVO"`,
+# o stub recebia o caminho em `$1` e o teste passava. O hook real, que é
+# `mvn spotless:apply <arquivo>`, aborta com "Unknown lifecycle phase" — e
+# nenhum teste via isso, porque o stub aceitava tudo.
+#
+# Agora o stub procura o caminho ENTRE os argumentos, nas formas que as
+# ferramentas de verdade usam (posicional, `-DspotlessFiles=`,
+# `-PspotlessIdeHook=`, `--include`). Se o comando gerado não passar o
+# arquivo de um jeito que a ferramenta entenderia, nada é formatado e o
+# teste reprova — que é o comportamento que faltava.
+_STUB_VALIDADOR = r"""#!/bin/bash
+# Grava o argv recebido, um por linha, com o prefixo de flag removido
+# (`-DspotlessFiles=/x` vira `/x`). O teste confere se o caminho ALVO está
+# nessa lista — não basta a ferramenta ter sido chamada com algum arquivo:
+# `dotnet format Catalogo.sln --include <alvo>` passa dois caminhos, e a
+# versão anterior deste stub aceitava o primeiro que existisse no disco.
+for arg in "$@"; do
+  printf '%s\n' "${arg#*=}" >> "$STUB_LOG"
+done
+exit 0
+"""
 
-    alvo = destino / stack.formatavel
-    original = alvo.read_text()
+
+def _stub(diretorio: Path, binario: str, repo_root: Path) -> Path:
+    """Instala o stub onde o hook realmente vai procurá-lo.
+
+    Wrapper de build (`./gradlew`) não é resolvido pelo PATH: mora na raiz do
+    repositório. Escrever o stub no PATH e esperar que `command -v ./gradlew`
+    o encontrasse era o que mascarava o caso Gradle.
+    """
+    diretorio.mkdir(parents=True, exist_ok=True)
+    alvo = (repo_root / binario[2:]) if binario.startswith("./") else (diretorio / binario)
+    alvo.parent.mkdir(parents=True, exist_ok=True)
+    alvo.write_text(_STUB_VALIDADOR)
+    alvo.chmod(0o755)
+    return diretorio
+
+
+def _argv_recebido(destino: Path, stack: Stack, alvo: Path, fake: Path, log: Path) -> list[str]:
+    env_log = {"STUB_LOG": str(log)}
     _roda_hook(
         destino / ".claude/hooks/format-on-edit.sh",
         entrada_do_hook("Edit", str(alvo)),
         extra_path=fake,
+        cwd=destino,
+        extra_env=env_log,
     )
-    assert "FORMATADO" in alvo.read_text(), (
-        f"o hook não alcançou {stack.formatavel} com o glob {stack.file_glob!r}"
+    return log.read_text().splitlines() if log.exists() else []
+
+
+def test_formatter_alcanca_o_codigo_da_stack(repo: tuple[Path, Stack, str], tmp_path: Path) -> None:
+    destino, stack, nome = repo
+    fake = _stub(tmp_path / f"bin-{nome}", stack.formatter_bin, destino)
+    alvo = destino / stack.formatavel
+
+    argv = _argv_recebido(destino, stack, alvo, fake, tmp_path / f"log-{nome}")
+
+    assert str(alvo) in argv, (
+        f"o caminho de {stack.formatavel} não chegou ao formatter. "
+        f"glob {stack.file_glob!r}, comando {stack.formatter_command!r}, "
+        f"argv recebido: {argv}"
     )
-    assert alvo.read_text() != original
 
 
 def test_formatter_ignora_o_que_nao_e_codigo(repo: tuple[Path, Stack, str], tmp_path: Path) -> None:
     destino, stack, nome = repo
-    fake = tmp_path / f"bin-neg-{nome}"
-    fake.mkdir()
-    (fake / stack.formatter_bin).write_text('#!/bin/bash\nprintf "FORMATADO" >> "$1"\n')
-    (fake / stack.formatter_bin).chmod(0o755)
-
+    fake = _stub(tmp_path / f"bin-neg-{nome}", stack.formatter_bin, destino)
     alvo = destino / stack.nao_formatavel
-    _roda_hook(
-        destino / ".claude/hooks/format-on-edit.sh",
-        entrada_do_hook("Edit", str(alvo)),
-        extra_path=fake,
+
+    argv = _argv_recebido(destino, stack, alvo, fake, tmp_path / f"log-neg-{nome}")
+
+    assert str(alvo) not in argv, (
+        f"o hook mandou {stack.nao_formatavel} para o formatter, e ele não é "
+        f"código da stack. argv: {argv}"
     )
-    assert "FORMATADO" not in alvo.read_text(), (
-        f"o hook formatou {stack.nao_formatavel}, que não é código da stack"
+
+
+def test_formatter_command_nao_e_so_o_binario(repo: tuple[Path, Stack, str]) -> None:
+    """O comando tem de ser o de `ecossistemas.md`, não o binário sozinho.
+
+    Este é o sensor da cegueira que deixou o defeito de Java passar: enquanto
+    `gerar.py` preenchia `<formatter_command>` com `formatter_bin`, o hook
+    gerado nos testes era `mvn <arquivo>` — que nem existe como comando — e
+    o hook real, `mvn spotless:apply <arquivo>`, nunca era exercitado.
+    """
+    _, stack, nome = repo
+    assert stack.formatter_command.strip() != stack.formatter_bin, (
+        f"{nome}: <formatter_command> reduzido ao binário {stack.formatter_bin!r}. "
+        "O gerador tem de reproduzir o comando real da tabela de ecossistemas."
+    )
+
+
+def test_formatter_command_passa_o_arquivo(repo: tuple[Path, Stack, str]) -> None:
+    """Todo comando de formatação precisa referenciar o arquivo editado.
+
+    Sem isso o hook formata o projeto inteiro a cada edit, ou nada — foi o
+    caso do Maven, que lia o caminho posicional como fase de ciclo de vida e
+    abortava, com o erro engolido pelo `2>/dev/null || true`.
+    """
+    _, stack, nome = repo
+    assert '"$FILE_PATH"' in stack.formatter_command, (
+        f"{nome}: {stack.formatter_command!r} não passa o arquivo editado."
+    )
+
+
+def test_hook_gerado_nao_anexa_o_caminho_no_fim(repo: tuple[Path, Stack, str]) -> None:
+    """O template não pode voltar a anexar `"$FILE_PATH"` depois do comando.
+
+    Anexar quebra todo formatter que precisa do caminho numa flag
+    (`-DspotlessFiles=`, `-PspotlessIdeHook=`), que é justamente o caso dos
+    dois ecossistemas Java.
+    """
+    destino, stack, nome = repo
+    corpo = (destino / ".claude/hooks/format-on-edit.sh").read_text()
+    assert f'{stack.formatter_command} "$FILE_PATH"' not in corpo, (
+        f"{nome}: o hook anexa o caminho depois do comando, que já o contém."
     )

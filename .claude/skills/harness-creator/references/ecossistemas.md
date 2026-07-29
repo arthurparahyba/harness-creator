@@ -15,17 +15,26 @@ não o que está escrito aqui.
 
 | Ecossistema | Detectar por | Teste | Lint | Types | Formatter | `<file_glob>` |
 |---|---|---|---|---|---|---|
-| **Node / TS** | `package.json` sem `angular.json` nem framework de UI | `npm test` | `eslint .` | `tsc --noEmit` | `prettier --write` | `*.js\|*.ts\|*.mjs\|*.cjs` |
-| **React** | `react` em `dependencies` | `vitest run` / `jest` | `eslint .` | `tsc --noEmit` | `prettier --write` | `*.js\|*.jsx\|*.ts\|*.tsx` |
-| **Angular** | `angular.json` | `ng test --watch=false` | `ng lint` | `tsc --noEmit` (ver `strictTemplates`) | `prettier --write` | `*.ts\|*.html\|*.scss` |
-| **Java / Maven** | `pom.xml` | `mvn test` | `mvn checkstyle:check` | compilador | `mvn spotless:apply` | `*.java` |
-| **Java / Gradle** | `build.gradle(.kts)` | `./gradlew test` | `./gradlew checkstyleMain` | compilador | `./gradlew spotlessApply` | `*.java\|*.kt` |
-| **.NET / C#** | `.sln` ou `.csproj` | `dotnet test <sln>` | analyzers via `.editorconfig` | compilador | `dotnet format <sln>` | `*.cs` |
-| **Go** | `go.mod` | `go test ./...` | `golangci-lint run` | compilador | `gofmt -w` | `*.go` |
-| **Python** | `pyproject.toml`, `setup.py` | `pytest` | `ruff check .` | `mypy` | `ruff format` | `*.py` |
-| **Rust** | `Cargo.toml` | `cargo test` | `cargo clippy` | compilador | `rustfmt` | `*.rs` |
-| **Ruby** | `Gemfile` | `rspec` | `rubocop` | — | `rubocop -A` | `*.rb` |
-| **PHP** | `composer.json` | `phpunit` | `phpcs` | `phpstan` | `php-cs-fixer fix` | `*.php` |
+| **Node / TS** | `package.json` sem `angular.json` nem framework de UI | `npm test` | `eslint .` | `tsc --noEmit` | `npx prettier --write "$FILE_PATH"` | `*.js\|*.ts\|*.mjs\|*.cjs` |
+| **React** | `react` em `dependencies` | `vitest run` / `jest` | `eslint .` | `tsc --noEmit` | `npx prettier --write "$FILE_PATH"` | `*.js\|*.jsx\|*.ts\|*.tsx` |
+| **Angular** | `angular.json` | `ng test --watch=false` | `ng lint` | `tsc --noEmit` (ver `strictTemplates`) | `npx prettier --write "$FILE_PATH"` | `*.ts\|*.html\|*.scss` |
+| **Java / Maven** | `pom.xml` | `mvn test` | `mvn checkstyle:check` | compilador | `mvn -q spotless:apply -DspotlessFiles="$FILE_PATH"` | `*.java` |
+| **Java / Gradle** | `build.gradle(.kts)` | `./gradlew test` | `./gradlew checkstyleMain` | compilador | `./gradlew -q spotlessApply -PspotlessIdeHook="$FILE_PATH"` | `*.java\|*.kt` |
+| **.NET / C#** | `.sln` ou `.csproj` | `dotnet test <sln>` | analyzers via `.editorconfig` | compilador | `dotnet format <sln> --include "$FILE_PATH"` | `*.cs` |
+| **Go** | `go.mod` | `go test ./...` | `golangci-lint run` | compilador | `gofmt -w "$FILE_PATH"` | `*.go` |
+| **Python** | `pyproject.toml`, `setup.py` | `pytest` | `ruff check .` | `mypy` | `ruff format "$FILE_PATH"` | `*.py` |
+| **Rust** | `Cargo.toml` | `cargo test` | `cargo clippy` | compilador | `rustfmt "$FILE_PATH"` | `*.rs` |
+| **Ruby** | `Gemfile` | `rspec` | `rubocop` | — | `rubocop -A "$FILE_PATH"` | `*.rb` |
+| **PHP** | `composer.json` | `phpunit` | `phpcs` | `phpstan` | `php-cs-fixer fix "$FILE_PATH"` | `*.php` |
+
+A coluna **Formatter** é o valor de `<formatter_command>` e já inclui
+`"$FILE_PATH"` na posição que a ferramenta exige — o template do hook **não**
+o anexa no fim. Formatter que roda como plugin de build (`spotless`) não
+aceita caminho posicional: `mvn spotless:apply <arquivo>` faz o Maven ler o
+caminho como fase de ciclo de vida e abortar com `Unknown lifecycle phase`,
+e o `2>/dev/null || true` do hook engole o erro. O hook fica inerte e nada
+acusa. Por isso Maven usa `-DspotlessFiles=` e Gradle usa
+`-PspotlessIdeHook=`, que são as formas documentadas de escopar por arquivo.
 
 `<file_glob>` vira padrão de `case`, que **não faz brace expansion**:
 `*.{js,ts}` não casa com nada e o hook para de formatar em silêncio.

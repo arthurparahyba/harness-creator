@@ -18,14 +18,18 @@
 # o item 6 da FASE 5 acusar marcador sobrevivente numa geracao correta.
 # Instrucoes de preenchimento: references/02-preenchimento-templates.md.
 #
-# Comando de formatacao por linguagem:
-#   Python:  ruff format          (ver references/ecossistemas.md)
-#   JS/TS:   prettier --write
-#   Go:      gofmt -w
-#   Rust:    rustfmt
-#   Ruby:    rubocop -A
-#   .NET:    dotnet format SOLUCAO.sln --include
-#   Java:    google-java-format -i
+# Comando de formatacao por linguagem: FONTE UNICA em
+# references/ecossistemas.md, coluna "Formatter". Nao duplicar a lista aqui —
+# quando existiam duas, elas divergiram (o cabecalho dizia
+# `google-java-format -i` e a tabela dizia `mvn spotless:apply`) e a versao
+# errada foi a que acabou gerada.
+#
+# ATENCAO: o comando ja inclui o caminho do arquivo na posicao que a
+# ferramenta exige — o template NAO o anexa no fim. Formatter que roda como
+# plugin de build nao aceita caminho posicional: o Maven le
+# `mvn spotless:apply <arquivo>` como fase de ciclo de vida e aborta com
+# "Unknown lifecycle phase", e o `2>/dev/null || true` engole o erro, deixando
+# o hook inerte sem que nada acuse.
 #
 # Padrao de arquivos por linguagem. ATENCAO: isto vira um padrao de `case`,
 # que NAO faz brace expansion — `*.{js,ts}` nunca casa com nada e o hook
@@ -127,7 +131,7 @@ fi
 case "$FILE_PATH" in
   <file_glob>)
     if command -v <formatter_bin> >/dev/null 2>&1 && [ -f "$FILE_PATH" ]; then
-      <formatter_command> "$FILE_PATH" 2>/dev/null || true
+      <formatter_command> 2>/dev/null || true
     fi
     ;;
 esac
