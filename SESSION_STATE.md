@@ -3,14 +3,30 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `f0566bb` na `main` — merge da `feature/bateria-nivel-c`
-  (Grupos 21 a 24). DoD verde depois do merge. **Nada publicado ainda**: a
-  `main` local está à frente da `origin/main`.
-- Testes: 406/406 (`pytest -q`); ruff e mypy strict limpos; `mede.py --autoteste` OK.
-- Change/plano ativo: `TASKS.md` na raiz — **nenhuma task aberta**
-  (Grupos 21, 22, 23 e 24 concluídos).
-- Em andamento: nada — Grupo 24 commitado, fronteira limpa.
-- Não commitado: só o arquivo `-c` na raiz, lixo de execução manual antiga.
+- Commit verificado: Grupos 28 e 30, entregues na `main` e publicados.
+- Testes: 404/404 (`pytest -q`); ruff e mypy strict limpos; `harness-score`
+  em L4 (100/108, era 105 antes do Grupo 30). Caiu de 406 testes porque os
+  dois sensores do marcador `<checks-do-repo>` saíram com ele.
+- Change/plano ativo: `TASKS.md` na raiz — **Grupos 25, 26, 27 e 29 abertos**,
+  propostos e não iniciados. Grupos 28 e 30 concluídos.
+- Em andamento: nada — fronteira limpa.
+- Não commitado: só o `-c` na raiz, lixo de execução manual antiga.
+
+## O que mudou nesta sessão (Grupo 28)
+A skill deixou de gerar o subagente `code-reviewer`, a pedido do usuário. A
+ressalva foi apresentada antes e mantida: na rodada do nível C o agente
+delegava por conta própria (T1 e T2), e em T1 a revisão mudou o código.
+
+O custo está medido e registrado, não maquiado: `V6 — Regras arquiteturais`
+usava `.claude/agents/code-reviewer.md` como equivalência e passou de `eq` para
+`fail`. O score da geração caiu de +64~+67 para **+62** em todos os
+ecossistemas. `tests/fixtures/README.md` mostra as duas colunas lado a lado e
+`eval/mapa-equivalencias.md` registra regra arquitetural como SEM COBERTURA. O
+scanner **não** foi remendado para preservar a nota.
+
+Efeito colateral que os sensores pegaram: o marcador `<checks-do-repo>` ficou
+documentado sem template que o preenchesse, e os dois testes de marcador
+reprovaram. Removido junto.
 
 ## O que mudou nesta sessão (Grupos 21, 22, 23 e 24)
 Primeira execução do **nível C**, que existia só como protocolo em prosa
@@ -50,6 +66,22 @@ dentro de cada repo alvo.
   `mvn` falso no PATH que aceita qualquer argumento).
 - O nível C ficou em **n=1 por célula**; o protocolo pede 3. Subir para 3 é o
   próximo passo antes de tratar qualquer número como estável.
+- **O `AGENTS.md` deste repo está desatualizado em dois pontos, e a causa é
+  uma só: ele foi escrito à mão e nunca regenerado.** Manda
+  `git checkout develop` (a skill corrigiu isso no Grupo 7.1 com
+  `<branch-base>` descoberto por git) e cita `/opsx:propose` sem haver
+  `openspec/` (corrigido no 7.2 com `<como-propor-mudanca-de-plano>`). O
+  terceiro item, o `code-reviewer` órfão, saiu no Grupo 30. A correção mais
+  barata talvez não seja editar à mão de novo, e sim rodar a própria skill
+  neste repositório — que é também o teste real do catálogo `atualizacao.md`,
+  hoje exercitado só por fixture.
+- **Descoberta da FASE 1 como script bundled — decisão de design em aberto.**
+  O `skill-creator` oficial manda procurar trabalho que se repete a cada
+  invocação e empacotá-lo em `scripts/`; a FASE 1 refaz a investigação de
+  stack/comandos/lockfile à mão toda vez, e este repo já tem o código que faz
+  isso programaticamente (`tests/gerar.py`). Não virou task: trocar raciocínio
+  por script muda o que a skill é, e o ganho precisa ser medido (custo e
+  variância entre execuções) antes de valer um grupo.
 - Herdadas das sessões anteriores: subdisparo da skill (nível E) não se
   resolve reescrevendo a `description`; iteração 2 do nível D por fazer;
   Grupo 17 por escrever; o `AGENTS.md` deste repo ainda manda

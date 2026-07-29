@@ -128,17 +128,15 @@ genérica ("escreva testes") não é acionável.
 15. **LICENSE e README**: existem `LICENSE` e `README.md` na raiz? O
     README é o primeiro documento de orientação que um agente lê; se não
     existir, registrar como pendência e oferecer na FASE 4.
-16. **Subagentes**: `.claude/agents/`, `.cursor/agents/` — já tem
-    subagentes definidos? Se não, gerar `code-reviewer.md` do template.
-17. **Skills**: `.claude/skills/*/SKILL.md`, `.cursor/skills/`,
+16. **Skills**: `.claude/skills/*/SKILL.md`, `.cursor/skills/`,
     `.agents/skills/` — o repo já empacota algum procedimento como skill?
     Se não, gerar `executar-grupo` do template.
-18. **Contexto com escopo**: existe `AGENTS.md`/`CLAUDE.md` aninhado em
+17. **Contexto com escopo**: existe `AGENTS.md`/`CLAUDE.md` aninhado em
     subdiretório, ou arquivo de rule com escopo (`.cursor/rules/*.mdc`,
     `.windsurf/rules/`, `.clinerules/`, `.github/instructions/`)? Sem
     nenhum deles, todo o conhecimento vive na raiz e é carregado em todo
     request. Se não houver, gerar o AGENTS.md com escopo na FASE 2.
-19. **Branch base do fluxo**: de qual branch as features saem? Fonte, nesta
+18. **Branch base do fluxo**: de qual branch as features saem? Fonte, nesta
     ordem: `git symbolic-ref refs/remotes/origin/HEAD` (o default do
     remoto), `git branch -r` (existe `origin/develop`?), a documentação de
     contribuição, e por último `git branch --show-current`. Nunca assumir
@@ -147,7 +145,7 @@ genérica ("escreva testes") não é acionável.
     com o nome errado isso falha na primeira execução, antes de o agente
     escrever uma linha. Repo sem git: registrar NÃO ENCONTRADO e tratar na
     FASE 4 como pendência do usuário.
-20. **Ponte para o Claude Code**: existe `CLAUDE.md` (raiz ou junto de cada
+19. **Ponte para o Claude Code**: existe `CLAUDE.md` (raiz ou junto de cada
     AGENTS.md com escopo)? Se existir, ele importa (`@AGENTS.md`), é
     symlink, ou já contém o protocolo? O Claude Code carrega `CLAUDE.md` e
     **não** carrega `AGENTS.md`; sem a ponte, o harness existe no disco e

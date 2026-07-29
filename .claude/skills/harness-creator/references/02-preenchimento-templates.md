@@ -109,7 +109,6 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
   ```
   - Para fechar um grupo do plano: skill `executar-grupo` (passo a passo).
   - Para verificar a Definition of Done: comando `/dod`.
-  - Antes de commitar um grupo: delegue a revisão ao subagente `code-reviewer`.
   - Hooks de agent loop ativos: gate de comandos destrutivos e formatação
     automática a cada edição.
   ```
@@ -247,19 +246,6 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
   !.env.example
   ```
   NUNCA sobrescrever o `.gitignore` existente — sempre append.
-- Subagente: se não existir `.claude/agents/`, gerar
-  `resources/agents/code-reviewer.md` em `.claude/agents/code-reviewer.md`.
-  - `<checks-do-repo>`: 2 a 4 checks derivados das convenções REAIS da
-    Fase 1 — a camada onde vive a lógica de domínio, o padrão de acesso a
-    dados, onde ficam os testes, a regra de nomenclatura que o linter não
-    cobre. Mesma regra dos `MUST NOT`: sem evidência no repositório, não
-    entra.
-  - O template já traz os checks universais (escopo do diff, cobertura,
-    credencial, código morto). Não repeti-los aqui.
-  - Cobrar "SOLID" e "funções < 20 linhas" em todo repositório era a skill
-    violando a própria regra de não inventar restrição genérica: em Go
-    idiomático ou num script, metade do checklist vira ruído — e review
-    ruidoso é review que o time ignora.
 - **Manifesto** (`resources/harness-manifest.json` → `.claude/harness.json`):
   preencher `<versao-da-skill>` com a `metadata.version` do `SKILL.md`,
   `<data-iso>` com a data da geração, `<ecossistema>` com a linha detectada

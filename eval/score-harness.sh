@@ -341,7 +341,7 @@ check V5 "$S" crit "Enforcement executavel (a DoD roda sozinha, nao depende de b
   "Instalar ao menos um sensor que bloqueia: hook de agent loop, pre-commit ou workflow de CI rodando a DoD."
 
 _arch="$(first_of .harness/arch-rules.json scripts/check-arch.sh docs/architecture.md ARCHITECTURE.md)"
-_arch_eq="$(first_of .claude/agents/code-reviewer.md .claude/agents)"
+_arch_eq="$(first_of .claude/agents)"
 check V6 "$S" rec "Regras arquiteturais verificaveis / achado de review vira regra" \
   "$( [[ -n "$_arch" ]] && echo pass || { [[ -n "$_arch_eq" ]] && echo eq || echo fail; } )" \
   "${_arch:-$_arch_eq}" \
@@ -370,7 +370,7 @@ check X3 "$S" rec "Observabilidade: sinal de execucao gravado a cada sessao" \
   "Gravar sinal por sessao (JSONL em .harness/traces/ ou historico no arquivo de estado) para o problema ficar visivel."
 
 _qual="$(first_of docs/quality-document.md templates/evaluator-rubric.md)"
-_qual_eq="$(first_of .claude/agents/code-reviewer.md .claude/commands/dod.md)"
+_qual_eq="$(first_of .claude/commands/dod.md)"
 check X4 "$S" rec "Rubrica de qualidade / revisao estruturada por sessao" \
   "$( [[ -n "$_qual" ]] && echo pass || { [[ -n "$_qual_eq" ]] && echo eq || echo fail; } )" \
   "${_qual:-$_qual_eq}" \

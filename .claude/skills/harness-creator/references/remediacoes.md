@@ -29,7 +29,7 @@ skill faz; o segundo ela propõe.
 ## Grupo A — gerado pela skill (não precisa recomendar)
 
 AGENTS.md na raiz e com escopo, skill `executar-grupo`, comando `/dod`,
-subagente `code-reviewer`, hooks de agent loop com `settings.json`,
+hooks de agent loop com `settings.json`,
 `init.sh`, `SESSION_STATE.md`, fonte de trabalho, `.editorconfig`,
 `.gitignore`, README mínimo e conversão de credencial de MCP
 para `${VAR}`.

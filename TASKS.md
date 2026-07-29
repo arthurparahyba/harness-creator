@@ -331,3 +331,133 @@ Verificação: `pytest -q && ruff check . && mypy && python3 eval/nivel-c/mede.p
       aparece num e não no outro é divergência, e divergência entre a vitrine
       e a evidência é pior do que não ter vitrine
 Verificação: `pytest -q && ruff check . && mypy`
+
+## Grupo 25 - Ordem da description e custo permanente do corpo
+<!-- Achado nº1 da auditoria contra as best practices oficiais. A doc do
+     Claude Code manda pôr o caso de uso principal PRIMEIRO, porque o listing
+     trunca pelo fim. A description gasta 323 dos seus 694 chars (47%) antes
+     do primeiro gatilho, e 148 deles são a enumeração de artefatos entre
+     parênteses — que não dispara nada: ninguém pede "me gera um
+     SESSION_STATE.md". Sob qualquer truncamento, o que se perde primeiro é
+     exatamente a lista de gatilhos. Isso é candidato a causa do subdisparo
+     do nível E, junto com a hipótese do orçamento (Grupo 26). -->
+- [ ] 25.1 Reordenar a `description`: o que faz + gatilhos primeiro, a
+      enumeração de artefatos por último, onde o corte a atinge antes de
+      atingir o que faz a skill disparar
+- [ ] 25.2 Mover os gatilhos para `when_to_use`, o campo que o Claude Code
+      dedica a isso — torna a ordem irrelevante em vez de só melhor
+- [ ] 25.3 Cortar as duas duplicações que sobreviveram ao Grupo 18: a ponte
+      `CLAUDE.md` (linhas 89-90 vs Regra 9) e o Plano de Remediação (102-110
+      vs Regra 6). A regra numerada é a forma acionável; a prosa paga custo
+      em todo request e não instrui nada a mais. A terceira cópia da ponte,
+      na tabela de diagnóstico, FICA — é outro caso de uso
+- [ ] 25.4 Remover o TL;DR (22-28): quando ele entra em contexto a decisão de
+      usar a skill já foi tomada, e ele não muda nenhuma ação seguinte
+- [ ] 25.5 Rodar a bateria de triggering antes e depois; sem o número, 25.1 e
+      25.2 são preferência estética
+Verificação: `pytest -q && ruff check . && mypy` + triggering antes/depois
+
+## Grupo 26 - Testar o orçamento do listing como causa do subdisparo
+<!-- O nível E mediu subdisparo e as sessões anteriores concluíram que
+     reescrever a description não resolve. A doc do Claude Code aponta uma
+     causa que não é o texto: o listing de skills tem orçamento de 1% da
+     janela de contexto e, ao estourar, corta descriptions começando pelas
+     skills MENOS invocadas — o perfil exato desta. Os 694 chars não batem no
+     cap de 1536 por entrada, mas podem ser cortados pelo orçamento global.
+     Se for isso, nenhuma reescrita de description jamais resolveria. -->
+- [ ] 26.1 Medir o listing real com `/doctor` e `claude --debug`, registrando
+      se há aviso de overflow e se a description da skill chega inteira
+- [ ] 26.2 Rerodar a bateria de triggering (`evals/triggering.json`) com
+      `skillListingBudgetFraction` elevado, contra a mesma baseline
+- [ ] 26.3 Registrar o resultado em `eval/` — inclusive se for negativo, que
+      elimina a hipótese e é o que impede a próxima sessão de repeti-la
+Verificação: `pytest -q && ruff check . && mypy` + tabela de triggering antes/depois
+
+## Grupo 27 - Itens mecânicos de conformidade (depende: Grupo 25)
+<!-- Separados do 25 de propósito: são reais e baratos, mas nenhum deles muda
+     a eficácia da skill. O que tem efeito é o índice — a doc manda pôr em
+     arquivo de referência com mais de 100 linhas porque, em leitura parcial,
+     o agente perde o resto sem saber que perdeu, e
+     `02-preenchimento-templates.md` tem 285 linhas. -->
+- [ ] 27.1 Índice no topo dos 7 arquivos com mais de 100 linhas
+      (`references/`: 01, 02, 05, `atualizacao.md`, `remediacoes.md`,
+      `arquivos-gerados.md`; e `MUDANCAS-NO-REPOSITORIO.md`)
+- [ ] 27.2 Teste que reprova `.md` da skill com mais de 100 linhas sem índice:
+      a regra só vale se um sensor a cobrar, senão o próximo nasce sem
+- [ ] 27.3 `compatibility` no frontmatter (três agentes-alvo, git, shell
+      POSIX) e `invioláveis` → `inviolaveis` na linha 112, único acento de
+      uma SKILL.md que no resto não usa nenhum
+- [ ] 27.4 `allowed-tools` cobrindo o que a FASE 5 executa
+      (`verificar-harness.sh` e o gate hook): hoje a skill promete rodar
+      "sem perguntar nada" e para num prompt de permissão que ela mesma causou
+Verificação: `pytest -q && ruff check . && mypy`
+
+## Grupo 28 - Remover o subagente code-reviewer do produto ✅
+<!-- Decisão do usuário: a skill deixa de gerar o subagente. A ressalva foi
+     apresentada e mantida — na rodada do nível C o agente delegou por conta
+     própria em T1 e T2, e em T1 a revisão mudou o código (o teste passou a
+     afirmar o código da mensagem, não só o campo). O custo medido é
+     conhecido e não deve ser escondido: `V6 — Regras arquiteturais` usa
+     `first_of .claude/agents/code-reviewer.md .claude/agents` como
+     equivalência e, sem nenhum dos dois, cai de `eq` para `fail`. `X4` tem
+     fallback para `dod.md` e sobrevive. A remoção é do produto: o órfão em
+     `.claude/agents/` DESTE repo fica onde está, é outro escopo. -->
+- [x] 28.1 Apagar `resources/agents/code-reviewer.md` e a escrita
+      correspondente em `tests/gerar.py`, inclusive a linha do subagente em
+      `<ferramentas-do-harness>`
+- [x] 28.2 Tirar os ponteiros da corrente: passo 6 do `executar-grupo`
+      (renumerando 7-9), o bloco `<ferramentas-do-harness>` e a seção
+      "Subagente" da FASE 2, o item 16 da FASE 1 e a regra de conflito da
+      FASE 3
+- [x] 28.3 Atualizar os catálogos e a documentação de vitrine:
+      `arquivos-gerados.md` (linha da tabela e o limite conhecido do Devin),
+      `remediacoes.md` (grupo A), `README.md` e `MUDANCAS-NO-REPOSITORIO.md`
+- [x] 28.4 `eval/score-harness.sh` e `eval/mapa-equivalencias.md`: V6 perde a
+      equivalência e passa a `fail`. Registrar a queda como resultado, não
+      remendar o scanner para preservar o número — scanner que se ajusta para
+      manter a nota deixa de medir
+- [x] 28.5 Rodar `python3 tests/medir.py` e gravar o score novo em
+      `tests/fixtures/README.md`, ao lado do anterior
+Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py` —
+404 testes (-2: os do marcador `<checks-do-repo>`); score de +64~+67 para +62,
+queda de 5 pontos do V6, registrada em `tests/fixtures/README.md`
+
+## Grupo 29 - Descobrir o fluxo de branches, não só a branch base
+<!-- Pedido do usuário. A FASE 1 já descobre `<branch-base>` por git CLI
+     (item 18, Grupo 7.1), mas para aí: o template segue fixando o prefixo
+     `feature/`, e o que fazer DEPOIS do commit — push? PR? merge direto? —
+     é conselho genérico ("muitos repos têm workflow que cria o PR"), não
+     fato do repositório. Num repo que usa `feat/` ou IDs de ticket, o
+     AGENTS.md gerado manda o agente criar uma branch fora do padrão do time
+     na primeira execução.
+
+     Design: descobrir, não perguntar. A Regra 1 proíbe perguntar qual
+     caminho seguir e o fluxo tem UMA pausa; o fluxo inferido vai para
+     confirmação dentro da FASE 4, junto com o resto, em vez de virar uma
+     pergunta nova no meio. -->
+- [ ] 29.1 Item novo na FASE 1: padrão de nome de branch por evidência —
+      `git branch -r` e `git log --format=%D` (prefixos realmente usados),
+      `CONTRIBUTING.md`, template de PR. Sem evidência: NÃO ENCONTRADO, e o
+      default `feature/` passa a ser escolha declarada, não silenciosa
+- [ ] 29.2 Item novo na FASE 1: política de entrega — existe
+      `.github/PULL_REQUEST_TEMPLATE*`, `CODEOWNERS`, proteção de branch
+      visível, workflow que abre PR? Deriva push-e-PR × commit direto
+- [ ] 29.3 Marcadores `<prefixo-de-branch>` e `<politica-de-entrega>` no
+      template do AGENTS.md, substituindo o `feature/` fixo e o parágrafo
+      genérico sobre PR
+- [ ] 29.4 O fluxo inferido entra no bloco de confirmação da FASE 4, com a
+      evidência que o sustenta — é onde o usuário corrige antes de gravar
+- [ ] 29.5 Testes: marcadores documentados na fase que os preenche, geração
+      sem marcador sobrevivente, e caso de fixture com prefixo não-`feature/`
+Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
+
+## Grupo 30 - Remover o code-reviewer órfão deste repositório ✅
+<!-- O Grupo 28 tirou o subagente do produto e deixou de fora, de propósito,
+     o arquivo órfão deste repo. O usuário pediu a remoção também. Órfão
+     porque o `AGENTS.md` da raiz nunca o citou: nenhuma regra mandava
+     revisar antes de commitar, então ele não estava sendo usado aqui. -->
+- [x] 30.1 Apagar `.claude/agents/code-reviewer.md` e o diretório vazio
+- [x] 30.2 Confirmar que o gate `--min-level 4` do `harness-dod.yml` continua
+      passando: medido antes (L4 · 105/108) e depois (L4 · 100/108). Os 5
+      pontos saem de "Skills & Commands"; o nível não cai
+Verificação: `pytest -q && ruff check . && mypy && npx -y harness-score --min-level 4 --quiet`

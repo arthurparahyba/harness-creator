@@ -110,9 +110,6 @@ dois trabalhando sem proteção, e nada avisa.
 Done inteira. "Concluído" passa a significar "estes comandos passaram", e
 não o julgamento do agente.
 
-**`.claude/agents/code-reviewer.md`**. Um subagente de revisão, somente
-leitura, acionado antes de commitar.
-
 **`.pre-commit-config.yaml`**. Lint e build rodando antes de o commit
 existir — o feedback mais barato e mais cedo possível.
 
