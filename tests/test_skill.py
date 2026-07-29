@@ -244,7 +244,14 @@ def test_extracao_de_json_identica_nos_dois_hooks() -> None:
 
 def _preparar_format_hook(tmp: Path, glob: str) -> tuple[Path, dict[str, str]]:
     """Gera o format-on-edit.sh preenchido com um formatter de mentira que
-    marca o arquivo, para verificar se o hook de fato o alcança."""
+    marca o arquivo, para verificar se o hook de fato o alcança.
+
+    `<formatter_command>` já inclui `"$FILE_PATH"` na posição que a ferramenta
+    exige — o template não o anexa no fim. Preencher só com o binário, como
+    este helper fazia, é o que mascarava o defeito dos formatters de plugin
+    de build (`mvn spotless:apply <arquivo>` aborta com "Unknown lifecycle
+    phase"); ver `references/ecossistemas.md`.
+    """
     formatter = tmp / "formatador-falso"
     formatter.write_text('#!/bin/bash\nprintf "FORMATADO" >> "$1"\n')
     formatter.chmod(0o755)
@@ -254,7 +261,7 @@ def _preparar_format_hook(tmp: Path, glob: str) -> tuple[Path, dict[str, str]]:
         .read_text()
         .replace("<file_glob>", glob)
         .replace("<formatter_bin>", formatter.name)
-        .replace("<formatter_command>", str(formatter))
+        .replace("<formatter_command>", f'{formatter} "$FILE_PATH"')
     )
     script.chmod(0o755)
     env = {"PATH": f"{tmp}:/usr/bin:/bin", "HOME": str(tmp)}

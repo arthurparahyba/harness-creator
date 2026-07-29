@@ -518,3 +518,41 @@ Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
 - [ ] 32.4 Teste de que o agente gerado não tem permissão de escrita em
       `arch-rules.json` e de que o formato do rascunho é o do arquivo
 Verificação: `pytest -q && ruff check . && mypy`
+
+## Grupo 33 - format-on-edit.sh inerte em Java/Maven e Java/Gradle ✅
+<!-- Pendência antiga, promovida a grupo. Investigando, são TRÊS defeitos
+     encadeados, não um:
+
+     1. ESTRUTURAL: o template faz `<formatter_command> "$FILE_PATH"`, o que
+        obriga o caminho a ser o último argumento posicional. Formatter de
+        plugin de build não aceita isso. Reproduzido com Maven real:
+        [ERROR] Unknown lifecycle phase "src/main/java/Foo.java"
+        e o `2>/dev/null || true` engole o erro — falha em silêncio.
+
+     2. CEGUEIRA DO TESTE: `gerar.py` preenchia `<formatter_command>` com
+        `stack.formatter_bin` (só o binário), gerando `mvn "$FILE_PATH"`. O
+        gerador de teste divergia da skill, então nenhum teste jamais
+        exercitou o comando real. O stub de binário aceitava qualquer argv e
+        completava o encobrimento.
+
+     3. FONTES DIVERGENTES: o cabeçalho do hook diz `Java: google-java-format
+        -i`; `ecossistemas.md` diz `mvn spotless:apply`. A skill tem regra de
+        fonte única e a violava aqui. -->
+- [x] 33.1 `<formatter_command>` passa a conter `"$FILE_PATH"` na posição que
+      cada ferramenta exige, e o template deixa de anexá-lo: Maven usa
+      `-DspotlessFiles=`, Gradle usa `-PspotlessIdeHook=`, os demais seguem
+      posicionais. Fonte única em `ecossistemas.md`; o cabeçalho do hook
+      deixa de listar comando e passa a apontar para a tabela
+- [x] 33.2 `gerar.py` passa a usar o comando REAL de cada ecossistema
+      (campo novo em `Stack`), não o binário — é o que reaproxima o gerador
+      de teste do que a skill gera
+- [x] 33.3 Stub que VALIDA o argv em vez de aceitar tudo: só formata se
+      encontrar o caminho alvo entre os argumentos, nas formas que as
+      ferramentas reais usam. Stub permissivo foi o que deixou isso passar
+- [x] 33.4 Teste que reprova `<formatter_command>` reduzido ao binário e
+      teste que exige o caminho presente no comando de todo ecossistema
+Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py` —
+443 testes (+39). O stub rigoroso revelou um QUARTO defeito não previsto: o
+hook checava `command -v gradle` mas rodava `./gradlew`, então em projeto com
+wrapper (a maioria) era no-op. `formatter_bin` do Gradle passou a ser o
+wrapper. Score por ecossistema inalterado.

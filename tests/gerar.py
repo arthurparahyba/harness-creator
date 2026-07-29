@@ -52,6 +52,11 @@ class Stack:
     dod: str
     file_glob: str
     formatter_bin: str
+    formatter_command: str
+    """Comando REAL de `ecossistemas.md`, com `"$FILE_PATH"` na posição que a
+    ferramenta exige. Antes isto era preenchido com `formatter_bin`, e o
+    gerador de teste divergia da skill: nenhum teste exercitava o comando de
+    verdade, que é como o hook ficou inerte em Java sem ninguém notar."""
     dir_escopo: str
     setup_steps: str
     pre_commit: str
@@ -81,6 +86,7 @@ STACKS: dict[str, Stack] = {
         dod="npm test && npm run lint && npx tsc --noEmit",
         file_glob="*.js|*.ts|*.mjs|*.cjs",
         formatter_bin="npx",
+        formatter_command='npx prettier --write "$FILE_PATH"',
         dir_escopo="src",
         setup_steps="      - uses: actions/setup-node@v4\n      - run: npm ci",
         pre_commit="npm run lint",
@@ -91,6 +97,7 @@ STACKS: dict[str, Stack] = {
         dod="npm test && npm run lint && npx tsc --noEmit",
         file_glob="*.js|*.jsx|*.ts|*.tsx",
         formatter_bin="npx",
+        formatter_command='npx prettier --write "$FILE_PATH"',
         dir_escopo="src",
         setup_steps="      - uses: actions/setup-node@v4\n      - run: npm ci",
         pre_commit="npm run lint",
@@ -101,6 +108,7 @@ STACKS: dict[str, Stack] = {
         dod="npm test && npm run lint && npx tsc --noEmit",
         file_glob="*.ts|*.html|*.scss",
         formatter_bin="npx",
+        formatter_command='npx prettier --write "$FILE_PATH"',
         dir_escopo="src/app",
         setup_steps="      - uses: actions/setup-node@v4\n      - run: npm ci",
         pre_commit="npm run lint",
@@ -111,6 +119,7 @@ STACKS: dict[str, Stack] = {
         dod="mvn test && mvn checkstyle:check && mvn spotless:check",
         file_glob="*.java",
         formatter_bin="mvn",
+        formatter_command='mvn -q spotless:apply -DspotlessFiles="$FILE_PATH"',
         dir_escopo="src/main/java",
         setup_steps="      - uses: actions/setup-java@v4",
         pre_commit="mvn checkstyle:check",
@@ -120,7 +129,8 @@ STACKS: dict[str, Stack] = {
     "java-gradle": Stack(
         dod="./gradlew test && ./gradlew checkstyleMain && ./gradlew spotlessCheck",
         file_glob="*.java|*.kt",
-        formatter_bin="gradle",
+        formatter_bin="./gradlew",
+        formatter_command='./gradlew -q spotlessApply -PspotlessIdeHook="$FILE_PATH"',
         dir_escopo="src/main/java",
         setup_steps="      - uses: actions/setup-java@v4",
         pre_commit="./gradlew checkstyleMain",
@@ -135,6 +145,7 @@ STACKS: dict[str, Stack] = {
         ),
         file_glob="*.cs",
         formatter_bin="dotnet",
+        formatter_command='dotnet format Catalogo.sln --include "$FILE_PATH"',
         dir_escopo="src",
         setup_steps="      - uses: actions/setup-dotnet@v4",
         pre_commit="dotnet format Catalogo.sln --verify-no-changes",
@@ -145,6 +156,7 @@ STACKS: dict[str, Stack] = {
         dod="go test ./... && golangci-lint run && gofmt -l .",
         file_glob="*.go",
         formatter_bin="gofmt",
+        formatter_command='gofmt -w "$FILE_PATH"',
         dir_escopo="internal",
         setup_steps="      - uses: actions/setup-go@v5",
         pre_commit="go vet ./...",
@@ -155,6 +167,7 @@ STACKS: dict[str, Stack] = {
         dod="npm test --workspaces && npm run lint --workspaces",
         file_glob="*.js|*.jsx|*.ts|*.tsx",
         formatter_bin="npx",
+        formatter_command='npx prettier --write "$FILE_PATH"',
         dir_escopo="apps/web/src",
         setup_steps="      - uses: actions/setup-node@v4\n      - run: npm ci",
         pre_commit="npm run lint --workspaces",
@@ -169,6 +182,7 @@ STACKS: dict[str, Stack] = {
         dod="npm test && npm run lint && npm run typecheck",
         file_glob="*.js|*.jsx|*.ts|*.tsx",
         formatter_bin="npx",
+        formatter_command='npx prettier --write "$FILE_PATH"',
         dir_escopo="apps/web/src",
         setup_steps="      - uses: actions/setup-node@v4\n      - run: npm ci",
         pre_commit="npm run lint",
@@ -181,6 +195,7 @@ STACKS: dict[str, Stack] = {
         dod="pytest && ruff check . && mypy",
         file_glob="*.py",
         formatter_bin="ruff",
+        formatter_command='ruff format "$FILE_PATH"',
         dir_escopo="cobranca",
         setup_steps=('      - uses: actions/setup-python@v5\n      - run: pip install -e ".[dev]"'),
         pre_commit="ruff check .",
@@ -191,6 +206,7 @@ STACKS: dict[str, Stack] = {
         dod="cargo test && cargo clippy -- -D warnings && cargo fmt --check",
         file_glob="*.rs",
         formatter_bin="rustfmt",
+        formatter_command='rustfmt "$FILE_PATH"',
         dir_escopo="src",
         setup_steps="      - run: rustup toolchain install stable --profile minimal",
         pre_commit="cargo clippy -- -D warnings",
@@ -201,6 +217,7 @@ STACKS: dict[str, Stack] = {
         dod="rspec && rubocop",
         file_glob="*.rb",
         formatter_bin="rubocop",
+        formatter_command='rubocop -A "$FILE_PATH"',
         dir_escopo="lib",
         setup_steps=("      - uses: ruby/setup-ruby@v1\n      - run: bundle install"),
         pre_commit="rubocop",
@@ -211,6 +228,7 @@ STACKS: dict[str, Stack] = {
         dod="phpunit && phpcs src && phpstan analyse src",
         file_glob="*.php",
         formatter_bin="php-cs-fixer",
+        formatter_command='php-cs-fixer fix "$FILE_PATH"',
         dir_escopo="src",
         setup_steps=("      - uses: shivammathur/setup-php@v2\n      - run: composer install"),
         pre_commit="phpcs src",
@@ -223,6 +241,7 @@ STACKS: dict[str, Stack] = {
         dod="",
         file_glob="*.py",
         formatter_bin="formatter-nao-definido",
+        formatter_command='formatter-nao-definido "$FILE_PATH"',
         dir_escopo="relatorios",
         setup_steps="      - uses: actions/setup-python@v5",
         pre_commit="",
@@ -324,7 +343,7 @@ def gerar(nome: str, destino: Path) -> Stack:
             {
                 "<file_glob>": stack.file_glob,
                 "<formatter_bin>": stack.formatter_bin,
-                "<formatter_command>": stack.formatter_bin,
+                "<formatter_command>": stack.formatter_command,
             },
         ),
     )
