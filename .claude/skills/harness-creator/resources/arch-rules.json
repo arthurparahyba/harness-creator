@@ -2,19 +2,19 @@
   {
     "id": "A01",
     "description": "O gate de comandos destrutivos e bash valido",
-    "check": "bash -n .claude/hooks/gate-destructive.sh",
+    "check": "test ! -f .claude/hooks/gate-destructive.sh || bash -n .claude/hooks/gate-destructive.sh",
     "expect": "exit-0",
     "what": ".claude/hooks/gate-destructive.sh tem erro de sintaxe",
-    "why": "Gate quebrado nao bloqueia nada e falha em silencio: o agente executa rm -rf e git push --force como se o harness nao existisse",
+    "why": "Gate quebrado nao bloqueia nada e falha em silencio: o agente executa rm -rf e git push --force como se o harness nao existisse. A regra tolera o hook ausente: nem todo repo recebe os dois (formatter que nao escopa por arquivo nao vira hook de edicao)",
     "fix": "Rode 'bash -n .claude/hooks/gate-destructive.sh' e corrija o erro na linha indicada"
   },
   {
     "id": "A02",
     "description": "O hook de formatacao e bash valido",
-    "check": "bash -n .claude/hooks/format-on-edit.sh",
+    "check": "test ! -f .claude/hooks/format-on-edit.sh || bash -n .claude/hooks/format-on-edit.sh",
     "expect": "exit-0",
     "what": ".claude/hooks/format-on-edit.sh tem erro de sintaxe",
-    "why": "O hook roda a cada edicao de arquivo; quebrado, ele morre em toda edicao sem que nada acuse, e a formatacao para de acontecer",
+    "why": "O hook roda a cada edicao de arquivo; quebrado, ele morre em toda edicao sem que nada acuse, e a formatacao para de acontecer. A regra tolera o hook ausente: nem todo repo recebe os dois (formatter que nao escopa por arquivo nao vira hook de edicao)",
     "fix": "Rode 'bash -n .claude/hooks/format-on-edit.sh' e corrija o erro na linha indicada"
   },
   {

@@ -472,3 +472,29 @@ def test_agente_propositor_devolve_regra_e_nao_veredito(
     for campo in ('"check"', '"what"', '"why"', '"fix"'):
         assert campo in corpo, f"{nome}: rascunho sem o campo {campo}"
     assert "<branch-base>" not in corpo, f"{nome}: marcador sobreviveu no agente"
+
+
+def test_check_arch_aprova_harness_sem_hook_de_formatacao(
+    repo: tuple[Path, Stack, str], tmp_path: Path
+) -> None:
+    """Harness parcial não pode reprovar nas próprias regras.
+
+    Nem todo repositório recebe os dois hooks: um formatter que não escopa por
+    arquivo (`spring-javaformat` no Spring PetClinic) formataria o módulo
+    inteiro a cada edit, e a skill manda não gerar enforcement que atrapalha.
+    Sem o hook, a regra A02 reprovava — e o primeiro contato do usuário com o
+    registro de regras virava um vermelho que ele não causou. A reação natural
+    a isso é apagar o arquivo, o que mata a catraca antes de ela girar.
+    """
+    destino, _, nome = repo
+    (destino / ".claude/hooks/format-on-edit.sh").unlink()
+    r = subprocess.run(
+        ["bash", str(destino / ".claude/check-arch.sh"), str(destino)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert r.returncode == 0, (
+        f"{nome}: check-arch reprovou um harness sem o hook de formatação, "
+        f"que é uma geração legítima:\n{r.stdout}"
+    )
