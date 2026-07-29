@@ -161,7 +161,28 @@ genérica ("escreva testes") não é acionável.
     com o nome errado isso falha na primeira execução, antes de o agente
     escrever uma linha. Repo sem git: registrar NÃO ENCONTRADO e tratar na
     FASE 4 como pendência do usuário.
-20. **Ponte para o Claude Code**: existe `CLAUDE.md` (raiz ou junto de cada
+20. **Prefixo de nome de branch**: o time usa `feature/`, `feat/`,
+    `users/LOGIN/`, ID de ticket? Derive de EVIDÊNCIA, nesta ordem:
+    `git branch -r --format='%(refname:short)'` e
+    `git log --format=%D --all` (os prefixos realmente usados no histórico),
+    `CONTRIBUTING.md`, template de PR. Conte as ocorrências e use o
+    majoritário; empate ou repo novo sem branches → `feature/`, e isso vai
+    para a FASE 4 como escolha declarada, não silenciosa. Preenche
+    `<prefixo-de-branch>` com o separador incluído (ex.: `feature/`).
+    O nome errado faz o agente criar branch fora do padrão do time logo na
+    primeira funcionalidade — e o time descobre no PR.
+21. **Política de entrega**: o que se faz DEPOIS do commit do grupo? Fontes:
+    `.github/PULL_REQUEST_TEMPLATE*` ou `.github/pull_request_template.md`
+    (o time usa PR), `CODEOWNERS` (PR exige revisão), workflows em
+    `.github/workflows/` com `pull_request:` ou que criem PR sozinhos,
+    `CONTRIBUTING.md`, e o histórico: `git log --merges --oneline -20`
+    mostra se merges vêm de PR (`Merge pull request #`) ou são diretos.
+    Preenche `<politica-de-entrega>` com uma linha por regra encontrada —
+    push da feature branch, PR sempre ou merge direto, se a CI abre o PR
+    sozinha. Sem evidência nenhuma: NÃO ENCONTRADO, e a FASE 4 pergunta.
+    Não inventar: mandar abrir PR num repo que faz merge direto trava o
+    agente esperando aprovação que ninguém vai dar.
+22. **Ponte para o Claude Code**: existe `CLAUDE.md` (raiz ou junto de cada
     AGENTS.md com escopo)? Se existir, ele importa (`@AGENTS.md`), é
     symlink, ou já contém o protocolo? O Claude Code carrega `CLAUDE.md` e
     **não** carrega `AGENTS.md`; sem a ponte, o harness existe no disco e

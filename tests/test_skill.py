@@ -932,3 +932,32 @@ def test_skill_md_nao_tem_secao_de_resumo_de_si_mesma() -> None:
     assert "## TL;DR" not in corpo, (
         "TL;DR de volta: descreve a skill para quem já a carregou"
     )
+
+
+def test_fase_1_descobre_prefixo_e_politica_por_comando_git() -> None:
+    """A descoberta do fluxo tem de ser por evidência executável, não por
+    convenção presumida.
+
+    A FASE 1 já descobria a `<branch-base>` (Grupo 7.1) e parava aí: o
+    prefixo continuava `feature/` fixo no template e o que fazer depois do
+    commit era conselho genérico, não fato do repositório.
+    """
+    fase1 = (SKILL / "references" / "01-descoberta.md").read_text()
+    for comando in ("git branch -r", "git log --format=%D", "git log --merges"):
+        assert comando in fase1, f"FASE 1 não deriva o fluxo de `{comando}`"
+    for fonte in ("PULL_REQUEST_TEMPLATE", "CODEOWNERS", "CONTRIBUTING.md"):
+        assert fonte in fase1, f"FASE 1 ignora `{fonte}` como fonte do fluxo"
+
+
+def test_fase_4_confirma_o_fluxo_com_a_evidencia() -> None:
+    """O fluxo inferido é confirmado na pausa que já existe, não numa nova.
+
+    A Regra 1 proíbe perguntar qual caminho seguir, e o fluxo tem UMA parada.
+    Confirmar por assunto transformaria um fluxo autônomo em interrupções.
+    """
+    fase4 = (SKILL / "references" / "04-saida-aprovacao.md").read_text()
+    assert "Branch base:" in fase4 and "Prefixo:" in fase4 and "Entrega:" in fase4
+    assert "sem evidência no repo" in fase4, (
+        "default apresentado como descoberta é pior que pergunta: o usuário "
+        "aprova achando que a skill viu algo que ela não viu"
+    )

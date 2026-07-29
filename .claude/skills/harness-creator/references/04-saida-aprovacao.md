@@ -6,6 +6,28 @@ aguardar aprovação explícita antes de gravar.
 
 ---
 
+
+## Fluxo de branches inferido — confirme antes de gravar
+
+Apresente, em três linhas, o que a FASE 1 concluiu sobre o fluxo, **com a
+evidência de cada uma**:
+
+```
+Branch base:  main          (fonte: git symbolic-ref refs/remotes/origin/HEAD)
+Prefixo:      feat/         (fonte: 12 de 15 branches do histórico usam feat/)
+Entrega:      push + PR     (fonte: .github/PULL_REQUEST_TEMPLATE.md + CODEOWNERS)
+```
+
+Vai aqui, e não numa pergunta própria, porque o fluxo já tem **uma** pausa: a
+Regra 1 proíbe perguntar qual caminho seguir, e uma confirmação por assunto
+transformaria um fluxo autônomo em várias interrupções. Este é o momento
+anterior a gravar — é onde o usuário corrige de graça.
+
+Quando algum dos três for default por falta de evidência, diga isso com todas
+as letras (`sem evidência no repo — usando o default`). Default apresentado
+como descoberta é pior que pergunta: o usuário aprova achando que a skill viu
+algo que ela não viu.
+
 ## Ordem de apresentação
 
 1. O Relatório de Descoberta (com fontes)

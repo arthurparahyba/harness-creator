@@ -37,7 +37,9 @@ PREENCHIVEIS = [
     "<file_glob>",
     "<formatter_bin>",
     "<formatter_command>",
+    "<politica-de-entrega>",
     "<pre-commit-hooks>",
+    "<prefixo-de-branch>",
     "<runner>",
     "<setup-steps>",
     "<sln>",
@@ -314,6 +316,15 @@ def gerar(nome: str, destino: Path) -> Stack:
                 "<como-propor-mudanca-de-plano>": (
                     "Para criar ou modificar o plano, acrescente o grupo ao `TASKS.md` no\n"
                     "formato descrito abaixo e confirme com o usuário antes de executá-lo."
+                ),
+                # Fixtures não têm histórico git: o prefixo cai no default
+                # declarado e a política pede a decisão ao usuário, que é o
+                # comportamento correto na ausência de evidência.
+                "<prefixo-de-branch>": "feature/",
+                "<politica-de-entrega>": (
+                    "- Política de entrega após o commit do grupo: NÃO ENCONTRADA no\n"
+                    "  repositório. Confirme com o time se é push + PR ou merge direto\n"
+                    "  antes de publicar a primeira feature branch."
                 ),
                 "<restrição 1 — derivada de convenção real do repo>": "editar artefato de build",
                 "<restrição 2>": "alterar o lockfile à mão",
