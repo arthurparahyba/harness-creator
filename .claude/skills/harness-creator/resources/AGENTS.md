@@ -28,7 +28,7 @@ Nunca invente tarefas fora da fonte de trabalho ativa.
    ```
    git checkout <branch-base>
    git remote | grep -q . && git pull        # repo sem remoto: pular
-   git checkout -b feature/<nome-da-funcionalidade>
+   git checkout -b <prefixo-de-branch><nome-da-funcionalidade>
    ```
    Não é necessário criar branch nova para continuar um grupo já em
    andamento na branch atual (ver passo 2).
@@ -77,9 +77,7 @@ Saída de comando é evidência; "parece funcionar" não é.
 ## Commits
 - Um commit por grupo concluído: `checkpoint: <nome do grupo>`
 - Nunca commitar com verificação falhando.
-- Após `git push` de uma feature branch, verifique antes de abrir PR
-  manualmente (`gh pr create`): muitos repos têm workflow de CI que
-  valida a branch e cria o PR automaticamente.
+<politica-de-entrega>
 
 ## Ao concluir cada grupo (OBRIGATÓRIO)
 Não existe um evento de "fim de sessão" que o agente consiga detectar —

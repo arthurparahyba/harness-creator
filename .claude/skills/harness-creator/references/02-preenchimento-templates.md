@@ -246,6 +246,17 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
   !.env.example
   ```
   NUNCA sobrescrever o `.gitignore` existente — sempre append.
+- **Fluxo de branches** no AGENTS.md da raiz:
+  - `<prefixo-de-branch>`: o prefixo majoritário do histórico, COM o
+    separador (`feature/`, `feat/`, `users/joao/`). Default `feature/` só
+    quando não houver evidência — e nesse caso declare na FASE 4 que é
+    default, não descoberta.
+  - `<politica-de-entrega>`: uma linha por regra que a FASE 1 encontrou, no
+    formato dos outros bullets da seção Commits. Exemplos do que sai daqui:
+    "Após o commit do grupo, `git push` da feature branch e abra PR para
+    `main` (`gh pr create`) — `CODEOWNERS` exige revisão." ou "Merges são
+    diretos na `main`; não abrir PR." Sem evidência, escreva a linha que
+    pede a decisão ao usuário em vez de inventar uma política.
 - **Regras arquiteturais** (`resources/arch-rules.json` →
   `.harness/arch-rules.json`, e `resources/check-arch.sh` →
   `.claude/check-arch.sh`, `chmod +x`): a semente vai VERBATIM, e as regras

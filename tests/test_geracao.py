@@ -404,3 +404,34 @@ def test_arch_rules_tem_os_tres_campos_acionaveis(repo: tuple[Path, Stack, str])
         assert len(regra["fix"]) > 30, (
             f"{nome}: fix de {regra['id']} curto demais para ser acionável: {regra['fix']!r}"
         )
+
+
+def test_agents_md_nao_fixa_o_prefixo_feature(repo: tuple[Path, Stack, str]) -> None:
+    """O prefixo tem de vir do marcador, não estar cravado no template.
+
+    Num repo que usa `feat/` ou `users/LOGIN/`, um `feature/` fixo faz o
+    agente criar a branch fora do padrão do time logo na primeira
+    funcionalidade — e o time só descobre no PR.
+    """
+    destino, _, nome = repo
+    agents = (destino / "AGENTS.md").read_text()
+    linha = [x for x in agents.splitlines() if "git checkout -b" in x]
+    assert linha, f"{nome}: AGENTS.md não manda criar a feature branch"
+    assert "<prefixo-de-branch>" not in linha[0], f"{nome}: marcador sobreviveu"
+
+
+def test_politica_de_entrega_presente_e_honesta(repo: tuple[Path, Stack, str]) -> None:
+    """Sem evidência no repo, a política declara que não foi encontrada.
+
+    Inventar "abra PR" num repo que faz merge direto trava o agente esperando
+    uma aprovação que ninguém vai dar; inventar "merge direto" num repo que
+    exige PR fura o processo do time. As fixtures não têm histórico git, então
+    o esperado aqui é justamente a declaração de ausência.
+    """
+    destino, _, nome = repo
+    commits = (destino / "AGENTS.md").read_text().split("## Commits")[1].split("## ")[0]
+    assert "<politica-de-entrega>" not in commits, f"{nome}: marcador sobreviveu"
+    assert "NÃO ENCONTRADA" in commits, (
+        f"{nome}: sem evidência de fluxo, a política tem de dizer que não foi "
+        f"encontrada em vez de inventar uma. Seção Commits:\n{commits}"
+    )
