@@ -421,3 +421,32 @@ Verificação: `pytest -q && ruff check . && mypy`
 Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py` —
 404 testes (-2: os do marcador `<checks-do-repo>`); score de +64~+67 para +62,
 queda de 5 pontos do V6, registrada em `tests/fixtures/README.md`
+
+## Grupo 29 - Descobrir o fluxo de branches, não só a branch base
+<!-- Pedido do usuário. A FASE 1 já descobre `<branch-base>` por git CLI
+     (item 18, Grupo 7.1), mas para aí: o template segue fixando o prefixo
+     `feature/`, e o que fazer DEPOIS do commit — push? PR? merge direto? —
+     é conselho genérico ("muitos repos têm workflow que cria o PR"), não
+     fato do repositório. Num repo que usa `feat/` ou IDs de ticket, o
+     AGENTS.md gerado manda o agente criar uma branch fora do padrão do time
+     na primeira execução.
+
+     Design: descobrir, não perguntar. A Regra 1 proíbe perguntar qual
+     caminho seguir e o fluxo tem UMA pausa; o fluxo inferido vai para
+     confirmação dentro da FASE 4, junto com o resto, em vez de virar uma
+     pergunta nova no meio. -->
+- [ ] 29.1 Item novo na FASE 1: padrão de nome de branch por evidência —
+      `git branch -r` e `git log --format=%D` (prefixos realmente usados),
+      `CONTRIBUTING.md`, template de PR. Sem evidência: NÃO ENCONTRADO, e o
+      default `feature/` passa a ser escolha declarada, não silenciosa
+- [ ] 29.2 Item novo na FASE 1: política de entrega — existe
+      `.github/PULL_REQUEST_TEMPLATE*`, `CODEOWNERS`, proteção de branch
+      visível, workflow que abre PR? Deriva push-e-PR × commit direto
+- [ ] 29.3 Marcadores `<prefixo-de-branch>` e `<politica-de-entrega>` no
+      template do AGENTS.md, substituindo o `feature/` fixo e o parágrafo
+      genérico sobre PR
+- [ ] 29.4 O fluxo inferido entra no bloco de confirmação da FASE 4, com a
+      evidência que o sustenta — é onde o usuário corrige antes de gravar
+- [ ] 29.5 Testes: marcadores documentados na fase que os preenche, geração
+      sem marcador sobrevivente, e caso de fixture com prefixo não-`feature/`
+Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`

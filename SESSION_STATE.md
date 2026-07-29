@@ -3,16 +3,32 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `f0566bb` na `main` — merge da `feature/bateria-nivel-c`
-  (Grupos 21 a 24). DoD verde depois do merge. **Nada publicado ainda**: a
-  `main` local está à frente da `origin/main`.
-- Testes: 406/406 (`pytest -q`); ruff e mypy strict limpos; `mede.py --autoteste` OK.
-- Change/plano ativo: `TASKS.md` na raiz — **Grupos 25 e 26 abertos**,
-  propostos e ainda não iniciados (Grupos 21 a 24 concluídos).
-- Em andamento: nada — Grupo 24 commitado, fronteira limpa. Os Grupos 25 e 26
-  são plano, nenhum arquivo da skill foi tocado.
-- Não commitado: `TASKS.md` (proposta dos Grupos 25/26) e este arquivo; mais
-  o `-c` na raiz, lixo de execução manual antiga.
+- Commit verificado: `86114cb` na `feature/remover-code-reviewer` — Grupo 28.
+  Branch **não publicada** e **não mergeada** na `main`. A `main` está em
+  sincronia com a `origin/main`.
+- Testes: 404/404 (`pytest -q`); ruff e mypy strict limpos. Caiu de 406 porque
+  os dois sensores do marcador `<checks-do-repo>` saíram com ele.
+- Change/plano ativo: `TASKS.md` na raiz — **Grupos 25, 26, 27 e 29 abertos**,
+  propostos e não iniciados. Grupo 28 concluído e commitado.
+- Em andamento: nada — fronteira limpa.
+- Não commitado: `TASKS.md` (proposta do Grupo 29) e este arquivo; mais o `-c`
+  na raiz, lixo de execução manual antiga.
+
+## O que mudou nesta sessão (Grupo 28)
+A skill deixou de gerar o subagente `code-reviewer`, a pedido do usuário. A
+ressalva foi apresentada antes e mantida: na rodada do nível C o agente
+delegava por conta própria (T1 e T2), e em T1 a revisão mudou o código.
+
+O custo está medido e registrado, não maquiado: `V6 — Regras arquiteturais`
+usava `.claude/agents/code-reviewer.md` como equivalência e passou de `eq` para
+`fail`. O score da geração caiu de +64~+67 para **+62** em todos os
+ecossistemas. `tests/fixtures/README.md` mostra as duas colunas lado a lado e
+`eval/mapa-equivalencias.md` registra regra arquitetural como SEM COBERTURA. O
+scanner **não** foi remendado para preservar a nota.
+
+Efeito colateral que os sensores pegaram: o marcador `<checks-do-repo>` ficou
+documentado sem template que o preenchesse, e os dois testes de marcador
+reprovaram. Removido junto.
 
 ## O que mudou nesta sessão (Grupos 21, 22, 23 e 24)
 Primeira execução do **nível C**, que existia só como protocolo em prosa
@@ -52,15 +68,15 @@ dentro de cada repo alvo.
   `mvn` falso no PATH que aceita qualquer argumento).
 - O nível C ficou em **n=1 por célula**; o protocolo pede 3. Subir para 3 é o
   próximo passo antes de tratar qualquer número como estável.
-- **O `code-reviewer` é órfão NESTE repo.** `.claude/agents/code-reviewer.md`
-  existe, mas o `AGENTS.md` da raiz não o cita — nenhuma regra manda revisar
-  antes de commitar um grupo. É o sintoma que a própria tabela de diagnóstico
-  da SKILL.md descreve (ponteiro ausente no arquivo que é lido sempre). No
-  harness GERADO ele funciona: a rodada do nível C tem o agente delegando por
-  conta própria em T1 e T2, e em T1 a revisão mudou o código. O defeito é só
-  do `AGENTS.md` deste repo, que foi escrito à mão. Junta-se às outras duas
-  incoerências dele (`git checkout develop` e `/opsx:propose`) — os três
-  cabem num grupo só de correção do harness próprio.
+- **O `AGENTS.md` deste repo está desatualizado em três pontos, e a causa é
+  uma só: ele foi escrito à mão e nunca regenerado.** Manda
+  `git checkout develop` (a skill corrigiu isso no Grupo 7.1 com
+  `<branch-base>` descoberto por git); cita `/opsx:propose` sem haver
+  `openspec/` (corrigido no 7.2 com `<como-propor-mudanca-de-plano>`); e deixa
+  `.claude/agents/code-reviewer.md` órfão, sem nenhuma regra que o alcance.
+  Os três cabem num grupo só. A correção mais barata talvez não seja editar à
+  mão de novo, e sim rodar a própria skill neste repositório — que é também o
+  teste real do catálogo `atualizacao.md`, hoje exercitado só por fixture.
 - **Descoberta da FASE 1 como script bundled — decisão de design em aberto.**
   O `skill-creator` oficial manda procurar trabalho que se repete a cada
   invocação e empacotá-lo em `scripts/`; a FASE 1 refaz a investigação de
