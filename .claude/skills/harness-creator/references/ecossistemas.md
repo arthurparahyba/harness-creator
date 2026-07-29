@@ -11,6 +11,14 @@ não o que está escrito aqui.
 
 ---
 
+## Conteúdo
+
+- Tabela de preenchimento
+- Lockfiles
+- Monorepos e workspaces
+
+---
+
 ## Tabela de preenchimento
 
 | Ecossistema | Detectar por | Teste | Lint | Types | Formatter | `<file_glob>` |
@@ -18,7 +26,8 @@ não o que está escrito aqui.
 | **Node / TS** | `package.json` sem `angular.json` nem framework de UI | `npm test` | `eslint .` | `tsc --noEmit` | `npx prettier --write "$FILE_PATH"` | `*.js\|*.ts\|*.mjs\|*.cjs` |
 | **React** | `react` em `dependencies` | `vitest run` / `jest` | `eslint .` | `tsc --noEmit` | `npx prettier --write "$FILE_PATH"` | `*.js\|*.jsx\|*.ts\|*.tsx` |
 | **Angular** | `angular.json` | `ng test --watch=false` | `ng lint` | `tsc --noEmit` (ver `strictTemplates`) | `npx prettier --write "$FILE_PATH"` | `*.ts\|*.html\|*.scss` |
-| **Java / Maven** | `pom.xml` | `mvn test` | `mvn checkstyle:check` | compilador | `mvn -q spotless:apply -DspotlessFiles="$FILE_PATH"` | `*.java` |
+| **Java / Maven + spotless** | `pom.xml` com `spotless-maven-plugin` | `mvn test` | `mvn checkstyle:check` | compilador | `mvn -q spotless:apply -DspotlessFiles="$FILE_PATH"` | `*.java` |
+| **Java / Maven + spring-javaformat** | `pom.xml` com `spring-javaformat-maven-plugin` | `mvn test` | `mvn checkstyle:check` | compilador | **não escopa por arquivo — sem hook** | `*.java` |
 | **Java / Gradle** | `build.gradle(.kts)` | `./gradlew test` | `./gradlew checkstyleMain` | compilador | `./gradlew -q spotlessApply -PspotlessIdeHook="$FILE_PATH"` | `*.java\|*.kt` |
 | **.NET / C#** | `.sln` ou `.csproj` | `dotnet test <sln>` | analyzers via `.editorconfig` | compilador | `dotnet format <sln> --include "$FILE_PATH"` | `*.cs` |
 | **Go** | `go.mod` | `go test ./...` | `golangci-lint run` | compilador | `gofmt -w "$FILE_PATH"` | `*.go` |
@@ -26,6 +35,28 @@ não o que está escrito aqui.
 | **Rust** | `Cargo.toml` | `cargo test` | `cargo clippy` | compilador | `rustfmt "$FILE_PATH"` | `*.rs` |
 | **Ruby** | `Gemfile` | `rspec` | `rubocop` | — | `rubocop -A "$FILE_PATH"` | `*.rb` |
 | **PHP** | `composer.json` | `phpunit` | `phpcs` | `phpstan` | `php-cs-fixer fix "$FILE_PATH"` | `*.php` |
+
+### Formatter que não escopa por arquivo
+
+Duas linhas da tabela dizem **"não escopa por arquivo — sem hook"** em vez de
+um comando. Não é lacuna: é a resposta certa.
+
+`spring-javaformat` (toda a família Spring, incluindo o Spring PetClinic) e
+`ktlint` sem `--file` formatam o **módulo inteiro**. Pendurar isso no
+`format-on-edit.sh` faria cada tecla disparar uma JVM e um build completo —
+alguns segundos por edição. Um hook que atrapalha é um hook que o time
+desliga, e quando ele é desligado some junto com o resto do enforcement.
+
+Nesses casos:
+- **não gere** `format-on-edit.sh` nem o registro dele nos configs de hook
+  dos três agentes;
+- a formatação vai para o **pre-commit** e para o **CI**, onde rodar o módulo
+  inteiro é aceitável porque acontece uma vez, não a cada edição;
+- registre um item no Plano de Remediação explicando a ausência — hook que
+  falta sem explicação parece esquecimento da skill.
+
+A regra geral continua valendo e vem antes da tabela: **o que está commitado
+ganha**. Inspecione qual plugin o manifesto declara, não só se existe algum.
 
 A coluna **Formatter** é o valor de `<formatter_command>` e já inclui
 `"$FILE_PATH"` na posição que a ferramenta exige — o template do hook **não**

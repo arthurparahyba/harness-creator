@@ -81,7 +81,7 @@ def test_nenhum_marcador_sobreviveu(repo: tuple[Path, Stack, str]) -> None:
         destino / stack.dir_escopo / "AGENTS.md",
         destino / "init.sh",
         destino / ".claude/commands/dod.md",
-        destino / ".claude/hooks/format-on-edit.sh",
+        *([destino / ".claude/hooks/format-on-edit.sh"] if stack.escopa_por_arquivo else []),
         destino / ".pre-commit-config.yaml",
         destino / ".github/workflows/harness-dod.yml",
     ]
@@ -116,7 +116,10 @@ def test_todo_registro_de_hook_aponta_para_script_executavel(
             assert script.is_file(), f"{rel} aponta para script inexistente: {ref}"
             assert os.access(script, os.X_OK), f"{rel} aponta para script não executável: {ref}"
             encontrados.add(script.name)
-    assert encontrados == {"gate-destructive.sh", "format-on-edit.sh"}
+    esperados = {"gate-destructive.sh"}
+    if (destino / ".claude/hooks/format-on-edit.sh").exists():
+        esperados.add("format-on-edit.sh")
+    assert encontrados == esperados
 
 
 @pytest.mark.parametrize("evento", ["tool_input", "cursor"])
@@ -275,6 +278,8 @@ def _argv_recebido(destino: Path, stack: Stack, alvo: Path, fake: Path, log: Pat
 
 def test_formatter_alcanca_o_codigo_da_stack(repo: tuple[Path, Stack, str], tmp_path: Path) -> None:
     destino, stack, nome = repo
+    if not stack.escopa_por_arquivo:
+        pytest.skip(f"{nome}: formatter formata o módulo inteiro, não há hook de edição")
     fake = _stub(tmp_path / f"bin-{nome}", stack.formatter_bin, destino)
     alvo = destino / stack.formatavel
 
@@ -289,6 +294,8 @@ def test_formatter_alcanca_o_codigo_da_stack(repo: tuple[Path, Stack, str], tmp_
 
 def test_formatter_ignora_o_que_nao_e_codigo(repo: tuple[Path, Stack, str], tmp_path: Path) -> None:
     destino, stack, nome = repo
+    if not stack.escopa_por_arquivo:
+        pytest.skip(f"{nome}: sem hook de edição")
     fake = _stub(tmp_path / f"bin-neg-{nome}", stack.formatter_bin, destino)
     alvo = destino / stack.nao_formatavel
 
@@ -300,7 +307,7 @@ def test_formatter_ignora_o_que_nao_e_codigo(repo: tuple[Path, Stack, str], tmp_
     )
 
 
-def test_formatter_command_nao_e_so_o_binario(repo: tuple[Path, Stack, str]) -> None:
+def test_formatter_command_nao_e_so_o_binario(repo: tuple[Path, Stack, str]) -> None:  # noqa: D401
     """O comando tem de ser o de `ecossistemas.md`, não o binário sozinho.
 
     Este é o sensor da cegueira que deixou o defeito de Java passar: enquanto
@@ -315,7 +322,7 @@ def test_formatter_command_nao_e_so_o_binario(repo: tuple[Path, Stack, str]) -> 
     )
 
 
-def test_formatter_command_passa_o_arquivo(repo: tuple[Path, Stack, str]) -> None:
+def test_formatter_command_passa_o_arquivo(repo: tuple[Path, Stack, str]) -> None:  # noqa: D401
     """Todo comando de formatação precisa referenciar o arquivo editado.
 
     Sem isso o hook formata o projeto inteiro a cada edit, ou nada — foi o
@@ -323,12 +330,14 @@ def test_formatter_command_passa_o_arquivo(repo: tuple[Path, Stack, str]) -> Non
     abortava, com o erro engolido pelo `2>/dev/null || true`.
     """
     _, stack, nome = repo
+    if not stack.escopa_por_arquivo:
+        pytest.skip(f"{nome}: formatter formata o módulo inteiro — não há comando de hook")
     assert '"$FILE_PATH"' in stack.formatter_command, (
         f"{nome}: {stack.formatter_command!r} não passa o arquivo editado."
     )
 
 
-def test_hook_gerado_nao_anexa_o_caminho_no_fim(repo: tuple[Path, Stack, str]) -> None:
+def test_hook_gerado_nao_anexa_o_caminho_no_fim(repo: tuple[Path, Stack, str]) -> None:  # noqa: D401
     """O template não pode voltar a anexar `"$FILE_PATH"` depois do comando.
 
     Anexar quebra todo formatter que precisa do caminho numa flag
@@ -336,6 +345,8 @@ def test_hook_gerado_nao_anexa_o_caminho_no_fim(repo: tuple[Path, Stack, str]) -
     dois ecossistemas Java.
     """
     destino, stack, nome = repo
+    if not stack.escopa_por_arquivo:
+        pytest.skip(f"{nome}: sem hook de edição")
     corpo = (destino / ".claude/hooks/format-on-edit.sh").read_text()
     assert f'{stack.formatter_command} "$FILE_PATH"' not in corpo, (
         f"{nome}: o hook anexa o caminho depois do comando, que já o contém."
@@ -490,7 +501,9 @@ def test_check_arch_aprova_harness_sem_hook_de_formatacao(
     a isso é apagar o arquivo, o que mata a catraca antes de ela girar.
     """
     destino, _, nome = repo
-    (destino / ".claude/hooks/format-on-edit.sh").unlink()
+    hook = destino / ".claude/hooks/format-on-edit.sh"
+    if hook.exists():
+        hook.unlink()
     r = subprocess.run(
         ["bash", str(destino / ".claude/check-arch.sh"), str(destino)],
         capture_output=True,
@@ -530,3 +543,34 @@ def test_verificador_ignora_a_propria_skill_instalada_no_alvo(
         f"{nome}: verificador reprovou por causa da skill instalada no alvo:\n"
         f"{r.stdout}"
     )
+
+
+def test_formatter_de_modulo_inteiro_nao_vira_hook_de_edicao() -> None:
+    """Formatter que não escopa por arquivo não pode virar hook de edição.
+
+    `spring-javaformat` — toda a família Spring, incluindo o Spring PetClinic
+    — formata o módulo inteiro. Pendurado no `format-on-edit.sh`, cada tecla
+    dispararia uma JVM e um build completo. Hook que atrapalha é hook que o
+    time desliga, e quando desliga leva o resto do enforcement junto.
+
+    A formatação vai para o pre-commit e o CI, onde rodar o módulo inteiro é
+    aceitável porque acontece uma vez, não a cada edição.
+    """
+    import tempfile
+
+    destino = Path(tempfile.mkdtemp()) / "java-spring"
+    stack = gerar("java-spring", destino)
+    assert not stack.escopa_por_arquivo
+
+    assert not (destino / ".claude/hooks/format-on-edit.sh").exists(), (
+        "hook de formatação gerado para um formatter que formata o módulo inteiro"
+    )
+    # E o registro tem de sair dos três configs: apontar para script que não
+    # existe é falha silenciosa — no Cursor com `failClosed` derruba o shell.
+    for rel in (".claude/settings.json", ".devin/hooks.v1.json", ".cursor/hooks.json"):
+        assert "format-on-edit" not in (destino / rel).read_text(), (
+            f"{rel} registra um hook que não foi gerado"
+        )
+    # O gate continua lá: a ausência é do hook de formatação, não do enforcement.
+    assert (destino / ".claude/hooks/gate-destructive.sh").exists()
+    assert "gate-destructive" in (destino / ".claude/settings.json").read_text()

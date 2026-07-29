@@ -66,6 +66,15 @@ class Stack:
     """Arquivo real da fixture que o hook de formatação DEVE alcançar."""
     nao_formatavel: str
     """Arquivo real da fixture que o hook DEVE ignorar."""
+    escopa_por_arquivo: bool = True
+    """Se o formatter aceita caminho de arquivo.
+
+    `spring-javaformat` e `ktlint` sem `--file` formatam o modulo inteiro:
+    pendurar isso no hook de edicao faria cada tecla disparar uma JVM e um
+    build completo. Hook que atrapalha e hook que o time desliga — e quando
+    desliga, leva o resto do enforcement junto. Nesses casos a formatacao vai
+    para o pre-commit e o CI, e a ausencia vira item do Plano de Remediacao.
+    """
 
     @property
     def comandos(self) -> list[str]:
@@ -205,6 +214,20 @@ STACKS: dict[str, Stack] = {
         formatavel="apps/web/src/formata.ts",
         nao_formatavel="package.json",
     ),
+    # Perfil Spring: formatter que NAO escopa por arquivo. Sem esta fixture, a
+    # regra "nao gere hook que formata o modulo inteiro" era so prosa.
+    "java-spring": Stack(
+        dod="mvn test && mvn checkstyle:check",
+        file_glob="*.java",
+        formatter_bin="mvn",
+        formatter_command="",
+        escopa_por_arquivo=False,
+        dir_escopo="src/main/java",
+        setup_steps="      - uses: actions/setup-java@v4",
+        pre_commit="mvn spring-javaformat:validate",
+        formatavel="src/main/java/com/exemplo/Pedido.java",
+        nao_formatavel="pom.xml",
+    ),
     # Os quatro abaixo estavam só documentados em `ecossistemas.md`. Sem
     # fixture, a linha da tabela era uma promessa que nada exercitava.
     "python": Stack(
@@ -296,6 +319,15 @@ def _preenche(
     return texto
 
 
+def _sem_format_hook(no: object) -> object:
+    """Poda do config de hook toda entrada que cite o `format-on-edit.sh`."""
+    if isinstance(no, list):
+        return [_sem_format_hook(x) for x in no if "format-on-edit" not in json.dumps(x)]
+    if isinstance(no, dict):
+        return {k: _sem_format_hook(v) for k, v in no.items()}
+    return no
+
+
 def gerar(nome: str, destino: Path) -> Stack:
     """Copia a fixture `nome` para `destino` e grava o harness sobre ela."""
     stack = STACKS[nome]
@@ -360,18 +392,23 @@ def gerar(nome: str, destino: Path) -> Stack:
             },
         ),
     )
-    _grava(
-        destino,
-        ".claude/hooks/format-on-edit.sh",
-        _preenche(
-            "hooks/format-on-edit.sh",
-            {
-                "<file_glob>": stack.file_glob,
-                "<formatter_bin>": stack.formatter_bin,
-                "<formatter_command>": stack.formatter_command,
-            },
-        ),
-    )
+    # Formatter que nao escopa por arquivo NAO vira hook de edicao: rodaria o
+    # modulo inteiro a cada tecla. A formatacao fica no pre-commit e no CI, e
+    # a ausencia e um item do Plano de Remediacao — hook faltando sem
+    # explicacao parece esquecimento da skill.
+    if stack.escopa_por_arquivo:
+        _grava(
+            destino,
+            ".claude/hooks/format-on-edit.sh",
+            _preenche(
+                "hooks/format-on-edit.sh",
+                {
+                    "<file_glob>": stack.file_glob,
+                    "<formatter_bin>": stack.formatter_bin,
+                    "<formatter_command>": stack.formatter_command,
+                },
+            ),
+        )
     _grava(
         destino,
         ".claude/commands/dod.md",
@@ -426,9 +463,6 @@ def gerar(nome: str, destino: Path) -> Stack:
         ("SESSION_STATE.md", "SESSION_STATE.md"),
         ("TASKS.md", "TASKS.md"),
         ("editorconfig-base", ".editorconfig"),
-        ("claude-settings.json", ".claude/settings.json"),
-        ("devin-hooks.json", ".devin/hooks.v1.json"),
-        ("cursor-hooks.json", ".cursor/hooks.json"),
         ("hooks/gate-destructive.sh", ".claude/hooks/gate-destructive.sh"),
         ("verificar-harness.sh", ".claude/verificar-harness.sh"),
         ("skills/executar-grupo/SKILL.md", ".claude/skills/executar-grupo/SKILL.md"),
@@ -436,6 +470,20 @@ def gerar(nome: str, destino: Path) -> Stack:
         ("CLAUDE.md", f"{stack.dir_escopo}/CLAUDE.md"),
     ]:
         _grava(destino, alvo, (RESOURCES / origem).read_text())
+
+    # Config de hook apontando para script inexistente e falha silenciosa: no
+    # Claude Code e no Devin o hook morre, e no Cursor com `failClosed` o
+    # agente perde o shell inteiro. Sem hook de formatacao, o registro dele
+    # sai dos tres.
+    for origem, alvo in [
+        ("claude-settings.json", ".claude/settings.json"),
+        ("devin-hooks.json", ".devin/hooks.v1.json"),
+        ("cursor-hooks.json", ".cursor/hooks.json"),
+    ]:
+        cfg = json.loads((RESOURCES / origem).read_text())
+        if not stack.escopa_por_arquivo:
+            cfg = _sem_format_hook(cfg)
+        _grava(destino, alvo, json.dumps(cfg, indent=2, ensure_ascii=False) + "\n")
 
     # O agente cita a branch base no comando de diff, então não é cópia crua:
     # marcador não preenchido aqui é marcador sobrevivente, e a FASE 5 o acusa.
@@ -448,7 +496,7 @@ def gerar(nome: str, destino: Path) -> Stack:
     scripts = (
         "init.sh",
         ".claude/hooks/gate-destructive.sh",
-        ".claude/hooks/format-on-edit.sh",
+        *(( ".claude/hooks/format-on-edit.sh",) if stack.escopa_por_arquivo else ()),
         ".claude/verificar-harness.sh",
     )
     for script in scripts:
