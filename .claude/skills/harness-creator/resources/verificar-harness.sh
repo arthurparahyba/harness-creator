@@ -116,6 +116,12 @@ fi
 # ------------------------------------------------- scripts: LF e executaveis
 SCRIPTS="init.sh"
 [ -f .claude/check-arch.sh ] && SCRIPTS="$SCRIPTS .claude/check-arch.sh"
+# O medidor de aderencia entra aqui e em lugar nenhum mais: o verificador
+# garante que ele esta integro (LF, bit de execucao) e NUNCA o executa. Sao
+# perguntas diferentes — integridade agora contra comportamento ao longo do
+# tempo — e um repo recem-gerado, sem commit nenhum, reprovaria numa medida
+# de aderencia que ainda nao teve chance de existir.
+[ -f .claude/medir-aderencia.sh ] && SCRIPTS="$SCRIPTS .claude/medir-aderencia.sh"
 for f in .claude/hooks/*.sh; do
   [ -f "$f" ] && SCRIPTS="$SCRIPTS $f"
 done

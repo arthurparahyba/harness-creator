@@ -723,3 +723,68 @@ Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py` —
 Verificação: `pytest -q && ruff check . && mypy` — 686 testes; a validação
 com o CLI é documentada em `tests/fixtures/README.md` e não é teste do
 pytest porque depende de rede, mesma razão do `medir.py`.
+
+## Grupo 40 - Eval de aderência dentro do harness gerado ✅
+<!-- Origem: docs/intersecao-harness-engineering-x-skill.md, lacuna 1.
+
+     A lacuna precisa ser dita com precisão, porque a versão larga ("faltam
+     evals") é FALSA neste repositório: existem cinco níveis (A/B em
+     `eval/score-harness.sh`, C em `eval/nivel-c/`, D em `evals/gradua.py`,
+     E em `evals/triggering.json`). O que nenhum deles faz é viajar junto
+     com o harness. Todos medem A SKILL, rodam AQUI, e são operados por
+     quem escreve a skill.
+
+     O repo alvo recebe `verificar-harness.sh`, que prova que o harness
+     EXISTE — JSON parseia, script é executável, gate devolve exit 2. Nada
+     prova que ele é OBEDECIDO. É exatamente a fronteira que o
+     `eval/README.md` traça entre o nível B (capacidade) e o nível C
+     (comportamento): o alvo hoje herda só o lado B.
+
+     Consequência concreta: um time que instala o harness e seis semanas
+     depois pergunta "isso está sendo seguido?" não tem instrumento. O
+     `SESSION_STATE.md` não serve de resposta — é escrito pelo mesmo agente
+     cuja aderência se quer medir.
+
+     LIMITE, a declarar no próprio script e no README para não ser vendido
+     como o que não é: git só enxerga o que foi commitado. Sessão que
+     descarrilhou e não commitou nada é invisível. Isto mede aderência do
+     histórico, não das sessões — é um sensor barato e determinístico, não
+     o nível C. Quem quiser eficácia comportamental continua precisando do
+     A/B. -->
+- [x] 40.1 `resources/medir-aderencia.sh` — lê `git log`, a fonte de
+      trabalho ativa e o `SESSION_STATE.md`, e reporta aderência ao
+      protocolo do AGENTS.md. POSIX sh, sem rede e sem modelo, mesma
+      restrição de portabilidade dos hooks (roda igual nos três
+      agentes-alvo). Sem Python e sem jq, com teste que roda num `PATH`
+      reduzido a 9 binários para provar isso
+- [x] 40.2 As quatro métricas, cada uma com `what`/`why`/`fix` no formato do
+      `arch-rules.json` e com uma linha declarando o que ela NÃO vê:
+      proporção de `checkpoint:`; grupo concluído na fonte de trabalho sem
+      checkpoint correspondente; `SESSION_STATE.md` ausente no checkpoint;
+      escopo do checkpoint. **Achado ao medir o próprio repositório:** a
+      terceira métrica, escrita como "no MESMO commit", dava 4 de 17 aqui —
+      falso positivo, porque registrar o hash do checkpoint no arquivo
+      obriga o commit dele a existir antes. Aceitando o commit seguinte,
+      17 de 17. Medida com falso positivo desse tamanho é desligada na
+      primeira semana e leva o resto do relatório junto
+- [x] 40.3 Ligação ao harness: entrada em `arquivos-gerados.md` (com a
+      tabela das três perguntas — íntegro / regras / protocolo), geração em
+      `gerar.py`, ponteiro no `<ferramentas-do-harness>` da FASE 2, e item
+      **1.2 da FASE 5 mandando NÃO executá-lo**: repo recém-gerado não tem
+      histórico, e 0% de aderência ali acusa o usuário de algo que ele não
+      teve chance de fazer. O verificador cobre o script por LF e bit de
+      execução, e nunca o roda
+- [x] 40.4 `tests/test_aderencia.py`, 17 testes com histórico git sintético
+      construído commit a commit. O teste central é a separação
+      obediente × desobediente — medidor que aprova os dois não mede nada.
+      Provado por mutação: desligar o limiar de checkpoint reprova 2 testes;
+      neutralizar a comparação de grupos reprova outros 2
+- [x] 40.5 Regressão medida: `python3 tests/medir.py` nos 16 ecossistemas —
+      `tests/medicao.json` saiu **byte a byte idêntico** ao baseline
+      commitado. +67 em todos, +64 no dotnet, +52 no `sem-sensores`
+Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py` —
+706 testes (+20), ruff e mypy limpos, medição sem diff. Fora do escopo mas
+corrigido porque quebrava a DoD: o hook de formatação deste repo colapsou o
+bloco `openspec/config.yaml` do `gerar.py` em linhas de 159 chars, e o
+`ruff check` reprovou — `ruff format` e `ruff check` discordando, com o hook
+aplicando a metade que quebra. Resolvido parentetizando os valores.

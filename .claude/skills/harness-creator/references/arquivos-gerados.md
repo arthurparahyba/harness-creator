@@ -44,12 +44,39 @@ cópia, o conteúdo continua vivendo num lugar só.
 | hooks/gate-destructive.sh | `.claude/hooks/gate-destructive.sh` (chmod +x) | sempre (se não existir) |
 | hooks/format-on-edit.sh | `.claude/hooks/format-on-edit.sh` (chmod +x) | sempre (se não existir) |
 | verificar-harness.sh | `.claude/verificar-harness.sh` (chmod +x) | sempre |
+| medir-aderencia.sh | `.claude/medir-aderencia.sh` (chmod +x) | sempre |
 | pre-commit-config.yaml | `.pre-commit-config.yaml` | se não existir **e houver comandos reais de lint/format/types** |
 | dod-command.md | `.claude/commands/dod.md` | sempre (se não existir) |
 | harness-manifest.json | `.claude/harness.json` | sempre (sobrescrever se já existir) |
 | arch-rules.json | `.harness/arch-rules.json` | sempre (**se não existir** — ver FASE 3) |
 | check-arch.sh | `.claude/check-arch.sh` (chmod +x) | sempre |
 | agents/propor-regra-arch.md | `.claude/agents/propor-regra-arch.md` | sempre (se não existir) — **só Claude Code** |
+
+### Os três scripts, e por que não são um só
+
+O repositório recebe três scripts de checagem, e a diferença entre eles é o
+que impede que sejam fundidos:
+
+| Script | Pergunta | Sujeito | Quando roda |
+|---|---|---|---|
+| `verificar-harness.sh` | o harness está íntegro? | arquivos parados | FASE 5 e sob demanda |
+| `check-arch.sh` | o código respeita as regras? | árvore de trabalho | dentro da DoD |
+| `medir-aderencia.sh` | o protocolo foi seguido? | histórico do git | quando o time quiser olhar |
+
+Um harness perfeitamente instalado e integralmente ignorado passa no
+verificador com nota máxima — é essa lacuna que o medidor fecha.
+
+Ele **não entra na DoD e não é um gate**: sai 0 mesmo com todas as medidas
+em alerta. "Aderência caiu de 80% para 60%" não tem conserto no harness,
+tem conversa com o time; atrás de um exit 1 isso viraria "alguém quebrou
+alguma coisa", e a reação previsível a um vermelho que ninguém causou é
+desligar o sensor. Exit 2 fica reservado para "não consegui medir" (sem
+git, sem commit, sem fonte de trabalho).
+
+O verificador cobre o medidor pelas checagens de LF e bit de execução, e
+nunca o executa: repositório recém-gerado não tem histórico, e cobrar
+aderência dele seria reprovar o usuário por algo que ele ainda não teve
+chance de fazer.
 
 ### O manifesto (`.claude/harness.json`)
 

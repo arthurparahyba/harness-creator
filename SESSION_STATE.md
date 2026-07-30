@@ -3,11 +3,43 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `c9bf6e2` na `main`, publicado, CI verde — Grupo 39.
-- Testes: 686/686 + 4 skips explícitos; ruff e mypy strict limpos; score da
-  geração **+67** em todos os ecossistemas (+52 no `sem-sensores`).
+- Commit verificado: Grupo 40 na `feature/eval-aderencia` — **não publicado**
+  (ninguém pediu push). Antes dele: `c9bf6e2` na `main`, CI verde — Grupo 39.
+- Testes: 706/706 + 4 skips explícitos; ruff e mypy strict limpos; score da
+  geração **+67** em todos os ecossistemas (+52 no `sem-sensores`) — o
+  `tests/medicao.json` saiu byte a byte idêntico ao baseline, sem regressão.
 - Change/plano ativo: `TASKS.md` na raiz — **só o Grupo 26 aberto, e
-  BLOQUEADO** (ver pendências). Grupos 25, 27 a 39 concluídos e publicados.
+  BLOQUEADO** (ver pendências). Grupos 25, 27 a 40 concluídos.
+- Em andamento: nada — fronteira limpa. Próximo: lacunas 2, 3 e 4 do
+  `docs/intersecao-harness-engineering-x-skill.md`, nessa ordem, cada uma
+  proposta como grupo no `TASKS.md` antes de implementar. As lacunas 5 e 6
+  o usuário decidiu NÃO implementar por ora.
+
+## O que mudou nesta sessão (Grupo 40 + pesquisa)
+Duas coisas, nesta ordem:
+
+1. **`docs/` novo** — [harness-engineering.md](docs/harness-engineering.md)
+   (pesquisa das fontes primárias: Böckeler/martinfowler, Anthropic, OpenAI,
+   survey arXiv 2604.08224, awesome-list) e
+   [intersecao-harness-engineering-x-skill.md](docs/intersecao-harness-engineering-x-skill.md)
+   (42 características × o que a skill gera; placar 21 coberto / 8 parcial /
+   2 proposto / 8 ausente / 3 fora de escopo, mais 6 lacunas priorizadas).
+2. **Grupo 40** — `medir-aderencia.sh` no harness gerado.
+
+**Correção registrada:** a lacuna 1 do doc de interseção estava larga demais
+como escrita ("não há como medir se o harness melhora o comportamento"). É
+falsa: este repo tem cinco níveis de eval (A/B em `eval/score-harness.sh`,
+C em `eval/nivel-c/`, D em `evals/gradua.py`, E em `evals/triggering.json`).
+A lacuna real é estreita — nenhum deles VIAJA com o harness; todos medem a
+skill e rodam aqui. O Grupo 40 fecha só essa parte. **O doc ainda não foi
+corrigido** para a forma estreita; está na lista de pendências.
+
+**Achado do Grupo 40, medindo o próprio repositório:** a métrica de handoff
+escrita como "SESSION_STATE no MESMO commit do checkpoint" dava 4 de 17 aqui.
+Falso positivo — registrar o hash do checkpoint no arquivo obriga o commit
+dele a existir antes. Aceitando também o commit seguinte: 17 de 17. O
+medidor rodado contra este repo hoje dá 2 alertas de 4 (grupos concluídos
+37 × 34 checkpoints, e 11 de 17 no handoff).
 - Os três defeitos achados na rodada do PetClinic viraram os Grupos 34, 35 e
   36 — todos entregues. Rodar a skill num repo real pagou por si.
 - Em andamento: nada — fronteira limpa.
@@ -113,6 +145,9 @@ Verificada contra o CLI real: `npx @fission-ai/openspec@latest`, versão 1.7.0
   via `npx`. Se quiser o binário fixo: `npm install -g @fission-ai/openspec`.
 
 ## Pendências
+- **`docs/intersecao-harness-engineering-x-skill.md` precisa de correção na
+  lacuna 1** (ver acima): está na forma larga e falsa. O usuário foi
+  informado e ainda não decidiu se quer a reescrita.
 - **BLOQUEADOR: o instrumento do nível E não detecta disparo nenhum.** Teste
   de sanidade: skill `deploy-producao`, description "Use SEMPRE que o usuario
   pedir para rodar o deploy de producao", query "roda o deploy de producao

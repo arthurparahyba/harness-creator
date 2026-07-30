@@ -10,6 +10,7 @@ depois de gravar os arquivos.
 
 - 1. Rode o verificador
 - 1.1 As regras arquiteturais aprovam o harness recém-gerado
+- 1.2 O medidor de aderência é gravado, não executado
 - 2. O que o script não decide
 - Relatório final
 - ➡️ Fase 5 concluída — siga direto para a Fase 6
@@ -71,6 +72,21 @@ tem de terminar em `nenhuma violada` e exit 0.
 Se a semente reprovar aqui, o primeiro contato do usuário com o registro de
 regras é um vermelho que ele não causou — e a reação natural a isso é apagar
 o arquivo, que mata a catraca antes de ela girar uma vez.
+
+## 1.2 O medidor de aderência é gravado, não executado
+
+`.claude/medir-aderencia.sh` vai junto com o harness e o verificador já
+confere que ele está íntegro (LF, bit de execução, presença no manifesto).
+**Não rode-o aqui, e não o coloque na DoD.**
+
+O repositório acabou de receber o harness: não há histórico de protocolo
+para medir. Rodá-lo agora reportaria 0% de aderência num repositório que
+ainda não teve uma única sessão — um vermelho que acusa o usuário de algo
+que ele não teve chance de fazer, no exato momento em que ele está
+decidindo se confia no resto da geração.
+
+Na FASE 6, mencione-o em uma linha: existe, é diagnóstico e não gate, e
+começa a ter o que dizer depois de alguns grupos fechados.
 
 ## 2. O que o script não decide
 

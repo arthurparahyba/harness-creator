@@ -1,0 +1,300 @@
+#!/bin/sh
+# medir-aderencia.sh — mede se o PROTOCOLO do AGENTS.md foi seguido.
+#
+# NAO E O verificar-harness.sh, e a diferenca decide tudo o que vem abaixo:
+#
+#   verificar-harness.sh  o harness esta integro?   arquivos parados, agora
+#   check-arch.sh         o codigo respeita regras?  arvore de trabalho, agora
+#   medir-aderencia.sh    o protocolo foi seguido?   historico, ao longo do tempo
+#
+# Um harness perfeitamente instalado e integralmente ignorado passa no
+# verificador com nota maxima. E essa lacuna que este script fecha.
+#
+# POR QUE O GIT, E NAO O SESSION_STATE
+# O SESSION_STATE.md e escrito pelo mesmo agente cuja disciplina se quer
+# medir: testemunha e reu. O historico do git e subproduto — o agente
+# commita para trabalhar, nao para se avaliar —, o que o torna dificil de
+# maquiar sem esforco deliberado.
+#
+# ISTO NAO E UM GATE
+# O exit e 0 mesmo com todas as medidas em alerta. "Aderencia caiu de 80%
+# para 60%" nao tem conserto no harness: tem conversa com o time. Atras de
+# um exit 1 isso viraria "alguem quebrou alguma coisa", que e falso, e a
+# reacao previsivel a um vermelho que ninguem causou e desligar o sensor.
+# Exit 2 e reservado para "nao consegui medir", que e outra coisa.
+#
+# O QUE ELE NAO VE — declarado aqui porque um instrumento que nao declara
+# seu limite e lido como se nao tivesse nenhum:
+#   - Sessao que descarrilhou e nao commitou nada e invisivel. Git so
+#     registra o que virou commit. Isto mede a aderencia do HISTORICO, nao
+#     a das sessoes.
+#   - Qualidade. Um `checkpoint:` impecavel sobre codigo ruim marca ok.
+#     Qualidade e trabalho da DoD.
+#   - Eficacia. Se o protocolo VALE A PENA e experimento A/B, nao leitura
+#     de historico.
+#
+# POSIX sh, sem Python e sem jq: precisa rodar em repo Go, .NET ou Java, e
+# vale igual nos tres agentes-alvo (Claude Code, Devin CLI, Cursor).
+#
+# Uso:
+#   sh .claude/medir-aderencia.sh                 # tabela legivel
+#   sh .claude/medir-aderencia.sh --json          # para consumo por script
+#   sh .claude/medir-aderencia.sh --commits 100   # janela maior (padrao 30)
+#   sh .claude/medir-aderencia.sh --raiz DIR      # mede outro diretorio
+#
+# Saida: 0 = mediu (com ou sem alerta), 2 = nao consegui medir.
+set -u
+
+FORMATO=texto
+RAIZ=.
+JANELA=30
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --json) FORMATO=json ;;
+    --commits) shift; JANELA="${1:-30}" ;;
+    --raiz) shift; RAIZ="${1:-.}" ;;
+    -h|--help) sed -n '2,45p' "$0"; exit 0 ;;
+    *) echo "argumento desconhecido: $1" >&2; exit 2 ;;
+  esac
+  shift
+done
+
+cd "$RAIZ" 2>/dev/null || { echo "diretorio inacessivel: $RAIZ" >&2; exit 2; }
+
+case "$JANELA" in
+  ''|*[!0-9]*) echo "--commits espera um numero, recebeu: $JANELA" >&2; exit 2 ;;
+esac
+
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "sem repositorio git — nao ha historico para medir." >&2
+  exit 2
+fi
+
+# Repo sem commit nenhum nao e desobediencia, e ausencia de dados. Reportar
+# 0% de aderencia num scaffold recem-criado seria um vermelho que acusa o
+# usuario de algo que ele ainda nao teve chance de fazer.
+if ! git rev-parse HEAD >/dev/null 2>&1; then
+  echo "repositorio sem commits — nada para medir ainda." >&2
+  exit 2
+fi
+
+TOTAL=0
+ALERTAS=0
+SEP=""
+BUFFER=""
+if [ "$FORMATO" = json ]; then
+  BUFFER=$(mktemp 2>/dev/null || printf '/tmp/medir-aderencia.%s' $$)
+  : > "$BUFFER"
+  trap 'rm -f "$BUFFER"' EXIT INT TERM
+fi
+
+escapar() {
+  printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g' | tr '\n' ' '
+}
+
+# Cada medida imprime WHAT/WHY/FIX quando alerta, no mesmo formato que o
+# `arch-rules.json` usa. Numero solto ("aderencia: 43%") nao diz a ninguem o
+# que fazer na segunda-feira; agente que ve numero ruim sem receita tende a
+# atacar o medidor.
+medida() {
+  _nome="$1"; _alerta="$2"; _valor="$3"; _what="$4"; _why="$5"; _fix="$6"; _cego="$7"
+  TOTAL=$((TOTAL + 1))
+  [ "$_alerta" -eq 0 ] || ALERTAS=$((ALERTAS + 1))
+  if [ "$FORMATO" = json ]; then
+    if [ "$_alerta" -eq 0 ]; then _b=false; else _b=true; fi
+    printf '%s\n    {"medida": "%s", "alerta": %s, "valor": "%s", "cego_para": "%s"}' \
+      "$SEP" "$(escapar "$_nome")" "$_b" "$(escapar "$_valor")" "$(escapar "$_cego")" >> "$BUFFER"
+    SEP=","
+  else
+    if [ "$_alerta" -eq 0 ]; then _st="[ok    ]"; else _st="[ALERTA]"; fi
+    printf '%s %-38s %s\n' "$_st" "$_nome" "$_valor"
+    if [ "$_alerta" -ne 0 ]; then
+      printf '         WHAT: %s\n' "$_what"
+      printf '         WHY:  %s\n' "$_why"
+      printf '         FIX:  %s\n' "$_fix"
+    fi
+    printf '         (nao ve: %s)\n' "$_cego"
+  fi
+}
+
+# ------------------------------------------------------------- janela de log
+# `%x09` e TAB: o assunto do commit pode conter qualquer coisa, e um
+# separador que aparece no proprio texto quebraria a leitura campo a campo.
+LOG=$(mktemp 2>/dev/null || printf '/tmp/medir-aderencia-log.%s' $$)
+git log -n "$JANELA" --no-merges --format='%H%x09%s' > "$LOG" 2>/dev/null
+trap 'rm -f "$LOG" ${BUFFER:-}' EXIT INT TERM
+
+N_COMMITS=$(awk 'END {print NR}' "$LOG")
+BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
+
+if [ "$FORMATO" != json ]; then
+  printf 'ADERENCIA AO PROTOCOLO — %s commit(s) em %s\n\n' "$N_COMMITS" "$BRANCH"
+fi
+
+# --------------------------------------------- 1. proporcao de checkpoints
+# O protocolo manda "um commit por grupo concluido: checkpoint: <nome>".
+# A proporcao e a leitura mais direta de quanto do trabalho passou pela
+# fronteira de grupo — e a fronteira e o que torna o reset de contexto
+# seguro. Sem ela o WIP=1 vira texto.
+N_CHECK=$(awk -F'\t' '$2 ~ /^checkpoint:/ {n++} END {print n+0}' "$LOG")
+if [ "$N_COMMITS" -gt 0 ]; then
+  PCT=$(( N_CHECK * 100 / N_COMMITS ))
+else
+  PCT=0
+fi
+# 50% e um limiar declarado, nao descoberto: abaixo dele a maior parte do
+# trabalho nao passou por checkpoint, e a fronteira deixou de ser a regra.
+if [ "$PCT" -lt 50 ]; then _a=1; else _a=0; fi
+medida "Commits de checkpoint" "$_a" "$N_CHECK de $N_COMMITS ($PCT%)" \
+  "a maioria dos commits nao segue 'checkpoint: <nome do grupo>'" \
+  "sem a fronteira de grupo nao ha ponto limpo para reiniciar contexto — o beneficio central do WIP=1 nao esta acontecendo" \
+  "feche o proximo grupo com a DoD e commite com o prefixo 'checkpoint: '" \
+  "commit de merge e commit fora da janela de $JANELA"
+
+# ------------------------------- 2. grupo concluido sem commit de checkpoint
+# Fonte de trabalho na precedencia do AGENTS.md: change ativa do OpenSpec
+# primeiro, TASKS.md depois. Medir a fonte errada produziria zero grupos e
+# um falso ok.
+FONTE=""
+if [ -d openspec/changes ]; then
+  for d in openspec/changes/*/; do
+    [ -d "$d" ] || continue
+    case "$d" in */archive/) continue ;; esac
+    [ -f "$d/tasks.md" ] && FONTE="$FONTE $d/tasks.md"
+  done
+fi
+if [ -z "$FONTE" ] && [ -f TASKS.md ]; then FONTE="TASKS.md"; fi
+
+if [ -z "$FONTE" ]; then
+  medida "Grupos concluidos com checkpoint" 1 "sem fonte de trabalho" \
+    "nao ha TASKS.md nem change ativa em openspec/changes/" \
+    "sem fonte de trabalho o agente inventa tarefas, que e o que o protocolo proibe — e nao ha o que comparar com o historico" \
+    "crie TASKS.md com ao menos um grupo no formato '## Grupo N - <objetivo>'" \
+    "plano que vive fora do repositorio (issue tracker, documento)"
+else
+  # Um grupo esta concluido quando TODAS as suas tasks estao marcadas. E a
+  # definicao que sai do proprio template (`- [ ]` / `- [x]`), e nao do
+  # simbolo de status no titulo, que e convencao de cada repo.
+  CONCLUIDOS=$(awk '
+    function fecha() {
+      if (nome == "") return
+      if (feitas > 0 && abertas == 0) print nome
+      nome = ""; feitas = 0; abertas = 0
+    }
+    /^##[[:space:]]+Grupo[[:space:]]/ { fecha(); nome = $0; next }
+    /^[[:space:]]*-[[:space:]]*\[[ xX]\]/ {
+      if (nome == "") next
+      if ($0 ~ /\[[xX]\]/) feitas++; else abertas++
+    }
+    END { fecha() }
+  ' $FONTE | awk 'END {print NR}')
+  # Historico INTEIRO, nao a janela: grupos se acumulam ao longo da vida do
+  # projeto, e comparar o total deles com uma amostra de 30 commits acusaria
+  # todo repositorio maduro.
+  CHECK_TOTAL=$(git log --no-merges --format='%s' 2>/dev/null \
+                | awk '/^checkpoint:/ {n++} END {print n+0}')
+  if [ "$CONCLUIDOS" -gt "$CHECK_TOTAL" ]; then _a=1; else _a=0; fi
+  medida "Grupos concluidos com checkpoint" "$_a" \
+    "$CONCLUIDOS concluido(s), $CHECK_TOTAL checkpoint(s)" \
+    "ha grupo marcado como concluido sem commit de checkpoint correspondente" \
+    "marcar a caixinha sem fechar o checkpoint faz 'concluido' voltar a ser opiniao, que e exatamente o que a DoD existe para impedir" \
+    "confira se o trabalho de cada grupo marcado esta commitado antes de marca-lo" \
+    "QUAL grupo ficou sem checkpoint — a comparacao e de contagem, nao de nome"
+fi
+
+# ----------------------------------------- 3. SESSION_STATE nos checkpoints
+# O protocolo manda atualizar o SESSION_STATE.md ao concluir cada grupo.
+# Checkpoint sem handoff deixa a proxima sessao comecando cega, que e o modo
+# de falha que o arquivo existe para evitar.
+#
+# O HANDOFF PODE VIR NO COMMIT SEGUINTE, e a medida aceita os dois casos. O
+# protocolo diz "atualize o SESSION_STATE" ao concluir o grupo, sem exigir
+# que seja no mesmo commit — e registrar o hash do checkpoint no arquivo
+# obriga o commit dele a existir antes. Exigir o mesmo commit acusaria de
+# desobediencia quem seguiu o protocolo ao pe da letra: medido contra o
+# proprio repositorio da skill, era 4 de 17 pela regra estrita e 17 de 17
+# pela regra correta. Uma medida com falso positivo desse tamanho e
+# desligada na primeira semana, e leva o resto do relatorio junto.
+if [ "$N_CHECK" -gt 0 ]; then
+  COM_ESTADO=0
+  # Para cada checkpoint, o par (ele, seu sucessor cronologico). O log vem do
+  # mais novo para o mais antigo, entao o sucessor e a LINHA ANTERIOR.
+  PARES=$(awk -F'\t' '$2 ~ /^checkpoint:/ {print $1 "\t" prev} {prev = $1}' "$LOG")
+  printf '%s\n' "$PARES" | while IFS="$(printf '\t')" read -r sha seguinte; do
+    [ -n "${sha:-}" ] || continue
+    _achou=0
+    for _c in "$sha" "${seguinte:-}"; do
+      [ -n "$_c" ] || continue
+      if git show --name-only --format='' "$_c" 2>/dev/null \
+         | grep -q '^SESSION_STATE\.md$'; then
+        _achou=1
+        break
+      fi
+    done
+    echo "$_achou"
+  done > "$LOG.estado"
+  COM_ESTADO=$(awk '/^1$/ {n++} END {print n+0}' "$LOG.estado")
+  rm -f "$LOG.estado"
+  if [ "$COM_ESTADO" -lt "$N_CHECK" ]; then _a=1; else _a=0; fi
+  medida "SESSION_STATE nos checkpoints" "$_a" "$COM_ESTADO de $N_CHECK" \
+    "ha checkpoint sem atualizacao do SESSION_STATE.md nele nem no commit seguinte" \
+    "sem o handoff a proxima sessao comeca sem saber o que foi feito, o que travou nem qual e a proxima acao — o custo aparece so na sessao seguinte" \
+    "atualize o SESSION_STATE.md ao fechar o grupo (hash, testes X/Y, bloqueios, proxima acao)" \
+    "se o conteudo do handoff e util — so que o arquivo foi tocado"
+else
+  medida "SESSION_STATE nos checkpoints" 0 "sem checkpoint na janela" \
+    "" "" "" \
+    "nada: nao houve checkpoint nos ultimos $JANELA commits"
+fi
+
+# ------------------------------------------------ 4. escopo dos checkpoints
+# "MUST NOT: tocar em arquivos fora do escopo do grupo atual". Um checkpoint
+# com dezenas de arquivos nao e um grupo de 2-5 tasks. E SINAL, nao prova:
+# renomear um diretorio move dezenas de arquivos legitimamente. Por isso o
+# limiar e alto e a medida diz o que e.
+if [ "$N_CHECK" -gt 0 ]; then
+  CONTAGENS=$(mktemp 2>/dev/null || printf '/tmp/medir-aderencia-esc.%s' $$)
+  : > "$CONTAGENS"
+  while IFS="$(printf '\t')" read -r sha assunto; do
+    case "$assunto" in
+      checkpoint:*) ;;
+      *) continue ;;
+    esac
+    git show --name-only --format='' "$sha" 2>/dev/null \
+      | sed '/^$/d' | awk 'END {print NR}' >> "$CONTAGENS"
+  done < "$LOG"
+  ESC=$(sort -n "$CONTAGENS" | awk '
+    { v[NR] = $1 }
+    END {
+      if (NR == 0) { print "0 0"; exit }
+      m = (NR % 2) ? v[(NR + 1) / 2] : int((v[NR / 2] + v[NR / 2 + 1]) / 2)
+      print m, v[NR]
+    }')
+  rm -f "$CONTAGENS"
+  MEDIANA=$(echo "$ESC" | cut -d' ' -f1)
+  MAXIMO=$(echo "$ESC" | cut -d' ' -f2)
+  if [ "$MAXIMO" -gt 40 ]; then _a=1; else _a=0; fi
+  medida "Escopo dos checkpoints" "$_a" "mediana $MEDIANA arquivo(s), maximo $MAXIMO" \
+    "ha checkpoint alterando mais de 40 arquivos" \
+    "grupo de 2-5 tasks nao costuma tocar tantos arquivos; o padrao provavel e varios grupos fechados num commit so, o que anula a fronteira de reset" \
+    "confira o commit maior: se ele juntou grupos, divida os proximos; se foi renomeacao em massa, ignore este alerta" \
+    "a diferenca entre escopo estourado e refatoracao legitima — isto e sinal, nao prova"
+else
+  medida "Escopo dos checkpoints" 0 "sem checkpoint na janela" \
+    "" "" "" \
+    "nada: nao houve checkpoint nos ultimos $JANELA commits"
+fi
+
+# ---------------------------------------------------------------------- saida
+if [ "$FORMATO" = json ]; then
+  printf '{\n  "commits_analisados": %s,\n  "medidas": %s,\n  "alertas": %s,\n  "resultado": [' \
+    "$N_COMMITS" "$TOTAL" "$ALERTAS"
+  cat "$BUFFER"
+  printf '\n  ]\n}\n'
+else
+  printf '\n%s de %s medida(s) em alerta.\n' "$ALERTAS" "$TOTAL"
+  printf 'Diagnostico, nao gate: o exit e 0 mesmo com alerta.\n'
+  printf 'Mede o historico commitado — sessao que nao commitou e invisivel aqui.\n'
+fi
+
+exit 0

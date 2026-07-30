@@ -122,6 +122,8 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
   - Para verificar a Definition of Done: comando `/dod`.
   - Hooks de agent loop ativos: gate de comandos destrutivos e formatação
     automática a cada edição.
+  - Para conferir se o protocolo vem sendo seguido:
+    `sh .claude/medir-aderencia.sh` (diagnóstico, não gate).
   ```
   Sem esses ponteiros a corrente arrebenta no meio: a skill `executar-grupo`
   guarda o procedimento inteiro e só é carregada se o agente souber que ela
