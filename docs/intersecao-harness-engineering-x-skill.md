@@ -4,12 +4,19 @@
 > As características vêm do glossário de [harness-engineering.md](harness-engineering.md);
 > a coluna da skill foi verificada lendo `SKILL.md`, `references/` e `resources/`.
 >
-> **Revisado em 2026-07-30**, depois de duas imprecisões achadas ao tentar
-> transformar as lacunas em trabalho. As duas eram do mesmo tipo — eu marquei
-> como ausência o que era, num caso, medição que existe e mora noutro lugar; no
-> outro, decisão explícita do usuário. O registro de ambas ficou no texto em vez
-> de ser apagado: uma análise que esconde as próprias correções não serve para
-> decidir nada. Ver "Correções" no fim.
+> **Revisado em 2026-07-30**, duas vezes:
+>
+> 1. Depois de duas imprecisões achadas ao tentar transformar as lacunas em
+>    trabalho. As duas eram do mesmo tipo — eu marquei como ausência o que
+>    era, num caso, medição que existe e mora noutro lugar; no outro, decisão
+>    explícita do usuário. O registro de ambas ficou no texto em vez de ser
+>    apagado: uma análise que esconde as próprias correções não serve para
+>    decidir nada. Ver "Correções" no fim.
+> 2. Depois de executados os **Grupos 40, 41 e 42**, que fecharam as lacunas
+>    1, 3 e 4. As linhas afetadas trazem o número do grupo. O placar passou a
+>    ser **contado** a partir das tabelas, não somado de cabeça — as duas
+>    versões anteriores dele estavam erradas, o que é a mesma categoria de
+>    descuido que a seção Correções documenta.
 
 Legenda de cobertura:
 
@@ -43,7 +50,7 @@ Legenda de cobertura:
 | **Plano como artefato** — o trabalho vive num arquivo, não no chat | Fonte de trabalho com precedência: `openspec/changes/<ativa>/tasks.md` → `TASKS.md`. Regra: "nunca invente tarefas fora da fonte ativa" | **Coberto** |
 | **Plan-and-execute** — planejar separado de executar | Gate explícito: se o pedido não está coberto pela fonte de trabalho, o agente PARA e propõe antes de editar qualquer arquivo | **Coberto** |
 | **Task decomposition com marcos** | Grupos de 2-5 tasks, cada um com linha `Verificação:` executável e dependências declaradas entre grupos | **Coberto** |
-| **Progressive disclosure de contexto** | A própria skill lê uma fase por vez; o harness gerado tira procedimento e escopo do arquivo sempre-lido | **Coberto** no design; **Ausente** como instrução ao agente do repo alvo |
+| **Progressive disclosure de contexto** | A própria skill lê uma fase por vez, e o harness gerado tira procedimento e escopo do arquivo sempre-lido. O que não existe é instrução ao agente do repo alvo para aplicar o princípio no trabalho dele | **Parcial** — aplicado no desenho, não ensinado |
 | **Restrições arquiteturais mecânicas** (as "camadas" do Codex) | `.harness/arch-rules.json` — regras com `check`, `expect`, `what`, `why`, `fix` — mais o subagente `propor-regra-arch` para adicionar novas | **Coberto** |
 
 ---
@@ -101,21 +108,22 @@ fornecedor do agente, não do repositório.
 
 | Característica esperada | O que a skill constrói | Cobertura |
 |---|---|---|
-| **Guardrails de ação destrutiva** | `gate-destructive.sh` — exit 2 bloqueia. Registrado nos três agentes-alvo (`.claude/settings.json`, `.devin/hooks.v1.json`, `.cursor/hooks.json` com `failClosed`) | **Coberto** |
-| **Fail-closed** — gate quebrado não pode liberar | `failClosed` no Cursor; fallback em awk nos scripts para não depender de Python; regra A01/A02 valida sintaxe do hook | **Coberto** — é o tipo de detalhe que a maioria dos harnesses erra |
-| **Higiene de segredos** | Credencial literal de MCP vira `${VAR}` (regra nº 4); `.env` no `.gitignore`; `.env.example` recomendado; rotação do segredo exposto reportada como decisão humana | **Coberto** |
-| **Permissions / approval tiers** | Só o binário do gate destrutivo | **Parcial** — não há gradação por risco |
+| **Guardrails de ação destrutiva** | `gate-destructive.sh`, registrado nos três agentes-alvo. Os padrões saíram do script para `.harness/gate-rules.json` no Grupo 42 | **Coberto** |
+| **Fail-closed** — gate quebrado não pode liberar | `failClosed` no Cursor; fallback em awk nos scripts; regras A01/A02 validam sintaxe; e o gate cai numa lista embutida se o registro sumir, ficar ilegível ou perder todas as regras de bloqueio | **Coberto** — é o tipo de detalhe que a maioria dos harnesses erra |
+| **Higiene de segredos** | Credencial de MCP vira `${VAR}`; `.env` no `.gitignore`; rotação reportada como decisão humana. E o trace de sessão redige o comando por lista de permissão, para não gravar credencial em disco | **Coberto** |
+| **Permissions / approval tiers** | Três níveis no `gate-rules.json`: `permitir` (exceção ancorada, precede `bloquear`), `bloquear` (exit 2 com WHAT/WHY/FIX), `avisar` (passa, mas grava `risco` no trace) | **Coberto** — Grupo 42 |
+| **Proteção do próprio enforcement** | Regras `G01`/`G02`: a DoD **executa** o gate a cada grupo e exige exit 2 no destrutivo e 0 no seguro. Detecção, porque prevenção não é portátil — o Cursor não tem evento de pré-edição de arquivo | **Coberto** — Grupo 42; não estava na tabela original |
 | **Sandbox / workspace isolado** | Nada | **Ausente** |
 | **Human-in-the-loop** | Uma pausa de aprovação na FASE 4; no harness gerado, o "PARE após o commit" e o gate de proposta de plano | **Coberto** |
-| **Observability / tracing do agente** | Nada | **Ausente** |
-| **Telemetry-driven development** | Nada | **Ausente** |
-| **Evals do harness** | `medir-aderencia.sh`, entregue no Grupo 40: lê git log, fonte de trabalho e SESSION_STATE, e reporta quatro medidas de aderência ao protocolo. Diagnóstico, não gate | **Parcial** — mede aderência do histórico commitado, não eficácia; sessão que não commitou é invisível |
+| **Observability / tracing do agente** | `registrar-sessao.sh`, Grupo 41: uma linha por chamada de ferramenta em `.harness/trace/`, nos três agentes. Sai 0 sempre e nunca com `failClosed` — observação não pode custar o enforcement | **Coberto** — para chamadas de ferramenta |
+| **Telemetry-driven development** | O trace registra o que a sessão fez, mas nada consome isso para reproduzir bug | **Ausente** |
+| **Evals do harness** | `medir-aderencia.sh`: quatro medidas sobre o git (Grupo 40), a quinta sobre o trace (Grupo 41) e a sexta sobre risco dos comandos (Grupo 42). Diagnóstico, não gate | **Parcial** — mede aderência e risco, não eficácia; para isso continua sendo preciso o A/B do nível C |
 
 ---
 
 ## 7. O que a skill tem e a literatura não discute
 
-Três coisas aparecem aqui e não no vocabulário estabelecido. Valem como
+Cinco coisas aparecem aqui e não no vocabulário estabelecido. Valem como
 contribuição própria:
 
 - **Meta-harness verificado** — `verificar-harness.sh` (316 linhas) checa o
@@ -130,24 +138,51 @@ contribuição própria:
 - **Portabilidade entre agentes-alvo** — os mesmos scripts registrados em
   três formatos de hook, com leitura dos dois layouts de JSON. Quase toda
   a literatura assume um agente só.
+- **Enforcement que se prova a cada grupo** — as regras `G01`/`G02` executam
+  o gate dentro da DoD. A literatura discute guardrails como coisa que se
+  configura; aqui a configuração é verificada em toda rodada, porque quem
+  pode enfraquecê-la é justamente quem ela vigia. O par importa: a G01
+  sozinha é satisfeita por um gate que bloqueia tudo.
+- **A distinção prevenção × detecção como decisão de portabilidade** — o
+  Cursor não tem evento de pré-edição de arquivo, então proteger o gate
+  contra edição não valeria nos três agentes. Em vez de entregar
+  enforcement parcial, a skill previne no shell e detecta no resto. A
+  literatura trata guardrail como capacidade uniforme; na prática ela é
+  desigual entre agentes, e o desenho precisa dizer onde.
 
 ---
 
 ## Placar
 
+Contado a partir das tabelas acima, não somado de cabeça — as duas versões
+anteriores deste placar estavam erradas por aritmética minha, o que é a mesma
+categoria de descuido que a seção Correções documenta. O comando abaixo
+recontá-lo, e **reprova linha ambígua**: contar expôs uma característica
+marcada como Coberto *e* Ausente ao mesmo tempo, que por isso não era
+contável por ninguém — virou Parcial, que é o que ela sempre foi.
+
+```
+awk -F'|' '/^\|/ && NF==5 && $4 !~ /---|Cobertura/ {print $4}' \
+  docs/intersecao-harness-engineering-x-skill.md | sed 's/\*\*//g'
+```
+
 | Cobertura | Nº de características |
 |---|---|
-| Coberto | 21 |
-| Parcial | 10 |
+| Coberto | 24 |
+| Parcial | 9 |
 | Proposto (diagnosticado, não gerado) | 2 |
-| Ausente | 6 |
+| Ausente | 4 |
 | Fora de escopo (deliberado) | 3 |
+| **Total** | **42** |
 
-O padrão é nítido: **a skill é forte onde o harness é de repositório**
-(instrução, guides, sensors, continuidade, guardrails) e vazia onde o
-harness é de runtime (loop, contexto, tracing) — o que é a divisão correta
-entre inner e outer harness. As ausências que *não* seguem esse padrão são
-as que valem discutir.
+**As quatro ausências restantes são todas de runtime**: sandbox, tool design,
+progressive token budgeting e telemetry-driven development. As três primeiras
+são inner harness — vêm do fornecedor do agente, não do repositório. Só a
+última é outer harness de verdade.
+
+Isso confirma a leitura original e a torna mais forte: a skill cobre o que é
+harness *de repositório*, e o que sobra está do outro lado da fronteira entre
+inner e outer harness. Não há mais nenhuma ausência do tipo "foi esquecido".
 
 ---
 
@@ -165,19 +200,26 @@ Remediação da própria skill:
    `propor-regra-arch` é gerado e é inferencial; o revisor com veredito foi
    removido por decisão do usuário no Grupo 28, com o custo medido.
    Resíduo legítimo, menor: a camada inferencial vale só para Claude Code.
-3. **Observability do agente** — sem trace, um grupo que descarrilha só
-   deixa o `SESSION_STATE.md`, que é escrito pelo próprio agente que
-   descarrilhou. O `medir-aderencia.sh` reduziu isso, mas só para o que
-   virou commit: sessão que rodou duas horas e desistiu continua invisível.
-   **É a lacuna nº 1 hoje.**
-4. **Approval tiers** — o gate é binário. Uma gradação por risco reduziria
-   tanto o falso bloqueio quanto o falso verde.
+3. ~~**Observability do agente**~~ — **fechada pelo Grupo 41.** O
+   `registrar-sessao.sh` grava uma linha por chamada de ferramenta,
+   independente de o agente commitar, cooperar ou chegar ao fim; a medida 5
+   do `medir-aderencia.sh` lê isso e detecta sessão que editou e não
+   commitou. Continua fora: raciocínio, custo, e se a edição foi descartada
+   depois — o trace vê chamada de ferramenta, não intenção.
+4. ~~**Approval tiers**~~ — **fechada pelo Grupo 42.** Três níveis em
+   `.harness/gate-rules.json`, exceções ancoradas, e as regras `G01`/`G02`
+   executando o gate na cadeia da DoD. Prevenção onde é portátil, detecção
+   onde não é.
 5. **Progressive disclosure no repo alvo** — a skill aplica o princípio em
-   si mesma, mas não o ensina ao harness que gera.
-6. **Sandbox** — provavelmente fora de escopo de verdade (é do runtime),
-   mas hoje isso não está registrado como decisão em lugar nenhum.
+   si mesma, mas não o ensina ao harness que gera. **Em aberto por decisão
+   do usuário**, que quis entender melhor antes.
+6. **Sandbox** — é do runtime, então provavelmente fora de escopo de verdade;
+   mas isso não está registrado como decisão em lugar nenhum, e ausência sem
+   motivo escrito é indistinguível de esquecimento. **Em aberto.**
 
-O usuário decidiu implementar até a 4 e deixar 5 e 6 em aberto.
+A sequência 1–4 foi executada. As lacunas 1 e 2 não viraram código pelo
+motivo esperado: a 1 foi reduzida à forma estreita e a 2 cancelada — as duas
+por erro de análise, não por mudança de escopo (ver Correções).
 
 ---
 
