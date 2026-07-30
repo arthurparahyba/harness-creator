@@ -389,7 +389,9 @@ def gerar(nome: str, destino: Path) -> Stack:
                     "- Para fechar um grupo do plano: skill `executar-grupo` (passo a passo).\n"
                     "- Para verificar a Definition of Done: comando `/dod`.\n"
                     "- Hooks de agent loop ativos: gate de comandos destrutivos e formatação\n"
-                    "  automática a cada edição."
+                    "  automática a cada edição.\n"
+                    "- Para conferir se o protocolo vem sendo seguido:\n"
+                    "  `sh .claude/medir-aderencia.sh` (diagnóstico, não gate)."
                 ),
             },
             remove_exemplos=True,
@@ -445,6 +447,11 @@ def gerar(nome: str, destino: Path) -> Stack:
     # dependem de test runner nenhum. O que não vai, sem sensores, é a DoD que
     # os executa — ver `dod_gerada`.
     _grava(destino, ".harness/arch-rules.json", (RESOURCES / "arch-rules.json").read_text())
+    # Registro de risco do gate. Vai junto do arch-rules e pelo mesmo motivo:
+    # o que precisa ser ajustado por repositório não pode morar dentro de um
+    # script. A defesa contra edição maliciosa é a regra G01, que executa o
+    # gate na cadeia da DoD.
+    _grava(destino, ".harness/gate-rules.json", (RESOURCES / "gate-rules.json").read_text())
     _grava(destino, ".claude/check-arch.sh", (RESOURCES / "check-arch.sh").read_text())
     (destino / ".claude/check-arch.sh").chmod(0o755)
     # Regra de honestidade da FASE 2: sem sensores, a DoD fica vazia e o
@@ -489,7 +496,12 @@ def gerar(nome: str, destino: Path) -> Stack:
         *(() if usa_openspec else (("TASKS.md", "TASKS.md"),)),
         ("editorconfig-base", ".editorconfig"),
         ("hooks/gate-destructive.sh", ".claude/hooks/gate-destructive.sh"),
+        # Vai SEMPRE, inclusive onde o `format-on-edit.sh` não vai: observar
+        # não depende de o formatter escopar por arquivo, e é justamente no
+        # repo com menos enforcement que saber o que a sessão fez vale mais.
+        ("hooks/registrar-sessao.sh", ".claude/hooks/registrar-sessao.sh"),
         ("verificar-harness.sh", ".claude/verificar-harness.sh"),
+        ("medir-aderencia.sh", ".claude/medir-aderencia.sh"),
         ("skills/executar-grupo/SKILL.md", ".claude/skills/executar-grupo/SKILL.md"),
         ("CLAUDE.md", "CLAUDE.md"),
         ("CLAUDE.md", f"{stack.dir_escopo}/CLAUDE.md"),
@@ -511,20 +523,25 @@ def gerar(nome: str, destino: Path) -> Stack:
         _grava(destino, alvo, json.dumps(cfg, indent=2, ensure_ascii=False) + "\n")
 
     if usa_openspec:
+        # Os valores vão entre parênteses porque os marcadores em prosa são
+        # longos: sem eles o `ruff format` colapsa cada par numa linha só e o
+        # `ruff check` reprova por E501 — as duas metades da mesma ferramenta
+        # discordando, com o hook de formatação aplicando a que quebra a DoD.
+        subs_openspec = {
+            "<stack e ferramentas de teste/lint/types descobertas — 2-3 linhas>": (
+                f"Fixture {nome}. Verificação: {stack.dod_gerada}."
+            ),
+            "<comandos reais do repo encadeados com && — idênticos ao AGENTS.md>": (
+                stack.dod_gerada
+            ),
+            "<3-6 restrições — idênticas às do AGENTS.md, derivadas do repo real>": (
+                "- Não editar artefato de build\n  - Não alterar o lockfile à mão"
+            ),
+        }
         _grava(
             destino,
             "openspec/config.yaml",
-            _preenche(
-                "openspec-config.yaml",
-                {
-                    "<stack e ferramentas de teste/lint/types descobertas — 2-3 linhas>":
-                        f"Fixture {nome}. Verificação: {stack.dod_gerada}.",
-                    "<comandos reais do repo encadeados com && — idênticos ao AGENTS.md>":
-                        stack.dod_gerada,
-                    "<3-6 restrições — idênticas às do AGENTS.md, derivadas do repo real>":
-                        "- Não editar artefato de build\n  - Não alterar o lockfile à mão",
-                },
-            ),
+            _preenche("openspec-config.yaml", subs_openspec),
         )
 
     # O agente cita a branch base no comando de diff, então não é cópia crua:
@@ -538,8 +555,10 @@ def gerar(nome: str, destino: Path) -> Stack:
     scripts = (
         "init.sh",
         ".claude/hooks/gate-destructive.sh",
-        *(( ".claude/hooks/format-on-edit.sh",) if stack.escopa_por_arquivo else ()),
+        ".claude/hooks/registrar-sessao.sh",
+        *((".claude/hooks/format-on-edit.sh",) if stack.escopa_por_arquivo else ()),
         ".claude/verificar-harness.sh",
+        ".claude/medir-aderencia.sh",
     )
     for script in scripts:
         (destino / script).chmod(0o755)
@@ -551,9 +570,15 @@ def gerar(nome: str, destino: Path) -> Stack:
             newline="\n",
         )
 
+    # O ignore é do SUBDIRETÓRIO `trace/`, nunca de `.harness/`: as regras
+    # arquiteturais moram em `.harness/arch-rules.json` e são versionadas de
+    # propósito — é o registro que faz cada classe de erro ser cometida uma
+    # vez só. Ignorar `.harness/` inteiro mataria isso junto com o trace.
     gitignore = destino / ".gitignore"
     gitignore.write_text(
-        gitignore.read_text() + "\n# Environment files (never commit credentials)\n.env\n.env.*\n",
+        gitignore.read_text()
+        + "\n# Environment files (never commit credentials)\n.env\n.env.*\n"
+        + "\n# Agent session trace (local, never commit)\n.harness/trace/\n",
         newline="\n",
     )
 

@@ -6,6 +6,10 @@
         {
           "type": "command",
           "command": ".claude/hooks/gate-destructive.sh"
+        },
+        {
+          "type": "command",
+          "command": ".claude/hooks/registrar-sessao.sh"
         }
       ]
     }
@@ -17,6 +21,10 @@
         {
           "type": "command",
           "command": ".claude/hooks/format-on-edit.sh"
+        },
+        {
+          "type": "command",
+          "command": ".claude/hooks/registrar-sessao.sh"
         }
       ]
     }

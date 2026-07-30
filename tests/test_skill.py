@@ -747,6 +747,60 @@ def test_verificador_aprova_harness_recem_gerado(tmp_path: Path) -> None:
     assert r.returncode == 0, f"verificador reprovou geração limpa:\n{r.stdout}"
 
 
+def test_medidor_de_aderencia_fica_fora_da_dod(tmp_path: Path) -> None:
+    """A separação que define o medidor: ele NÃO é um gate.
+
+    Na cadeia da DoD, um repositório recém-gerado — sem histórico de protocolo
+    para medir — reprovaria por algo que o usuário ainda não teve chance de
+    fazer. E "aderência caiu de 80% para 60%" não tem conserto no harness, tem
+    conversa com o time; atrás de um exit != 0 isso vira "alguém quebrou
+    alguma coisa". Vermelho que ninguém causou faz o time desligar o sensor.
+    """
+    import gerar
+
+    repo = tmp_path / "node"
+    stack = gerar.gerar("node", repo)
+    assert "medir-aderencia" not in stack.dod_gerada, "o medidor entrou na DoD"
+
+    # No AGENTS.md a varredura é do BLOCO da DoD, não do arquivo: o ponteiro
+    # em "Ferramentas deste harness" é justamente o que torna o medidor
+    # alcançável, e cobrá-lo como violação inverteria o requisito.
+    agents = (repo / "AGENTS.md").read_text()
+    corpo = agents.split("## Definition of Done", 1)[1]
+    bloco_dod = corpo.split("```")[1]
+    assert "medir-aderencia" not in bloco_dod, "o medidor entrou na cadeia da DoD do AGENTS.md"
+
+    # Estes dois arquivos são a DoD inteira, então a varredura é do arquivo.
+    for rel in (".claude/commands/dod.md", ".github/workflows/harness-dod.yml"):
+        assert "medir-aderencia" not in (repo / rel).read_text(), (
+            f"{rel} coloca o medidor na cadeia de verificação"
+        )
+
+
+def test_medidor_de_aderencia_e_alcancavel_pelo_agents(tmp_path: Path) -> None:
+    """O AGENTS.md é o único arquivo lido sempre. Artefato que não é apontado
+    dali é gravado e nunca alcançado — o mesmo modo de falha já catalogado na
+    tabela de diagnóstico do SKILL.md para o `<ferramentas-do-harness>` vazio.
+    """
+    import gerar
+
+    repo = tmp_path / "node"
+    gerar.gerar("node", repo)
+    assert "medir-aderencia" in (repo / "AGENTS.md").read_text(), (
+        "o medidor foi gravado sem ponteiro no AGENTS.md"
+    )
+
+
+def test_fase_5_manda_nao_executar_o_medidor() -> None:
+    """A FASE 5 roda o verificador e o check-arch, e precisa dizer
+    explicitamente que o medidor é exceção. Sem isso o agente executa tudo que
+    encontra gravado e apresenta 0% de aderência como resultado da geração,
+    no exato momento em que o usuário decide se confia no resto."""
+    texto = (SKILL / "references" / "05-verificacao-pos-geracao.md").read_text()
+    assert "medir-aderencia" in texto, "FASE 5 não menciona o medidor"
+    assert "Não rode-o aqui" in texto, "FASE 5 não proíbe executar o medidor"
+
+
 def test_verificador_reprova_repo_sem_harness(tmp_path: Path) -> None:
     """Checagem que passa em diretório vazio não mede nada. As de ponte e de
     hooks registrados passavam por vacuidade: sem nenhum AGENTS.md, "todo
@@ -929,9 +983,7 @@ def test_skill_md_nao_tem_secao_de_resumo_de_si_mesma() -> None:
     tomada — um resumo do que a skill faz não muda nenhuma ação seguinte.
     """
     corpo = SKILL.joinpath("SKILL.md").read_text()
-    assert "## TL;DR" not in corpo, (
-        "TL;DR de volta: descreve a skill para quem já a carregou"
-    )
+    assert "## TL;DR" not in corpo, "TL;DR de volta: descreve a skill para quem já a carregou"
 
 
 def test_fase_1_descobre_prefixo_e_politica_por_comando_git() -> None:
@@ -1008,9 +1060,7 @@ def test_frontmatter_pre_aprova_o_que_a_fase_5_executa() -> None:
     fm = yaml.safe_load(m.group(1))
     permitidas = fm.get("allowed-tools", "")
     for script in ("verificar-harness.sh", "check-arch.sh", "gate-destructive.sh"):
-        assert script in permitidas, (
-            f"a FASE 5 executa `{script}` e ele não está em allowed-tools"
-        )
+        assert script in permitidas, f"a FASE 5 executa `{script}` e ele não está em allowed-tools"
 
 
 def test_frontmatter_declara_compatibilidade() -> None:

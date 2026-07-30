@@ -116,7 +116,10 @@ def test_todo_registro_de_hook_aponta_para_script_executavel(
             assert script.is_file(), f"{rel} aponta para script inexistente: {ref}"
             assert os.access(script, os.X_OK), f"{rel} aponta para script não executável: {ref}"
             encontrados.add(script.name)
-    esperados = {"gate-destructive.sh"}
+    # `registrar-sessao.sh` é incondicional: observar não depende de o
+    # formatter escopar por arquivo, e é no repo com menos enforcement que
+    # saber o que a sessão fez vale mais.
+    esperados = {"gate-destructive.sh", "registrar-sessao.sh"}
     if (destino / ".claude/hooks/format-on-edit.sh").exists():
         esperados.add("format-on-edit.sh")
     assert encontrados == esperados
@@ -465,8 +468,7 @@ def test_agente_propositor_nao_pode_escrever(repo: tuple[Path, Stack, str]) -> N
     ferramentas = {x.strip() for x in m.group(1).split(",")}
     proibidas = {"Write", "Edit", "MultiEdit", "NotebookEdit"}
     assert not (ferramentas & proibidas), (
-        f"{nome}: agente propositor com ferramenta de escrita: "
-        f"{sorted(ferramentas & proibidas)}"
+        f"{nome}: agente propositor com ferramenta de escrita: {sorted(ferramentas & proibidas)}"
     )
 
 
@@ -540,9 +542,40 @@ def test_verificador_ignora_a_propria_skill_instalada_no_alvo(
         check=False,
     )
     assert r.returncode == 0, (
-        f"{nome}: verificador reprovou por causa da skill instalada no alvo:\n"
-        f"{r.stdout}"
+        f"{nome}: verificador reprovou por causa da skill instalada no alvo:\n{r.stdout}"
     )
+
+
+def test_gitignore_cobre_trace_mas_nao_as_regras(repo: tuple[Path, Stack, str]) -> None:
+    """O ignore é do subdiretório `.harness/trace/`, nunca de `.harness/`.
+
+    As duas coisas moram sob `.harness/` e têm destinos opostos: o trace é
+    dado de sessão local — commitá-lo publica o que cada pessoa rodou e gera
+    conflito em toda sessão paralela —, enquanto `arch-rules.json` é
+    versionado de propósito, porque é o registro que faz cada classe de erro
+    ser cometida uma vez só. Um `.harness/` no `.gitignore` mataria a catraca
+    junto com o log, e ninguém perceberia até a regra sumir do repo de outra
+    pessoa.
+    """
+    destino, _, nome = repo
+    linhas = [ln.strip() for ln in (destino / ".gitignore").read_text().splitlines()]
+    assert ".harness/trace/" in linhas, f"{nome}: trace de sessão não está no .gitignore"
+    for proibido in (".harness", ".harness/", "/.harness"):
+        assert proibido not in linhas, (
+            f"{nome}: `.gitignore` ignora `{proibido}` e leva o arch-rules.json junto"
+        )
+
+    # E a prova de que o git concorda com a leitura acima.
+    subprocess.run(["git", "init", "-q"], cwd=destino, check=True, capture_output=True)
+    ignorados = subprocess.run(
+        ["git", "check-ignore", "-v", ".harness/trace/x.jsonl", ".harness/arch-rules.json"],
+        cwd=destino,
+        capture_output=True,
+        text=True,
+        check=False,
+    ).stdout
+    assert "trace" in ignorados, f"{nome}: git não ignora o trace"
+    assert "arch-rules" not in ignorados, f"{nome}: git está ignorando o arch-rules.json"
 
 
 def test_formatter_de_modulo_inteiro_nao_vira_hook_de_edicao() -> None:
@@ -616,12 +649,8 @@ def test_config_do_openspec_nao_tem_placeholder_em_prosa() -> None:
     # formato do header de grupo e o da mensagem de commit. Eles têm de
     # sobreviver — a FASE 2 transcreve o protocolo VERBATIM.
     PROTOCOLO = {"<objetivo>", "<nome do grupo>"}
-    sobreviventes = [
-        m for m in re.findall(r"<[^>\n]{4,}>", corpo) if m not in PROTOCOLO
-    ]
-    assert sobreviventes == [], (
-        f"placeholder em prosa sobreviveu no config.yaml: {sobreviventes}"
-    )
+    sobreviventes = [m for m in re.findall(r"<[^>\n]{4,}>", corpo) if m not in PROTOCOLO]
+    assert sobreviventes == [], f"placeholder em prosa sobreviveu no config.yaml: {sobreviventes}"
     assert yaml.safe_load(corpo)["schema"] == "spec-driven"
 
 

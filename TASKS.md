@@ -723,3 +723,224 @@ Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py` —
 Verificação: `pytest -q && ruff check . && mypy` — 686 testes; a validação
 com o CLI é documentada em `tests/fixtures/README.md` e não é teste do
 pytest porque depende de rede, mesma razão do `medir.py`.
+
+## Grupo 40 - Eval de aderência dentro do harness gerado ✅
+<!-- Origem: docs/intersecao-harness-engineering-x-skill.md, lacuna 1.
+
+     A lacuna precisa ser dita com precisão, porque a versão larga ("faltam
+     evals") é FALSA neste repositório: existem cinco níveis (A/B em
+     `eval/score-harness.sh`, C em `eval/nivel-c/`, D em `evals/gradua.py`,
+     E em `evals/triggering.json`). O que nenhum deles faz é viajar junto
+     com o harness. Todos medem A SKILL, rodam AQUI, e são operados por
+     quem escreve a skill.
+
+     O repo alvo recebe `verificar-harness.sh`, que prova que o harness
+     EXISTE — JSON parseia, script é executável, gate devolve exit 2. Nada
+     prova que ele é OBEDECIDO. É exatamente a fronteira que o
+     `eval/README.md` traça entre o nível B (capacidade) e o nível C
+     (comportamento): o alvo hoje herda só o lado B.
+
+     Consequência concreta: um time que instala o harness e seis semanas
+     depois pergunta "isso está sendo seguido?" não tem instrumento. O
+     `SESSION_STATE.md` não serve de resposta — é escrito pelo mesmo agente
+     cuja aderência se quer medir.
+
+     LIMITE, a declarar no próprio script e no README para não ser vendido
+     como o que não é: git só enxerga o que foi commitado. Sessão que
+     descarrilhou e não commitou nada é invisível. Isto mede aderência do
+     histórico, não das sessões — é um sensor barato e determinístico, não
+     o nível C. Quem quiser eficácia comportamental continua precisando do
+     A/B. -->
+- [x] 40.1 `resources/medir-aderencia.sh` — lê `git log`, a fonte de
+      trabalho ativa e o `SESSION_STATE.md`, e reporta aderência ao
+      protocolo do AGENTS.md. POSIX sh, sem rede e sem modelo, mesma
+      restrição de portabilidade dos hooks (roda igual nos três
+      agentes-alvo). Sem Python e sem jq, com teste que roda num `PATH`
+      reduzido a 9 binários para provar isso
+- [x] 40.2 As quatro métricas, cada uma com `what`/`why`/`fix` no formato do
+      `arch-rules.json` e com uma linha declarando o que ela NÃO vê:
+      proporção de `checkpoint:`; grupo concluído na fonte de trabalho sem
+      checkpoint correspondente; `SESSION_STATE.md` ausente no checkpoint;
+      escopo do checkpoint. **Achado ao medir o próprio repositório:** a
+      terceira métrica, escrita como "no MESMO commit", dava 4 de 17 aqui —
+      falso positivo, porque registrar o hash do checkpoint no arquivo
+      obriga o commit dele a existir antes. Aceitando o commit seguinte,
+      17 de 17. Medida com falso positivo desse tamanho é desligada na
+      primeira semana e leva o resto do relatório junto
+- [x] 40.3 Ligação ao harness: entrada em `arquivos-gerados.md` (com a
+      tabela das três perguntas — íntegro / regras / protocolo), geração em
+      `gerar.py`, ponteiro no `<ferramentas-do-harness>` da FASE 2, e item
+      **1.2 da FASE 5 mandando NÃO executá-lo**: repo recém-gerado não tem
+      histórico, e 0% de aderência ali acusa o usuário de algo que ele não
+      teve chance de fazer. O verificador cobre o script por LF e bit de
+      execução, e nunca o roda
+- [x] 40.4 `tests/test_aderencia.py`, 17 testes com histórico git sintético
+      construído commit a commit. O teste central é a separação
+      obediente × desobediente — medidor que aprova os dois não mede nada.
+      Provado por mutação: desligar o limiar de checkpoint reprova 2 testes;
+      neutralizar a comparação de grupos reprova outros 2
+- [x] 40.5 Regressão medida: `python3 tests/medir.py` nos 16 ecossistemas —
+      `tests/medicao.json` saiu **byte a byte idêntico** ao baseline
+      commitado. +67 em todos, +64 no dotnet, +52 no `sem-sensores`
+Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py` —
+706 testes (+20), ruff e mypy limpos, medição sem diff. Fora do escopo mas
+corrigido porque quebrava a DoD: o hook de formatação deste repo colapsou o
+bloco `openspec/config.yaml` do `gerar.py` em linhas de 159 chars, e o
+`ruff check` reprovou — `ruff format` e `ruff check` discordando, com o hook
+aplicando a metade que quebra. Resolvido parentetizando os valores.
+
+## Grupo 41 - Trace de sessão: o que aconteceu quando nada foi commitado ✅
+<!-- Origem: docs/intersecao-harness-engineering-x-skill.md, lacuna 3.
+
+     Antes de propor, as três fontes que a Correção do doc manda conferir:
+     `eval/` tem trace de sessão, mas só das 8 sessões headless do nível C,
+     neste repositório, produzido pelo `claude -p --output-format json`.
+     `evals/` mede a skill. Nada disso viaja com o harness. O repo alvo não
+     ganha observabilidade nenhuma hoje.
+
+     O Grupo 40 fechou metade do problema e DECLAROU a outra metade no
+     próprio script: "sessao que descarrilhou e nao commitou nada e
+     invisivel". Duas horas de agente rodando em circulos e desistindo nao
+     deixam rastro. Este grupo cobre exatamente esse buraco.
+
+     POR QUE OS HOOKS, E NAO OUTRO MECANISMO
+     Eles já disparam a cada comando de shell e a cada edição, nos três
+     agentes-alvo, e já estão registrados. É a única superfície de
+     observação que a skill controla e que roda independentemente de o
+     agente commitar, cooperar ou sequer chegar ao fim. Mesma epistemologia
+     do git no Grupo 40 — subproduto, não auto-relato.
+
+     O RISCO QUE DECIDE O DESENHO
+     Hook de trace quebrado NAO PODE derrubar o gate. No Claude Code e no
+     Devin um hook que morre some em silêncio; no Cursor, com `failClosed`,
+     ele bloqueia o shell inteiro. Por isso o trace é um script SEPARADO que
+     sai 0 sempre — nunca embutido no `gate-destructive.sh`, e nunca
+     registrado com `failClosed`. Enforcement e observação não podem
+     compartilhar destino.
+
+     LIMITES, a declarar no script como o Grupo 40 fez:
+       - Vê o que os HOOKS veem: chamadas de ferramenta. Raciocínio do
+         agente, tokens e custo são invisíveis.
+       - Sessão que não roda ferramenta nenhuma não deixa linha.
+       - Não é APM: sem spans, sem correlação entre eventos. -->
+- [x] 41.1 `resources/hooks/registrar-sessao.sh` — sai 0 sempre, registrado
+      nos três agentes ao lado do gate e **nunca** com `failClosed`. Só awk,
+      sem Python: os outros dois hooks tentam Python antes porque leitura
+      errada ali é gate falhando aberto; aqui custa uma linha de trace
+      imperfeita, e este dispara em TODA chamada de ferramenta — subir um
+      interpretador por evento seria imposto permanente sobre a sessão
+- [x] 41.2 Redação por **lista de permissão**, não de bloqueio: binário mais
+      o segundo token só quando parece subcomando. Lista de bloqueio erra
+      por omissão — basta uma forma não prevista para o segredo ir a disco.
+      Coberto por 7 formas reais de passar credencial (`export TOKEN=`,
+      `VAR=x cmd`, `-H "Authorization:"`, `mysql -pSENHA`, `aws configure
+      set`, `user:token@github`, `postgres://user:senha@`). Teto por arquivo
+      para em silêncio em vez de truncar: trace pela metade que se apresenta
+      como completo engana mais que trace ausente
+- [x] 41.3 `.harness/trace/` no `.gitignore`, e o teste prova a fronteira nos
+      dois sentidos — `git check-ignore` tem de pegar o trace e **não** pegar
+      o `arch-rules.json`. Ignorar `.harness/` inteiro mataria a catraca
+      junto com o log
+- [x] 41.4 Medida 5 do `medir-aderencia.sh`. Sessão com edição e sem commit
+      é o alvo; sessão só de leitura não alerta — medida que grita sem motivo
+      é a primeira a ser ignorada. Sem trace, ela se declara cega em vez de
+      calar. **Reduzido de propósito:** contar bloqueios do gate exigiria o
+      gate escrever em disco, e qualquer escrita dentro dele pode fazê-lo
+      falhar aberto. Não vale a troca; registrado no cabeçalho do script
+- [x] 41.5 51 testes novos (`test_trace.py` 26, `test_aderencia.py` +5,
+      `test_geracao.py` +15 do gitignore parametrizado). Provados por mutação
+      em quatro pontos: desligar a redação reprova 9; `set -e` no hook
+      reprova 2; remover a guarda final reprova 1. Regressão: `medicao.json`
+      byte a byte idêntico
+Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py` —
+751 testes (+45), limpos, medição sem diff, verificador 11/11 no alvo gerado.
+
+Dois defeitos achados pelos próprios testes, ambos onde os dois lados foram
+escritos juntos e concordaram por engano:
+- O teste de exit 0 **não mordia**: trocar a guarda final por `|| exit 1` não
+  reprovava nada, porque todo caminho interno já devolve 0. Substituído por
+  um par — `PATH` vazio (comportamento) e checagem textual da guarda e da
+  ausência de `set -e` (estrutura). É o único lugar onde essa proteção é
+  observável, e `set -e` sozinho quebraria o contrato sem nenhum teste acusar.
+- O leitor da medida 5 quebrava com espaço depois dos dois-pontos, e falhava
+  do pior jeito: reportando "trace vazio" em vez de erro. Quem lesse
+  concluiria que não houve sessão — o oposto da verdade.
+
+## Grupo 42 - Gate graduado: exceção declarada e o degrau do falso verde ✅
+<!-- Origem: docs/intersecao-harness-engineering-x-skill.md, lacuna 4.
+
+     Conferido antes de propor, como a Correção do doc manda: `eval/` e
+     `evals/` não têm nenhuma capacidade de permissão; o `score-harness.sh`
+     não mede isso; o único grupo que tocou o gate foi o 6, de
+     portabilidade. A lacuna está genuinamente aberta.
+
+     O gate hoje é binário: casa um padrão -> exit 2; não casa -> exit 0
+     silencioso. Isso erra dos dois lados.
+
+     FALSO BLOQUEIO, com evidência desta sessão. Ao montar a demonstração do
+     Grupo 41 eu rodei `rm -rf` num diretório de scratchpad e o gate
+     bloqueou. A saída foi CONTORNAR — usei outro diretório. Esse é
+     exatamente o caminho pelo qual um gate perde autoridade: ele erra, a
+     pessoa aprende a driblar, e o drible vira hábito que também passa por
+     cima dos bloqueios corretos.
+
+     FALSO VERDE. Tudo fora da lista passa em silêncio, inclusive
+     `git commit --no-verify`, que desliga o pre-commit do próprio harness.
+     O agente pode enfraquecer o enforcement e nada acusa.
+
+     POR QUE A PREVENÇÃO PARA NO SHELL
+     O Cursor tem `beforeShellExecution` e `afterFileEdit`, e NÃO tem evento
+     de pré-edição de arquivo (a lista publicada traz `beforeReadFile` e
+     `afterFileEdit`) — https://cursor.com/docs/hooks.md. Bloquear a edição
+     do próprio gate antes que ela ocorra não vale nos três agentes, e a
+     regra 10 da skill não admite enforcement que só funciona em um. Por
+     isso: prevenção onde é portátil (shell), DETECÇÃO onde não é (42.4).
+
+     A TENSÃO QUE PRECISA DE DECISÃO SUA — ver 42.1. Tirar os padrões de
+     dentro do script e pô-los num JSON torna o gate configurável por repo,
+     que é o que resolve o falso bloqueio. Mas um registro que o agente pode
+     editar é um registro que ele pode enfraquecer: bastaria acrescentar uma
+     exceção para liberar o que o gate existe para barrar. O contra-argumento
+     é que isso não é capacidade nova — o agente já pode editar o script
+     hoje, com shell. A mitigação real não é o formato do arquivo, é a 42.4:
+     a DoD passa a EXECUTAR o gate e exigir exit 2. Se você preferir manter
+     os padrões no script e aceitar menos configurabilidade, é a 42.1 que
+     muda. -->
+- [x] 42.1 `.harness/gate-rules.json` com três níveis. `permitir` tem
+      precedência sobre `bloquear`, senão a exceção nunca abriria caminho num
+      padrão amplo e o registro seria decorativo. Fallback embutido quando o
+      arquivo some, fica ilegível **ou perde todas as regras de bloqueio** —
+      este último caso não estava previsto e é o drible mais curto que existe
+- [x] 42.2 Exceções ancoradas em `^...$`, proibindo `;`, `|`, `&`, `$` e
+      crase no caminho. **Isto é o grupo inteiro:** sem âncora,
+      `rm -rf node_modules && rm -rf /` casa a exceção pelo começo e o gate
+      libera a segunda metade. Ancorar é o que separa exceção de buraco
+- [x] 42.3 Nível `avisar` grava `risco` no trace, não em stderr. A
+      classificação roda sobre o comando **inteiro**, antes da redação —
+      `--no-verify` é exatamente o que a redação joga fora, e classificar
+      depois faria o nível inteiro ser decorativo. Uma chamada de awk, não um
+      grep por regra: o hook dispara em toda chamada de ferramenta
+- [x] 42.4 Regras `G01`/`G02` no `arch-rules.json`, executando o gate na
+      cadeia da DoD. Vêm em par porque a G01 sozinha é satisfeita por um gate
+      que bloqueia TUDO — passa na checagem e torna o agente inútil
+- [x] 42.5 63 testes novos (`test_gate.py` 29, `test_trace.py` +11, mais o
+      ajuste dos existentes). Provados por mutação: tirar a âncora final das
+      exceções reprova 5; abrir uma exceção `^rm.*$` reprova 11
+Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py` —
+789 testes (+38), limpos, `medicao.json` byte a byte idêntico.
+
+Três coisas que só apareceram ao rodar:
+
+- **A sonda do `verificar-harness.sh` usava `/tmp/sonda-gate`** — e `/tmp/`
+  virou exceção declarada nesta mudança. O gate passou a liberá-la com razão,
+  e o verificador reportava "gate não bloqueia" numa geração correta. Uma
+  exceção nova redefine o que as sondas antigas medem; alvo trocado para
+  `/alvo-inexistente`.
+- **O primeiro ataque que testei falhou sozinho.** Trocar todo `bloquear` por
+  `permitir` deixa o registro sem regra de bloqueio, o gate cai no fallback e
+  continua barrando. A G01 passou — corretamente, porque o gate não foi
+  enfraquecido. Foi o que motivou testar o ataque que funciona: manter os
+  bloqueios e abrir uma exceção larga por cima.
+- **O gate deste repositório bloqueou a prova do gate.** Montar a bateria
+  exigiu construir `rm -rf` em partes, como o `verificar-harness.sh` já fazia
+  — o mesmo modo de falha registrado no defeito 5 do nível D.

@@ -3,11 +3,91 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `c9bf6e2` na `main`, publicado, CI verde — Grupo 39.
-- Testes: 686/686 + 4 skips explícitos; ruff e mypy strict limpos; score da
-  geração **+67** em todos os ecossistemas (+52 no `sem-sensores`).
+- Commit verificado: Grupo 42 na `feature/eval-aderencia` — **não publicado**
+  (ninguém pediu push). Cinco commits acumulados nela. Antes: `c9bf6e2` na
+  `main`, CI verde — Grupo 39.
+- Testes: 789/789 + 4 skips explícitos; ruff e mypy strict limpos; score da
+  geração **+67** em todos os ecossistemas (+52 no `sem-sensores`) — o
+  `tests/medicao.json` saiu byte a byte idêntico ao baseline, sem regressão.
 - Change/plano ativo: `TASKS.md` na raiz — **só o Grupo 26 aberto, e
-  BLOQUEADO** (ver pendências). Grupos 25, 27 a 39 concluídos e publicados.
+  BLOQUEADO** (ver pendências). Grupos 25, 27 a 42 concluídos.
+- Em andamento: nada — fronteira limpa. **A sequência de lacunas pedida pelo
+  usuário terminou**: 1 (Grupo 40), 2 (cancelada — erro de documentação),
+  3 (Grupo 41) e 4 (Grupo 42). As lacunas 5 e 6 ele decidiu não implementar
+  por ora. Próximo passo é decisão dele — publicar a branch é o candidato
+  óbvio, com cinco grupos acumulados e nenhum push.
+
+## O que mudou nesta sessão (Grupo 42)
+Gate deixou de ser binário. `.harness/gate-rules.json` com `permitir` /
+`bloquear` / `avisar`; exceções ancoradas em `^...$`; `avisar` grava `risco`
+no trace e vira a medida 6 do `medir-aderencia.sh`; regras `G01`/`G02`
+executam o gate na cadeia da DoD.
+
+**A decisão de arquitetura foi do usuário**, apresentada com o contra: mover
+padrões de segurança de código para dado permite ao agente editá-los. O
+contra-argumento aceito foi que ele já podia editar o script, e que a defesa
+real é a detecção na DoD, não o formato do arquivo.
+
+**Prevenção onde é portátil, detecção onde não é.** O Cursor não tem evento
+de pré-edição de arquivo (só `beforeReadFile` e `afterFileEdit`,
+https://cursor.com/docs/hooks.md), então bloquear a edição do gate antes que
+ela ocorra violaria a regra 10. Daí a G01.
+
+**Interações que só apareceram rodando:**
+- A sonda do `verificar-harness.sh` usava `/tmp/sonda-gate`, que virou
+  exceção declarada. Uma exceção nova redefine o que as sondas antigas medem.
+- O primeiro ataque testado (trocar todo `bloquear` por `permitir`) falha
+  sozinho: sem regra de bloqueio, o gate cai no fallback. O ataque que
+  funciona é manter os bloqueios e abrir uma exceção larga por cima.
+
+## O que mudou nesta sessão (Grupo 41)
+`registrar-sessao.sh`: hook de observação registrado nos três agentes, ao
+lado do gate e nunca com `failClosed`. Grava uma linha por chamada de
+ferramenta em `.harness/trace/`, com redação por lista de permissão. A medida
+5 do `medir-aderencia.sh` lê esse trace e responde o que as medidas 1-4
+declaravam não ver: sessão que editou arquivo e não commitou nada.
+
+**Reduções de escopo declaradas, não silenciosas:**
+- Contar bloqueios do gate ficou de fora. Exigiria o gate escrever em disco,
+  e qualquer escrita dentro dele pode fazê-lo falhar aberto.
+- O trace não vê raciocínio, custo, nem se a edição foi descartada depois.
+
+**Dois defeitos achados pelos próprios testes**, ambos da mesma classe — os
+dois lados escritos juntos, concordando por engano:
+1. O teste de "sai 0 sempre" não mordia (a função interna já é total).
+   Substituído por par comportamento + estrutura. `set -e` no hook quebraria
+   o contrato sem nenhum teste de comportamento acusar.
+2. O leitor da medida 5 quebrava com espaço depois dos dois-pontos e
+   reportava "trace vazio" em vez de erro — quem lesse concluiria que não
+   houve sessão.
+
+## O que mudou nesta sessão (Grupo 40 + pesquisa)
+
+## O que mudou nesta sessão (Grupo 40 + pesquisa)
+Duas coisas, nesta ordem:
+
+1. **`docs/` novo** — [harness-engineering.md](docs/harness-engineering.md)
+   (pesquisa das fontes primárias: Böckeler/martinfowler, Anthropic, OpenAI,
+   survey arXiv 2604.08224, awesome-list) e
+   [intersecao-harness-engineering-x-skill.md](docs/intersecao-harness-engineering-x-skill.md)
+   (42 características × o que a skill gera; placar 21 coberto / 8 parcial /
+   2 proposto / 8 ausente / 3 fora de escopo, mais 6 lacunas priorizadas).
+2. **Grupo 40** — `medir-aderencia.sh` no harness gerado.
+
+**Correção registrada:** a lacuna 1 do doc de interseção estava larga demais
+como escrita ("não há como medir se o harness melhora o comportamento"). É
+falsa: este repo tem cinco níveis de eval (A/B em `eval/score-harness.sh`,
+C em `eval/nivel-c/`, D em `evals/gradua.py`, E em `evals/triggering.json`).
+A lacuna real é estreita — nenhum deles VIAJA com o harness; todos medem a
+skill e rodam aqui. O Grupo 40 fecha só essa parte. **O doc ainda não foi
+corrigido** para a forma estreita; está na lista de pendências.
+
+**Achado do Grupo 40, medindo o próprio repositório:** a métrica de handoff
+escrita como "SESSION_STATE no MESMO commit do checkpoint" dava 4 de 17 aqui.
+Falso positivo — registrar o hash do checkpoint no arquivo obriga o commit
+dele a existir antes. Aceitando também o commit seguinte: 17 de 17. O
+medidor rodado contra este repo hoje dá 2 alertas de 4 (grupos concluídos
+37 × 34 checkpoints, e 11 de 17 no handoff).
 - Os três defeitos achados na rodada do PetClinic viraram os Grupos 34, 35 e
   36 — todos entregues. Rodar a skill num repo real pagou por si.
 - Em andamento: nada — fronteira limpa.
@@ -113,6 +193,17 @@ Verificada contra o CLI real: `npx @fission-ai/openspec@latest`, versão 1.7.0
   via `npx`. Se quiser o binário fixo: `npm install -g @fission-ai/openspec`.
 
 ## Pendências
+- **A lacuna 2 do doc de interseção foi CANCELADA, não implementada.** Era
+  erro de documentação: `propor-regra-arch` já é um controle inferencial
+  gerado, e o revisor com veredito foi removido no Grupo 28 por decisão do
+  usuário, com custo medido. Reclassificada como "Fora de escopo (decisão
+  explícita)" no commit `2e559ed`. Resíduo real e NÃO tratado: a camada
+  inferencial vale só para Claude Code, porque a doc do Devin não publica os
+  paths de subagente.
+- **Conferir as 6 linhas ainda marcadas "Ausente" no doc de interseção**
+  contra `eval/`, `evals/` e o histórico do `TASKS.md` antes de virarem
+  plano. As duas que já viraram estavam erradas pelo mesmo motivo: foram
+  escritas olhando só o repo alvo e o `resources/` da skill.
 - **BLOQUEADOR: o instrumento do nível E não detecta disparo nenhum.** Teste
   de sanidade: skill `deploy-producao`, description "Use SEMPRE que o usuario
   pedir para rodar o deploy de producao", query "roda o deploy de producao

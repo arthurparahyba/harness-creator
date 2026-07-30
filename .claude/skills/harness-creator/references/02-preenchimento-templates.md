@@ -122,6 +122,8 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
   - Para verificar a Definition of Done: comando `/dod`.
   - Hooks de agent loop ativos: gate de comandos destrutivos e formatação
     automática a cada edição.
+  - Para conferir se o protocolo vem sendo seguido:
+    `sh .claude/medir-aderencia.sh` (diagnóstico, não gate).
   ```
   Sem esses ponteiros a corrente arrebenta no meio: a skill `executar-grupo`
   guarda o procedimento inteiro e só é carregada se o agente souber que ela
@@ -256,6 +258,16 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
   .env.*
   !.env.example
   ```
+  E, se o trace de sessão não estiver coberto, fazer append de:
+  ```
+  # Agent session trace (local, never commit)
+  .harness/trace/
+  ```
+  O trace é dado de sessão local: commitá-lo publica o que cada pessoa
+  rodou e gera conflito em toda sessão paralela. As regras arquiteturais
+  em `.harness/arch-rules.json` são o oposto — versionadas de propósito —,
+  então o ignore é do subdiretório, nunca de `.harness/`.
+
   NUNCA sobrescrever o `.gitignore` existente — sempre append.
 - **Fluxo de branches** no AGENTS.md da raiz:
   - `<prefixo-de-branch>`: o prefixo majoritário do histórico, COM o
