@@ -16,6 +16,7 @@ caso especial.
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -38,22 +39,23 @@ Verificação: `echo ok`
 """
 
 
-def _git(repo: Path, *args: str) -> None:
-    subprocess.run(
-        ["git", *args],
-        cwd=repo,
-        check=True,
-        capture_output=True,
-        text=True,
-        env={
-            "PATH": "/usr/bin:/bin:/usr/local/bin",
-            "HOME": str(repo),
-            "GIT_AUTHOR_NAME": "t",
-            "GIT_AUTHOR_EMAIL": "t@t",
-            "GIT_COMMITTER_NAME": "t",
-            "GIT_COMMITTER_EMAIL": "t@t",
-        },
-    )
+def _git(repo: Path, *args: str, data: str | None = None) -> None:
+    env = {
+        "PATH": "/usr/bin:/bin:/usr/local/bin",
+        "HOME": str(repo),
+        "GIT_AUTHOR_NAME": "t",
+        "GIT_AUTHOR_EMAIL": "t@t",
+        "GIT_COMMITTER_NAME": "t",
+        "GIT_COMMITTER_EMAIL": "t@t",
+    }
+    if data is not None:
+        # As DUAS datas. `git log --since` filtra por data de COMMITTER, e
+        # `--date`/`GIT_AUTHOR_DATE` sozinhos mexem só na de autor — foi assim
+        # que a primeira versão destes testes acusou o leitor de um defeito
+        # que era do setup.
+        env["GIT_AUTHOR_DATE"] = data
+        env["GIT_COMMITTER_DATE"] = data
+    subprocess.run(["git", *args], cwd=repo, check=True, capture_output=True, text=True, env=env)
 
 
 def _init(repo: Path) -> None:
@@ -259,7 +261,97 @@ def test_sem_fonte_de_trabalho_alerta_mas_nao_derruba(tmp_path: Path) -> None:
     _commit(repo, "checkpoint: objetivo 1", {"SESSION_STATE.md": "- x\n"})
     saida = _json(repo)
     assert _alerta(saida, "Grupos concluidos")
-    assert saida["medidas"] == 4
+    assert saida["medidas"] == 5
+
+
+# --------------------------------------------- medida 5: sessões sem commit
+
+
+HOOK_TRACE = (
+    RAIZ / ".claude" / "skills" / "harness-creator" / "resources" / "hooks" / "registrar-sessao.sh"
+)
+
+
+def _trace(repo: Path, linhas: list[tuple[str, str, str]]) -> None:
+    """Grava trace à mão, com `json.dumps` — que põe espaço depois dos
+    dois-pontos, ao contrário do `printf` compacto do hook.
+
+    A divergência é de propósito: o leitor precisa tolerar as duas formas. A
+    primeira versão dele não tolerava, e o modo de falha era o pior possível
+    — reportava "trace vazio" em vez de erro, e quem lesse concluiria que não
+    houve sessão nenhuma. O formato exato do hook é coberto pelo teste de
+    integração no fim desta seção.
+    """
+    destino = repo / ".harness" / "trace"
+    destino.mkdir(parents=True, exist_ok=True)
+    conteudo = "".join(
+        json.dumps({"ts": ts, "evento": ev, "alvo": "x", "sessao": sid}) + "\n"
+        for ts, ev, sid in linhas
+    )
+    (destino / "2026-07-30.jsonl").write_text(conteudo, newline="\n")
+
+
+def test_sem_trace_a_medida_se_declara_cega(obediente: Path) -> None:
+    """Harness recém-instalado não tem trace. Calar seria pior que declarar:
+    quem lê o relatório precisa saber que a medida não olhou nada."""
+    saida = _json(obediente)
+    assert not _alerta(saida, "Sessoes sem commit")
+    cego = next(m["cego_para"] for m in _medidas(saida) if str(m["medida"]).startswith("Sessoes"))
+    assert "nao gravou nada" in str(cego)
+
+
+def test_sessao_com_edicao_e_sem_commit_hoje_alerta(tmp_path: Path) -> None:
+    """O buraco que as medidas 1-4 declaravam não ver: houve trabalho, e ele
+    não passou por fronteira nenhuma."""
+    repo = tmp_path / "trabalho-perdido"
+    _init(repo)
+    # Commit antigo, para o repo ter HEAD; a medida olha commits de HOJE.
+    _commit(repo, "checkpoint: objetivo 1", {"SESSION_STATE.md": "- x\n"})
+    _git(repo, "commit", "-q", "--amend", "--no-edit", data="2020-01-01T10:00:00")
+    _trace(repo, [("2026-07-30T10:00:00Z", "edit", "s1"), ("2026-07-30T10:05:00Z", "shell", "s1")])
+    assert _alerta(_json(repo), "Sessoes sem commit")
+
+
+def test_sessao_so_de_leitura_nao_alerta(tmp_path: Path) -> None:
+    """Sessão que só rodou comandos e não editou nada é investigação
+    legítima. Cobrar commit dela transformaria o medidor em ruído — e medida
+    que grita sem motivo é a primeira a ser ignorada."""
+    repo = tmp_path / "so-leitura"
+    _init(repo)
+    _commit(repo, "checkpoint: objetivo 1", {"SESSION_STATE.md": "- x\n"})
+    _git(repo, "commit", "-q", "--amend", "--no-edit", data="2020-01-01T10:00:00")
+    _trace(repo, [("2026-07-30T10:00:00Z", "shell", "s1"), ("2026-07-30T10:01:00Z", "shell", "s1")])
+    assert not _alerta(_json(repo), "Sessoes sem commit")
+
+
+def test_le_o_trace_que_o_hook_realmente_escreve(tmp_path: Path) -> None:
+    """Integração hook → leitor, sem formato escrito à mão no meio.
+
+    Os dois foram feitos juntos e é fácil eles concordarem por engano num
+    formato que nenhum dos dois produz de verdade. Aqui o arquivo vem do hook.
+    """
+    repo = tmp_path / "integrado"
+    _init(repo)
+    _commit(repo, "checkpoint: objetivo 1", {"SESSION_STATE.md": "- x\n"})
+    _git(repo, "commit", "-q", "--amend", "--no-edit", data="2020-01-01T10:00:00")
+    env = dict(os.environ)
+    env["HARNESS_TRACE_DIR"] = str(repo / ".harness" / "trace")
+    for payload in (
+        '{"session_id":"s1","tool_input":{"command":"npm test"}}',
+        '{"session_id":"s1","tool_input":{"file_path":"src/a.ts"}}',
+    ):
+        subprocess.run(
+            ["sh", str(HOOK_TRACE)],
+            input=payload,
+            capture_output=True,
+            text=True,
+            env=env,
+            check=False,
+        )
+    assert (repo / ".harness" / "trace").exists(), "o hook não gravou nada"
+    assert _alerta(_json(repo), "Sessoes sem commit"), (
+        "o leitor não entendeu o arquivo que o próprio hook escreveu"
+    )
 
 
 # ------------------------------------------------------------------ contratos

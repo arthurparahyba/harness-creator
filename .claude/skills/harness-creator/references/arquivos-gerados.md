@@ -43,6 +43,7 @@ cópia, o conteúdo continua vivendo num lugar só.
 | cursor-hooks.json | `.cursor/hooks.json` | sempre (se não existir) |
 | hooks/gate-destructive.sh | `.claude/hooks/gate-destructive.sh` (chmod +x) | sempre (se não existir) |
 | hooks/format-on-edit.sh | `.claude/hooks/format-on-edit.sh` (chmod +x) | sempre (se não existir) |
+| hooks/registrar-sessao.sh | `.claude/hooks/registrar-sessao.sh` (chmod +x) | sempre (se não existir) |
 | verificar-harness.sh | `.claude/verificar-harness.sh` (chmod +x) | sempre |
 | medir-aderencia.sh | `.claude/medir-aderencia.sh` (chmod +x) | sempre |
 | pre-commit-config.yaml | `.pre-commit-config.yaml` | se não existir **e houver comandos reais de lint/format/types** |

@@ -491,6 +491,10 @@ def gerar(nome: str, destino: Path) -> Stack:
         *(() if usa_openspec else (("TASKS.md", "TASKS.md"),)),
         ("editorconfig-base", ".editorconfig"),
         ("hooks/gate-destructive.sh", ".claude/hooks/gate-destructive.sh"),
+        # Vai SEMPRE, inclusive onde o `format-on-edit.sh` não vai: observar
+        # não depende de o formatter escopar por arquivo, e é justamente no
+        # repo com menos enforcement que saber o que a sessão fez vale mais.
+        ("hooks/registrar-sessao.sh", ".claude/hooks/registrar-sessao.sh"),
         ("verificar-harness.sh", ".claude/verificar-harness.sh"),
         ("medir-aderencia.sh", ".claude/medir-aderencia.sh"),
         ("skills/executar-grupo/SKILL.md", ".claude/skills/executar-grupo/SKILL.md"),
@@ -546,6 +550,7 @@ def gerar(nome: str, destino: Path) -> Stack:
     scripts = (
         "init.sh",
         ".claude/hooks/gate-destructive.sh",
+        ".claude/hooks/registrar-sessao.sh",
         *((".claude/hooks/format-on-edit.sh",) if stack.escopa_por_arquivo else ()),
         ".claude/verificar-harness.sh",
         ".claude/medir-aderencia.sh",
@@ -560,9 +565,15 @@ def gerar(nome: str, destino: Path) -> Stack:
             newline="\n",
         )
 
+    # O ignore é do SUBDIRETÓRIO `trace/`, nunca de `.harness/`: as regras
+    # arquiteturais moram em `.harness/arch-rules.json` e são versionadas de
+    # propósito — é o registro que faz cada classe de erro ser cometida uma
+    # vez só. Ignorar `.harness/` inteiro mataria isso junto com o trace.
     gitignore = destino / ".gitignore"
     gitignore.write_text(
-        gitignore.read_text() + "\n# Environment files (never commit credentials)\n.env\n.env.*\n",
+        gitignore.read_text()
+        + "\n# Environment files (never commit credentials)\n.env\n.env.*\n"
+        + "\n# Agent session trace (local, never commit)\n.harness/trace/\n",
         newline="\n",
     )
 

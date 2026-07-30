@@ -25,13 +25,20 @@
 #
 # O QUE ELE NAO VE — declarado aqui porque um instrumento que nao declara
 # seu limite e lido como se nao tivesse nenhum:
-#   - Sessao que descarrilhou e nao commitou nada e invisivel. Git so
-#     registra o que virou commit. Isto mede a aderencia do HISTORICO, nao
-#     a das sessoes.
 #   - Qualidade. Um `checkpoint:` impecavel sobre codigo ruim marca ok.
 #     Qualidade e trabalho da DoD.
 #   - Eficacia. Se o protocolo VALE A PENA e experimento A/B, nao leitura
 #     de historico.
+#   - Intencao. A medida 5 sabe que houve sessao com edicao e sem commit;
+#     nao sabe se o agente desistiu, se o usuario interrompeu, ou se a
+#     edicao foi descartada de proposito.
+#
+# ATE ONDE ELE VE
+# As medidas 1 a 4 leem git, e git so registra o que virou commit: por elas,
+# duas horas de agente rodando em circulos e desistindo eram invisiveis. A
+# medida 5 fecha esse buraco lendo o trace do `registrar-sessao.sh`, gravado
+# pelos hooks a cada chamada de ferramenta. Sem o trace (harness recem
+# instalado, hooks nao registrados) ela se declara cega em vez de calar.
 #
 # POSIX sh, sem Python e sem jq: precisa rodar em repo Go, .NET ou Java, e
 # vale igual nos tres agentes-alvo (Claude Code, Devin CLI, Cursor).
@@ -285,6 +292,75 @@ else
     "nada: nao houve checkpoint nos ultimos $JANELA commits"
 fi
 
+# ------------------------------------------- 5. sessoes que nao commitaram
+# A medida que as quatro acima declaram nao ver. Todas leem git, e git so
+# registra o que virou commit: duas horas de agente rodando em circulos e
+# desistindo eram invisiveis aqui.
+#
+# A fonte e o trace do `registrar-sessao.sh`, gravado pelos hooks a cada
+# chamada de ferramenta — independente de o agente commitar, cooperar ou
+# chegar ao fim. Mesma epistemologia do git: subproduto, nao auto-relato.
+#
+# Sessao com trace e sem commit NAO E, por si, desobediencia: sessao de
+# leitura, de investigacao ou interrompida pelo usuario e legitima. O alerta
+# so acende quando isso e a MAIORIA, que e o padrao de agente que trabalha
+# sem fechar grupo.
+TRACE_DIR="${HARNESS_TRACE_DIR:-.harness/trace}"
+if [ ! -d "$TRACE_DIR" ]; then
+  medida "Sessoes sem commit" 0 "sem trace" "" "" "" \
+    "tudo: o hook registrar-sessao.sh nao gravou nada ainda (harness recem-instalado, ou agente sem hooks registrados)"
+else
+  # Agrupamento por `sessao` quando o agente manda o id no payload; senao,
+  # por DIA, que e a granularidade que o nome do arquivo ja garante. O
+  # intervalo de tempo entre eventos seria mais preciso e exigiria aritmetica
+  # de data em sh — precisao que nao paga o custo aqui.
+  # A leitura tolera espaco depois dos dois-pontos e nao depende de offset
+  # fixo. O hook escreve compacto, mas um leitor que quebra com um espaco
+  # falha do pior jeito possivel: reportando "trace vazio" em vez de erro —
+  # e quem le conclui que nao houve sessao, que e o oposto da verdade.
+  # Sem intervalos `{n}` no regex: nem todo awk os suporta.
+  SESSOES=$(cat "$TRACE_DIR"/*.jsonl 2>/dev/null | awk '
+    function valor(linha, chave,   campo) {
+      if (!match(linha, "\"" chave "\"[ \t]*:[ \t]*\"[^\"]*\"")) return ""
+      campo = substr(linha, RSTART, RLENGTH)
+      sub(/^"[^"]*"[ \t]*:[ \t]*"/, "", campo)
+      sub(/"$/, "", campo)
+      return campo
+    }
+    {
+      sid = valor($0, "sessao")
+      ts  = valor($0, "ts")
+      dia = (ts ~ /^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/) ? substr(ts, 1, 10) : ""
+      chave = (sid != "") ? sid : dia
+      if (chave == "") next
+      visto[chave] = 1
+      if (valor($0, "evento") == "edit") escreveu[chave] = 1
+    }
+    END {
+      n = 0; e = 0
+      for (k in visto) { n++; if (k in escreveu) e++ }
+      print n, e
+    }')
+  N_SESSOES=$(echo "$SESSOES" | cut -d' ' -f1)
+  N_ESCREVEU=$(echo "$SESSOES" | cut -d' ' -f2)
+
+  if [ "${N_SESSOES:-0}" -eq 0 ]; then
+    medida "Sessoes sem commit" 0 "trace vazio" "" "" "" \
+      "tudo: ha diretorio de trace, mas nenhuma linha legivel nele"
+  else
+    # Sessao que EDITOU arquivo e nao produziu commit e a que interessa:
+    # houve trabalho, e ele nao passou por fronteira nenhuma.
+    COMMITS_HOJE=$(git log --since=midnight --oneline 2>/dev/null | awk 'END {print NR+0}')
+    if [ "$N_ESCREVEU" -gt 0 ] && [ "$COMMITS_HOJE" -eq 0 ]; then _a=1; else _a=0; fi
+    medida "Sessoes sem commit" "$_a" \
+      "$N_SESSOES sessao(oes) no trace, $N_ESCREVEU com edicao, $COMMITS_HOJE commit(s) hoje" \
+      "houve sessao que editou arquivo e nao produziu commit nenhum" \
+      "trabalho fora de fronteira de grupo nao entra no historico: some no proximo reset de contexto e nao aparece em nenhuma das medidas acima" \
+      "feche o grupo com a DoD e commite, ou registre em SESSION_STATE.md por que a sessao terminou sem checkpoint" \
+      "o que o agente PENSOU, quanto custou, e se a edicao foi descartada depois — o trace ve chamada de ferramenta, nao intencao"
+  fi
+fi
+
 # ---------------------------------------------------------------------- saida
 if [ "$FORMATO" = json ]; then
   printf '{\n  "commits_analisados": %s,\n  "medidas": %s,\n  "alertas": %s,\n  "resultado": [' \
@@ -294,7 +370,7 @@ if [ "$FORMATO" = json ]; then
 else
   printf '\n%s de %s medida(s) em alerta.\n' "$ALERTAS" "$TOTAL"
   printf 'Diagnostico, nao gate: o exit e 0 mesmo com alerta.\n'
-  printf 'Mede o historico commitado — sessao que nao commitou e invisivel aqui.\n'
+  printf 'Medidas 1-4 leem o historico do git; a 5 le o trace dos hooks.\n'
 fi
 
 exit 0

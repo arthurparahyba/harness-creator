@@ -258,6 +258,16 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
   .env.*
   !.env.example
   ```
+  E, se o trace de sessão não estiver coberto, fazer append de:
+  ```
+  # Agent session trace (local, never commit)
+  .harness/trace/
+  ```
+  O trace é dado de sessão local: commitá-lo publica o que cada pessoa
+  rodou e gera conflito em toda sessão paralela. As regras arquiteturais
+  em `.harness/arch-rules.json` são o oposto — versionadas de propósito —,
+  então o ignore é do subdiretório, nunca de `.harness/`.
+
   NUNCA sobrescrever o `.gitignore` existente — sempre append.
 - **Fluxo de branches** no AGENTS.md da raiz:
   - `<prefixo-de-branch>`: o prefixo majoritário do histórico, COM o

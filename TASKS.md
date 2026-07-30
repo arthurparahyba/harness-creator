@@ -789,7 +789,7 @@ bloco `openspec/config.yaml` do `gerar.py` em linhas de 159 chars, e o
 `ruff check` reprovou — `ruff format` e `ruff check` discordando, com o hook
 aplicando a metade que quebra. Resolvido parentetizando os valores.
 
-## Grupo 41 - Trace de sessão: o que aconteceu quando nada foi commitado
+## Grupo 41 - Trace de sessão: o que aconteceu quando nada foi commitado ✅
 <!-- Origem: docs/intersecao-harness-engineering-x-skill.md, lacuna 3.
 
      Antes de propor, as três fontes que a Correção do doc manda conferir:
@@ -823,27 +823,45 @@ aplicando a metade que quebra. Resolvido parentetizando os valores.
          agente, tokens e custo são invisíveis.
        - Sessão que não roda ferramenta nenhuma não deixa linha.
        - Não é APM: sem spans, sem correlação entre eventos. -->
-- [ ] 41.1 `resources/hooks/registrar-sessao.sh` — hook que **sai 0 sempre**,
-      registrado nos três agentes ao lado do gate e **nunca** com
-      `failClosed`. Uma linha por evento em `.harness/trace/AAAA-MM-DD.jsonl`.
-      Custo por evento perto de zero: append e sai. Falha ao gravar (disco
-      cheio, diretório read-only) é engolida — observação não pode custar o
-      enforcement
-- [ ] 41.2 O que a linha contém e o que ela NÃO contém: timestamp, evento,
-      ferramenta e o alvo **reduzido** (dois primeiros tokens do comando; o
-      caminho, na edição). Comando completo fica de fora por decisão, não
-      por economia: `export TOKEN=...` e `curl -H "Authorization: ..."` são
-      comandos comuns, e um trace em disco com segredo em claro é pior que
-      não ter trace. Rotação por dia e teto de tamanho
-- [ ] 41.3 `.harness/trace/` entra no `.gitignore` gerado. É dado de sessão
-      local: commitá-lo publica o que cada dev rodou e gera conflito em toda
-      sessão paralela
-- [ ] 41.4 A leitura, que é o ponto do grupo: `medir-aderencia.sh` ganha a
-      medida que hoje ele declara não ver — quantas sessões houve, quantas
-      terminaram sem commit, e quantas foram barradas pelo gate. Sem o
-      leitor, o trace é um arquivo que ninguém abre
-- [ ] 41.5 Testes: hook exercitado nos **três formatos de payload** (Cursor
-      manda `command` no topo, os outros dois em `tool_input`); prova de que
-      ele sai 0 com o diretório de trace não-gravável; prova de que segredo
-      em comando não chega ao arquivo; regressão do `python3 tests/medir.py`
-Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
+- [x] 41.1 `resources/hooks/registrar-sessao.sh` — sai 0 sempre, registrado
+      nos três agentes ao lado do gate e **nunca** com `failClosed`. Só awk,
+      sem Python: os outros dois hooks tentam Python antes porque leitura
+      errada ali é gate falhando aberto; aqui custa uma linha de trace
+      imperfeita, e este dispara em TODA chamada de ferramenta — subir um
+      interpretador por evento seria imposto permanente sobre a sessão
+- [x] 41.2 Redação por **lista de permissão**, não de bloqueio: binário mais
+      o segundo token só quando parece subcomando. Lista de bloqueio erra
+      por omissão — basta uma forma não prevista para o segredo ir a disco.
+      Coberto por 7 formas reais de passar credencial (`export TOKEN=`,
+      `VAR=x cmd`, `-H "Authorization:"`, `mysql -pSENHA`, `aws configure
+      set`, `user:token@github`, `postgres://user:senha@`). Teto por arquivo
+      para em silêncio em vez de truncar: trace pela metade que se apresenta
+      como completo engana mais que trace ausente
+- [x] 41.3 `.harness/trace/` no `.gitignore`, e o teste prova a fronteira nos
+      dois sentidos — `git check-ignore` tem de pegar o trace e **não** pegar
+      o `arch-rules.json`. Ignorar `.harness/` inteiro mataria a catraca
+      junto com o log
+- [x] 41.4 Medida 5 do `medir-aderencia.sh`. Sessão com edição e sem commit
+      é o alvo; sessão só de leitura não alerta — medida que grita sem motivo
+      é a primeira a ser ignorada. Sem trace, ela se declara cega em vez de
+      calar. **Reduzido de propósito:** contar bloqueios do gate exigiria o
+      gate escrever em disco, e qualquer escrita dentro dele pode fazê-lo
+      falhar aberto. Não vale a troca; registrado no cabeçalho do script
+- [x] 41.5 51 testes novos (`test_trace.py` 26, `test_aderencia.py` +5,
+      `test_geracao.py` +15 do gitignore parametrizado). Provados por mutação
+      em quatro pontos: desligar a redação reprova 9; `set -e` no hook
+      reprova 2; remover a guarda final reprova 1. Regressão: `medicao.json`
+      byte a byte idêntico
+Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py` —
+751 testes (+45), limpos, medição sem diff, verificador 11/11 no alvo gerado.
+
+Dois defeitos achados pelos próprios testes, ambos onde os dois lados foram
+escritos juntos e concordaram por engano:
+- O teste de exit 0 **não mordia**: trocar a guarda final por `|| exit 1` não
+  reprovava nada, porque todo caminho interno já devolve 0. Substituído por
+  um par — `PATH` vazio (comportamento) e checagem textual da guarda e da
+  ausência de `set -e` (estrutura). É o único lugar onde essa proteção é
+  observável, e `set -e` sozinho quebraria o contrato sem nenhum teste acusar.
+- O leitor da medida 5 quebrava com espaço depois dos dois-pontos, e falhava
+  do pior jeito: reportando "trace vazio" em vez de erro. Quem lesse
+  concluiria que não houve sessão — o oposto da verdade.

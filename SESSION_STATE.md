@@ -3,17 +3,41 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: Grupo 40 na `feature/eval-aderencia` — **não publicado**
-  (ninguém pediu push). Antes dele: `c9bf6e2` na `main`, CI verde — Grupo 39.
-- Testes: 706/706 + 4 skips explícitos; ruff e mypy strict limpos; score da
+- Commit verificado: Grupo 41 na `feature/eval-aderencia` — **não publicado**
+  (ninguém pediu push). Quatro commits acumulados nela. Antes: `c9bf6e2` na
+  `main`, CI verde — Grupo 39.
+- Testes: 751/751 + 4 skips explícitos; ruff e mypy strict limpos; score da
   geração **+67** em todos os ecossistemas (+52 no `sem-sensores`) — o
   `tests/medicao.json` saiu byte a byte idêntico ao baseline, sem regressão.
 - Change/plano ativo: `TASKS.md` na raiz — **só o Grupo 26 aberto, e
-  BLOQUEADO** (ver pendências). Grupos 25, 27 a 40 concluídos.
-- Em andamento: nada — fronteira limpa. Próximo: lacunas 2, 3 e 4 do
-  `docs/intersecao-harness-engineering-x-skill.md`, nessa ordem, cada uma
-  proposta como grupo no `TASKS.md` antes de implementar. As lacunas 5 e 6
-  o usuário decidiu NÃO implementar por ora.
+  BLOQUEADO** (ver pendências). Grupos 25, 27 a 41 concluídos.
+- Em andamento: nada — fronteira limpa. **Próximo: lacuna 4** (approval
+  tiers) do `docs/intersecao-harness-engineering-x-skill.md`, proposta como
+  grupo no `TASKS.md` antes de implementar. A lacuna 2 foi cancelada (era
+  erro de documentação, ver abaixo); 5 e 6 o usuário decidiu não implementar.
+
+## O que mudou nesta sessão (Grupo 41)
+`registrar-sessao.sh`: hook de observação registrado nos três agentes, ao
+lado do gate e nunca com `failClosed`. Grava uma linha por chamada de
+ferramenta em `.harness/trace/`, com redação por lista de permissão. A medida
+5 do `medir-aderencia.sh` lê esse trace e responde o que as medidas 1-4
+declaravam não ver: sessão que editou arquivo e não commitou nada.
+
+**Reduções de escopo declaradas, não silenciosas:**
+- Contar bloqueios do gate ficou de fora. Exigiria o gate escrever em disco,
+  e qualquer escrita dentro dele pode fazê-lo falhar aberto.
+- O trace não vê raciocínio, custo, nem se a edição foi descartada depois.
+
+**Dois defeitos achados pelos próprios testes**, ambos da mesma classe — os
+dois lados escritos juntos, concordando por engano:
+1. O teste de "sai 0 sempre" não mordia (a função interna já é total).
+   Substituído por par comportamento + estrutura. `set -e` no hook quebraria
+   o contrato sem nenhum teste de comportamento acusar.
+2. O leitor da medida 5 quebrava com espaço depois dos dois-pontos e
+   reportava "trace vazio" em vez de erro — quem lesse concluiria que não
+   houve sessão.
+
+## O que mudou nesta sessão (Grupo 40 + pesquisa)
 
 ## O que mudou nesta sessão (Grupo 40 + pesquisa)
 Duas coisas, nesta ordem:
@@ -145,9 +169,17 @@ Verificada contra o CLI real: `npx @fission-ai/openspec@latest`, versão 1.7.0
   via `npx`. Se quiser o binário fixo: `npm install -g @fission-ai/openspec`.
 
 ## Pendências
-- **`docs/intersecao-harness-engineering-x-skill.md` precisa de correção na
-  lacuna 1** (ver acima): está na forma larga e falsa. O usuário foi
-  informado e ainda não decidiu se quer a reescrita.
+- **A lacuna 2 do doc de interseção foi CANCELADA, não implementada.** Era
+  erro de documentação: `propor-regra-arch` já é um controle inferencial
+  gerado, e o revisor com veredito foi removido no Grupo 28 por decisão do
+  usuário, com custo medido. Reclassificada como "Fora de escopo (decisão
+  explícita)" no commit `2e559ed`. Resíduo real e NÃO tratado: a camada
+  inferencial vale só para Claude Code, porque a doc do Devin não publica os
+  paths de subagente.
+- **Conferir as 6 linhas ainda marcadas "Ausente" no doc de interseção**
+  contra `eval/`, `evals/` e o histórico do `TASKS.md` antes de virarem
+  plano. As duas que já viraram estavam erradas pelo mesmo motivo: foram
+  escritas olhando só o repo alvo e o `resources/` da skill.
 - **BLOQUEADOR: o instrumento do nível E não detecta disparo nenhum.** Teste
   de sanidade: skill `deploy-producao`, description "Use SEMPRE que o usuario
   pedir para rodar o deploy de producao", query "roda o deploy de producao
