@@ -944,3 +944,60 @@ Três coisas que só apareceram ao rodar:
 - **O gate deste repositório bloqueou a prova do gate.** Montar a bateria
   exigiu construir `rm -rf` em partes, como o `verificar-harness.sh` já fazia
   — o mesmo modo de falha registrado no defeito 5 do nível D.
+
+## Grupo 43 - A janela do medidor começa quando o harness chega ✅
+<!-- Achado ao rodar o harness no clone real do spring-petclinic, depois do
+     merge dos Grupos 40-42. Mesma fonte de valor da rodada anterior: repo de
+     verdade encontra o que fixture não encontra.
+
+     O DEFEITO. A medida 1 pergunta "que fração dos commits segue o
+     protocolo?" e aplica isso a commits feitos ANTES de o protocolo existir.
+     No PetClinic — anos de histórico do time do Spring — ela reportou
+     `0 de 1 (0%)` e ALERTA, sobre um commit que trata de um bug de
+     PostgreSQL e nunca teve como se chamar `checkpoint: Grupo N`.
+
+     É instalar um relógio de ponto hoje e emitir relatório dizendo que os
+     funcionários não bateram ponto nos últimos três anos. O número está
+     aritmeticamente certo e a conclusão é absurda.
+
+     POR QUE ISSO NÃO É FRESCURA. A primeira coisa que alguém lê depois de
+     instalar o harness passa a ser um alerta vermelho acusando o time de
+     algo que ele não teve como fazer. É exatamente o argumento do Grupo 42
+     sobre o falso bloqueio: alarme falso é o que faz o sensor ser ignorado,
+     e sensor ignorado leva o resto do relatório junto.
+
+     POR QUE É DEFEITO E NÃO TRADE-OFF. A medida 5 tem o mesmo problema em
+     potencial e o resolve: sem trace, ela imprime "sem trace" e se declara
+     cega em vez de alertar. Duas medidas do mesmo script tratando a mesma
+     situação de formas opostas.
+
+     O dado já existe: `.claude/harness.json` tem `gerado_em`. -->
+- [x] 43.1 `git log --since=<gerado_em>`, com a data lida do
+      `.claude/harness.json`. Uma linha resolve as medidas 1, 3 e 4 de uma
+      vez, porque as três leem o mesmo log
+- [x] 43.2 Sem commit desde a instalação, a medida 1 **se declara cega**, no
+      mesmo formato da medida 5 — que já fazia isso desde o Grupo 41. Eram
+      duas medidas do mesmo script tratando a mesma situação de formas
+      opostas; era isso que tornava o caso um defeito, e não um trade-off
+- [x] 43.3 Sem manifesto, sem `gerado_em` ou com data ilegível: mantém a
+      janela antiga e **declara** no campo "não vê". Degradar em silêncio
+      trocaria um alarme falso conhecido por um número que ninguém sabe ler
+- [x] 43.4 SIGPIPE. **A causa não era óbvia:** sem trap, o shell morre calado
+      no `head`; é o `trap ... EXIT` que este script instala para limpar os
+      temporários que o faz SOBREVIVER, e aí o `printf` reporta o erro. E
+      `trap '' PIPE` piora — testei, e ele produz o erro em vez de evitá-lo.
+      Toda escrita em stdout passou por um `diz()` que sai quieto
+- [x] 43.5 5 testes novos, ambos os consertos provados por mutação: zerar
+      `INSTALADO_EM` reprova o teste do histórico preexistente; voltar o
+      `diz()` para `printf` cru reprova o do SIGPIPE
+Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py` —
+794 testes (+5), limpos, `medicao.json` sem diff. Revalidado no clone do
+spring-petclinic: **0 de 6 medidas em alerta** num harness recém-instalado,
+contra 2 de 6 antes, e stderr limpo ao truncar com `head`.
+
+Um detalhe de método que quase escondeu o defeito: `tests/gerar.py` grava
+`gerado_em` com a constante fixa `2026-07-27`. Com ela, o commit do PetClinic
+(30/07) cai DENTRO da janela e o alerta persistia mesmo com o conserto certo.
+Só ajustando o manifesto para a data real de instalação o comportamento
+correto apareceu. Fixture com data congelada mede outra coisa que não a
+realidade — vale para o próximo grupo que mexer em janela de tempo.

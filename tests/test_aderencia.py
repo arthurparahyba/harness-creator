@@ -63,13 +63,13 @@ def _init(repo: Path) -> None:
     _git(repo, "init", "-q", "-b", "main")
 
 
-def _commit(repo: Path, assunto: str, arquivos: dict[str, str]) -> None:
+def _commit(repo: Path, assunto: str, arquivos: dict[str, str], data: str | None = None) -> None:
     for rel, conteudo in arquivos.items():
         alvo = repo / rel
         alvo.parent.mkdir(parents=True, exist_ok=True)
         alvo.write_text(conteudo, newline="\n")
     _git(repo, "add", "-A")
-    _git(repo, "commit", "-q", "-m", assunto)
+    _git(repo, "commit", "-q", "-m", assunto, data=data)
 
 
 def _tasks(*grupos: str) -> str:
@@ -262,6 +262,95 @@ def test_sem_fonte_de_trabalho_alerta_mas_nao_derruba(tmp_path: Path) -> None:
     saida = _json(repo)
     assert _alerta(saida, "Grupos concluidos")
     assert saida["medidas"] == 6
+
+
+# ------------------------------------- janela: começa quando o harness chega
+
+
+def _manifesto(repo: Path, data: str | None) -> None:
+    alvo = repo / ".claude" / "harness.json"
+    alvo.parent.mkdir(parents=True, exist_ok=True)
+    corpo: dict[str, object] = {"skill": "harness-creator"}
+    if data is not None:
+        corpo["gerado_em"] = data
+    alvo.write_text(json.dumps({"harness": corpo}, indent=2), newline="\n")
+
+
+def test_historico_anterior_a_instalacao_nao_alerta(tmp_path: Path) -> None:
+    """O defeito que a rodada no spring-petclinic encontrou.
+
+    Repositório com anos de histórico recebe o harness hoje. Nenhum commit
+    anterior tem como se chamar `checkpoint:` — o protocolo não existia. A
+    medida reportava `0%` e ALERTA, acusando o time por um período em que a
+    regra não estava em vigor. É instalar um relógio de ponto hoje e cobrar
+    os últimos três anos.
+    """
+    repo = tmp_path / "preexistente"
+    _init(repo)
+    for i in range(5):
+        _commit(repo, f"fix: bug {i}", {f"src/a{i}.txt": "x"}, data="2020-01-01T10:00:00")
+    _manifesto(repo, "2026-07-30")
+    assert not _alerta(_json(repo), "Commits de checkpoint")
+
+
+def test_commits_posteriores_a_instalacao_contam(tmp_path: Path) -> None:
+    """A janela não pode virar desculpa: depois da instalação, a medida volta
+    a cobrar normalmente. Sem este par, "não alerta nunca" passaria."""
+    repo = tmp_path / "depois"
+    _init(repo)
+    _commit(repo, "fix: antigo", {"src/a.txt": "x"}, data="2020-01-01T10:00:00")
+    _manifesto(repo, "2020-06-01")
+    for i in range(4):
+        _commit(repo, f"wip {i}", {f"src/b{i}.txt": "x"}, data="2026-07-30T10:00:00")
+    assert _alerta(_json(repo), "Commits de checkpoint")
+
+
+def test_sem_manifesto_mantem_janela_antiga_e_declara(tmp_path: Path) -> None:
+    """Degradar em silêncio seria trocar um alarme falso conhecido por um
+    número que ninguém sabe interpretar."""
+    repo = tmp_path / "sem-manifesto"
+    _init(repo)
+    for i in range(3):
+        _commit(repo, f"fix: bug {i}", {f"src/a{i}.txt": "x"}, data="2020-01-01T10:00:00")
+    saida = _json(repo)
+    assert _alerta(saida, "Commits de checkpoint"), "sem manifesto, a janela antiga vale"
+    cego = next(m["cego_para"] for m in _medidas(saida) if str(m["medida"]).startswith("Commits"))
+    assert "QUANDO o harness foi instalado" in str(cego), "degradou sem declarar"
+
+
+def test_manifesto_com_data_ilegivel_cai_na_janela_antiga(tmp_path: Path) -> None:
+    repo = tmp_path / "data-ruim"
+    _init(repo)
+    for i in range(3):
+        _commit(repo, f"fix: bug {i}", {f"src/a{i}.txt": "x"}, data="2020-01-01T10:00:00")
+    _manifesto(repo, "ontem de manhã")
+    assert _alerta(_json(repo), "Commits de checkpoint")
+
+
+def test_saida_truncada_nao_escreve_no_stderr(obediente: Path) -> None:
+    """`medir-aderencia.sh | head` é o uso mais natural de um relatório.
+
+    O `trap ... EXIT` que o script instala para limpar temporários faz o shell
+    SOBREVIVER ao SIGPIPE em vez de morrer calado — e aí o printf reporta
+    `write error: Broken pipe`. Ferramenta de diagnóstico não pode sujar o
+    terminal de quem a usa do jeito óbvio.
+    """
+    medidor = subprocess.Popen(
+        ["sh", str(MEDIDOR)],
+        cwd=obediente,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    assert medidor.stdout is not None
+    cabeca = subprocess.Popen(
+        ["head", "-3"], stdin=medidor.stdout, stdout=subprocess.DEVNULL, text=True
+    )
+    medidor.stdout.close()
+    cabeca.wait()
+    erro = medidor.stderr.read() if medidor.stderr else ""
+    medidor.wait()
+    assert erro == "", f"medidor escreveu no stderr ao ser truncado: {erro!r}"
 
 
 # --------------------------------------------- medida 5: sessões sem commit
