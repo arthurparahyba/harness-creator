@@ -3,9 +3,8 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: Grupo 42 na `feature/eval-aderencia` — **não publicado**
-  (ninguém pediu push). Cinco commits acumulados nela. Antes: `c9bf6e2` na
-  `main`, CI verde — Grupo 39.
+- Commit verificado: `58ef747` na `main` — merge de `feature/eval-aderencia`
+  (Grupos 40, 41 e 42), **publicado**, CI verde nos 8 steps antes do merge.
 - Testes: 789/789 + 4 skips explícitos; ruff e mypy strict limpos; score da
   geração **+67** em todos os ecossistemas (+52 no `sem-sensores`) — o
   `tests/medicao.json` saiu byte a byte idêntico ao baseline, sem regressão.
@@ -192,7 +191,45 @@ Verificada contra o CLI real: `npx @fission-ai/openspec@latest`, versão 1.7.0
 - Instalação global do CLI falhou por permissão nesta máquina; tudo foi feito
   via `npx`. Se quiser o binário fixo: `npm install -g @fission-ai/openspec`.
 
+## Validação no spring-petclinic real (2026-07-30, após o merge)
+Clone raso de `spring-projects/spring-petclinic` (`88e37c1`), harness gerado
+por `tests/gerar.py`. **Ressalva de método:** é a reimplementação
+determinística da FASE 2, não a skill executada por um modelo — o nível D
+existe para medir essa diferença. E **não há JDK nesta máquina** (Maven sim,
+runtime não), então o build do PetClinic não foi executado; o que foi
+validado é a maquinaria do harness, que é toda shell.
+
+Resultado: verificador **11/11**; check-arch **7/7** incluindo as regras
+`G01`/`G02` novas; gate graduado correto contra caminhos reais (`target` e
+`build` liberados, `src/main/java` e `/` bloqueados, e a exceção não abriu
+buraco em `target && /`); trace classificando risco; e a senha de teste
+`SPRING_DATASOURCE_PASSWORD=s3nh4-real` **não chegou ao disco**. Geração sem
+`format-on-edit.sh`, que é o correto para `spring-javaformat`.
+
+### DEFEITO ENCONTRADO — medida 1 alarme falso em repo preexistente
+Num repositório que acabou de receber o harness, TODO o histórico é anterior
+a ele e portanto não tem como conter commits `checkpoint:`. A medida 1
+reporta **0% e ALERTA**, acusando o time de indisciplina por um período em
+que o protocolo não existia.
+
+É a mesma classe de problema que a medida 5 já trata bem (sem trace, ela se
+declara cega em vez de alertar) e exatamente o modo de falha contra o qual o
+próprio Grupo 42 argumenta: alarme falso é o que faz o sensor ser ignorado.
+
+O dado para consertar já existe: `.claude/harness.json` tem `gerado_em`. A
+janela da medida 1 deveria começar ali, e a medida deveria se declarar cega
+quando não há commit posterior à instalação. **NÃO consertado** — fora do
+escopo do Grupo 42, que já está commitado e mergeado.
+
+### Defeito menor
+`medir-aderencia.sh` emite `printf: write error: Broken pipe` no stderr
+quando a saída é truncada por `head`. Cosmético, mas é uma ferramenta de
+diagnóstico sujando o terminal de quem a usa do jeito mais natural.
+
 ## Pendências
+- **Medida 1 do `medir-aderencia.sh` alarma falso em repo preexistente** —
+  ver acima. É o candidato natural a Grupo 43.
+- **`medir-aderencia.sh` e o SIGPIPE** — ver acima.
 - **A lacuna 2 do doc de interseção foi CANCELADA, não implementada.** Era
   erro de documentação: `propor-regra-arch` já é um controle inferencial
   gerado, e o revisor com veredito foi removido no Grupo 28 por decisão do
