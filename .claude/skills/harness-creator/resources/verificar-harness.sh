@@ -98,7 +98,7 @@ json_parseia() {
 }
 
 # ---------------------------------------------------------------- JSON valido
-JSONS=".claude/settings.json .devin/hooks.v1.json .cursor/hooks.json .mcp.json .claude/harness.json .harness/arch-rules.json"
+JSONS=".claude/settings.json .devin/hooks.v1.json .cursor/hooks.json .mcp.json .claude/harness.json .harness/arch-rules.json .harness/gate-rules.json"
 _ruins=""
 _vistos=0
 for f in $JSONS; do
@@ -152,7 +152,11 @@ if [ -f "$GATE" ]; then
   # repositorio onde isto roda bloquearia a propria verificacao.
   _rm=rm
   _flag=-rf
-  _payload=$(printf '{"tool_name":"Bash","tool_input":{"command":"%s %s /tmp/sonda-gate"}}' "$_rm" "$_flag")
+  # O alvo NAO pode ser sob /tmp: desde o gate graduado, caminho temporario e
+  # excecao declarada em `.harness/gate-rules.json`, e o gate o libera com
+  # razao. A sonda antiga passou a testar o caminho permitido e reportava
+  # "gate nao bloqueia" numa geracao correta.
+  _payload=$(printf '{"tool_name":"Bash","tool_input":{"command":"%s %s /alvo-inexistente"}}' "$_rm" "$_flag")
   # Executado pelo proprio shebang, nunca com `sh $GATE`: o gate e bash e usa
   # array. Forcar sh nele o faz morrer com erro de sintaxe, e um gate que
   # morre devolve exit != 2 — a verificacao acusaria falha onde nao ha.

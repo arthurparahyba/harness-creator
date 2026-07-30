@@ -447,6 +447,11 @@ def gerar(nome: str, destino: Path) -> Stack:
     # dependem de test runner nenhum. O que não vai, sem sensores, é a DoD que
     # os executa — ver `dod_gerada`.
     _grava(destino, ".harness/arch-rules.json", (RESOURCES / "arch-rules.json").read_text())
+    # Registro de risco do gate. Vai junto do arch-rules e pelo mesmo motivo:
+    # o que precisa ser ajustado por repositório não pode morar dentro de um
+    # script. A defesa contra edição maliciosa é a regra G01, que executa o
+    # gate na cadeia da DoD.
+    _grava(destino, ".harness/gate-rules.json", (RESOURCES / "gate-rules.json").read_text())
     _grava(destino, ".claude/check-arch.sh", (RESOURCES / "check-arch.sh").read_text())
     (destino / ".claude/check-arch.sh").chmod(0o755)
     # Regra de honestidade da FASE 2: sem sensores, a DoD fica vazia e o

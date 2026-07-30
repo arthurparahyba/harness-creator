@@ -361,6 +361,34 @@ else
   fi
 fi
 
+# ------------------------------------------------- 6. comandos de risco medio
+# O nivel `avisar` do `.harness/gate-rules.json` so existe se alguem LE o que
+# ele produz. Sem esta medida, o gate graduado teria um terceiro nivel que
+# grava um campo no trace e morre ali — pior que nao ter nivel nenhum, porque
+# parece cobertura.
+#
+# Risco `medio` e o que o gate deixou passar de proposito: nao e destrutivo o
+# bastante para bloquear, e nao deveria sumir em silencio. O caso que motivou
+# o nivel: `git commit --no-verify` e o agente desligando o pre-commit do
+# proprio harness.
+if [ ! -d "$TRACE_DIR" ]; then
+  medida "Comandos de risco medio" 0 "sem trace" "" "" "" \
+    "tudo: sem trace nao ha como saber o que passou pelo gate"
+else
+  RISCOS=$(cat "$TRACE_DIR"/*.jsonl 2>/dev/null | awk '
+    { if ($0 ~ /"risco"[ \t]*:[ \t]*"medio"/) m++; if ($0 ~ /"risco"[ \t]*:[ \t]*"alto"/) a++ }
+    END { print m+0, a+0 }')
+  N_MEDIO=$(echo "$RISCOS" | cut -d' ' -f1)
+  N_ALTO=$(echo "$RISCOS" | cut -d' ' -f2)
+  if [ "${N_MEDIO:-0}" -gt 0 ]; then _a=1; else _a=0; fi
+  medida "Comandos de risco medio" "$_a" \
+    "$N_MEDIO de risco medio, $N_ALTO tentativa(s) barrada(s) pelo gate" \
+    "houve comando que o gate deixou passar e marcou como digno de nota" \
+    "sao os comandos que nao merecem bloqueio e nao deveriam sumir: pular o pre-commit, abrir permissao 777, executar script baixado da rede. Nenhum quebra nada sozinho; juntos descrevem uma sessao que contornou o harness em vez de usa-lo" \
+    "abra o trace e veja quais foram; se algum for rotina legitima neste repo, mova para 'permitir' em .harness/gate-rules.json com o motivo escrito" \
+    "se o comando de risco medio de fato rodou — o trace registra a tentativa, e outro hook pode te-la barrado depois"
+fi
+
 # ---------------------------------------------------------------------- saida
 if [ "$FORMATO" = json ]; then
   printf '{\n  "commits_analisados": %s,\n  "medidas": %s,\n  "alertas": %s,\n  "resultado": [' \

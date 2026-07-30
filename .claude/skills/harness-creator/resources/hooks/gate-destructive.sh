@@ -97,44 +97,99 @@ if [ -z "$COMMAND" ]; then
   exit 0
 fi
 
-# Padroes de risco — operacoes irreversiveis ou com efeito colateral real.
-# Independem da linguagem: git, shell, SQL, filesystem.
-RISKY_PATTERNS=(
-  'rm[[:space:]]+-rf?[[:space:]]'
-  'git[[:space:]]+push[[:space:]].*--force'
-  'git[[:space:]]+push[[:space:]].*-f[[:space:]]'
-  'git[[:space:]]+reset[[:space:]]+--hard'
-  'git[[:space:]]+clean[[:space:]]+-fd'
-  'git[[:space:]]+branch[[:space:]]+-D'
-  'DROP[[:space:]]+(TABLE|SCHEMA|DATABASE)'
-  'TRUNCATE[[:space:]]+TABLE'
-  'drop[[:space:]]+database'
-  ':(){.*};:'
-  'mkfs\.'
-  'dd[[:space:]]+if=.*of=/dev/'
-  # Publicacao de artefato: irreversivel em qualquer registry publico —
-  # versao publicada nao se despublica. Universal de proposito: ter o
-  # padrao de npm num repo Go nao custa nada e evita esquecer de ativar.
-  'npm[[:space:]]+publish'
-  '(yarn|pnpm)[[:space:]]+publish'
-  'mvn[[:space:]]+.*(deploy|release:perform)'
-  'gradle(w)?[[:space:]]+.*publish'
-  'dotnet[[:space:]]+nuget[[:space:]]+push'
-  'cargo[[:space:]]+publish'
-  'gem[[:space:]]+push'
-  'twine[[:space:]]+upload'
-  # Destruicao de infraestrutura e de cache global de dependencias.
-  'terraform[[:space:]]+destroy'
-  'go[[:space:]]+clean[[:space:]]+.*-modcache'
-)
+# ------------------------------------------------------------ registro de regras
+# Os padroes vivem em `.harness/gate-rules.json`, nao aqui dentro, porque o
+# gate binario errava dos dois lados. O falso bloqueio e o mais caro: ele
+# ensina a driblar. Uma vez aprendido num caso obviamente errado (limpar um
+# diretorio temporario), o drible passa por cima tambem dos bloqueios certos.
+# Com registro, cada falso bloqueio vira uma excecao declarada UMA vez — a
+# mesma catraca do `arch-rules.json`.
+#
+# "MAS O AGENTE PODE EDITAR O REGISTRO E SE LIBERAR"
+# Pode — e ja podia editar este script, com o mesmo shell. Tirar os padroes
+# daqui nao cria a capacidade. A defesa nao e o formato do arquivo: e a regra
+# G01 do `arch-rules.json`, que EXECUTA este gate a cada rodada da DoD e exige
+# exit 2 no destrutivo. Gate enfraquecido deixa de ser invisivel e vira build
+# vermelho no proximo grupo.
+#
+# Este script NAO ESCREVE EM DISCO, por nada. Escrita pode falhar (disco
+# cheio, volume read-only), falha mata o script, e script morto devolve exit
+# 1 — que em PreToolUse significa "erro nao-bloqueante" e deixa o comando
+# destrutivo passar. O gate falha ABERTO. Quem registra e o
+# `registrar-sessao.sh`, que roda ao lado e pode falhar sem consequencia.
+REGRAS="${HARNESS_GATE_RULES:-.harness/gate-rules.json}"
 
-for PATTERN in "${RISKY_PATTERNS[@]}"; do
-  if printf '%s' "$COMMAND" | grep -qE "$PATTERN"; then
-    echo "BLOCKED: comando corresponde a padrao de risco: $PATTERN" >&2
-    echo "Operacao destrutiva bloqueada pelo gate hook (.claude/hooks/gate-destructive.sh)." >&2
+# Le o registro como TSV. Mesmo parser em awk do `check-arch.sh`: exigir jq
+# transformaria o gate em bloqueio de tudo em maquina sem jq.
+_le_registro() {
+  [ -f "$REGRAS" ] || return 1
+  awk '
+    function limpa(s) {
+      sub(/^[^:]*:[[:space:]]*"/, "", s)
+      sub(/",?[[:space:]]*$/, "", s)
+      gsub(/\\"/, "\"", s)
+      gsub(/\\\\/, "\\", s)
+      return s
+    }
+    /"nivel"[[:space:]]*:/  { nivel  = limpa($0) }
+    /"padrao"[[:space:]]*:/ { padrao = limpa($0) }
+    /"what"[[:space:]]*:/   { what   = limpa($0) }
+    /"why"[[:space:]]*:/    { why    = limpa($0) }
+    /"fix"[[:space:]]*:/ {
+      fix = limpa($0)
+      if (nivel != "" && padrao != "")
+        printf "%s\t%s\t%s\t%s\t%s\n", nivel, padrao, what, why, fix
+      nivel = ""; padrao = ""; what = ""; why = ""; fix = ""
+    }
+  ' "$REGRAS" 2>/dev/null
+}
+
+REGISTRO="$(_le_registro || printf '')"
+
+# Fallback embutido. Registro ausente, ilegivel ou sem NENHUMA regra de
+# bloqueio cai aqui: gate sem registro nao pode virar gate sem protecao, que
+# seria transformar "alguem apagou um arquivo" em "o harness parou de
+# proteger" sem nada acusando.
+if ! printf '%s' "$REGISTRO" | grep -q '^bloquear'; then
+  REGISTRO="$(printf '%s\n' \
+    "bloquear	rm[[:space:]]+-rf?[[:space:]]	remocao recursiva forcada	Nao ha desfazer	Confirme com o humano" \
+    "bloquear	git[[:space:]]+push[[:space:]].*(--force|[[:space:]]-f[[:space:]])	push forcado	Reescreve historico remoto	Use --force-with-lease" \
+    "bloquear	git[[:space:]]+reset[[:space:]]+--hard	reset destrutivo	Descarta o nao commitado	Use git stash" \
+    "bloquear	git[[:space:]]+clean[[:space:]]+-[a-z]*f	remocao de nao rastreados	Inclui .env sem copia	Use git clean -n" \
+    "bloquear	git[[:space:]]+branch[[:space:]]+-D	remocao forcada de branch	Commit fica so no reflog	Use git branch -d" \
+    "bloquear	(DROP[[:space:]]+(TABLE|SCHEMA|DATABASE)|TRUNCATE[[:space:]]+TABLE|drop[[:space:]]+database)	destruicao em banco	Nao ha desfazer	Peca ao humano" \
+    "bloquear	(npm[[:space:]]+publish|(yarn|pnpm)[[:space:]]+publish|mvn[[:space:]]+.*(deploy|release:perform)|gradle(w)?[[:space:]]+.*publish|dotnet[[:space:]]+nuget[[:space:]]+push|cargo[[:space:]]+publish|gem[[:space:]]+push|twine[[:space:]]+upload)	publicacao de artefato	Versao publicada nao se despublica	Peca ao humano" \
+    "bloquear	(terraform[[:space:]]+destroy|go[[:space:]]+clean[[:space:]]+.*-modcache|mkfs\\.|dd[[:space:]]+if=.*of=/dev/)	destruicao de infraestrutura	Efeito fora do repositorio	Peca ao humano")"
+fi
+
+# ---------------------------------------------------------------- decisao
+# `permitir` ANTES de `bloquear`, e a ordem e o ponto: sem precedencia, uma
+# excecao nunca conseguiria abrir buraco num padrao amplo como `rm -rf`, e o
+# registro seria decorativo.
+#
+# Toda excecao e ANCORADA (`^...$`) e proibe `;`, `|`, `&`, `$` e crase no
+# caminho. Sem isso, `rm -rf node_modules && rm -rf /` casaria a excecao pelo
+# comeco e o gate liberaria a segunda metade junto. Ancorar e o que separa
+# "excecao" de "buraco".
+while IFS=$'\t' read -r nivel padrao _what _why _fix; do
+  [ "$nivel" = "permitir" ] || continue
+  [ -n "${padrao:-}" ] || continue
+  if printf '%s' "$COMMAND" | grep -qE "$padrao"; then
+    exit 0
+  fi
+done <<< "$REGISTRO"
+
+while IFS=$'\t' read -r nivel padrao what why fix; do
+  [ "$nivel" = "bloquear" ] || continue
+  [ -n "${padrao:-}" ] || continue
+  if printf '%s' "$COMMAND" | grep -qE "$padrao"; then
+    echo "BLOCKED: $what" >&2
+    echo "WHY:  $why" >&2
+    echo "FIX:  $fix" >&2
+    echo "Bloqueado pelo gate (.claude/hooks/gate-destructive.sh)." >&2
     echo "Se realmente necessario, peça confirmacao explicita ao usuario." >&2
     exit 2
   fi
-done
+done <<< "$REGISTRO"
 
 exit 0

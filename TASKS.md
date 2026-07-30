@@ -865,3 +865,82 @@ escritos juntos e concordaram por engano:
 - O leitor da medida 5 quebrava com espaço depois dos dois-pontos, e falhava
   do pior jeito: reportando "trace vazio" em vez de erro. Quem lesse
   concluiria que não houve sessão — o oposto da verdade.
+
+## Grupo 42 - Gate graduado: exceção declarada e o degrau do falso verde ✅
+<!-- Origem: docs/intersecao-harness-engineering-x-skill.md, lacuna 4.
+
+     Conferido antes de propor, como a Correção do doc manda: `eval/` e
+     `evals/` não têm nenhuma capacidade de permissão; o `score-harness.sh`
+     não mede isso; o único grupo que tocou o gate foi o 6, de
+     portabilidade. A lacuna está genuinamente aberta.
+
+     O gate hoje é binário: casa um padrão -> exit 2; não casa -> exit 0
+     silencioso. Isso erra dos dois lados.
+
+     FALSO BLOQUEIO, com evidência desta sessão. Ao montar a demonstração do
+     Grupo 41 eu rodei `rm -rf` num diretório de scratchpad e o gate
+     bloqueou. A saída foi CONTORNAR — usei outro diretório. Esse é
+     exatamente o caminho pelo qual um gate perde autoridade: ele erra, a
+     pessoa aprende a driblar, e o drible vira hábito que também passa por
+     cima dos bloqueios corretos.
+
+     FALSO VERDE. Tudo fora da lista passa em silêncio, inclusive
+     `git commit --no-verify`, que desliga o pre-commit do próprio harness.
+     O agente pode enfraquecer o enforcement e nada acusa.
+
+     POR QUE A PREVENÇÃO PARA NO SHELL
+     O Cursor tem `beforeShellExecution` e `afterFileEdit`, e NÃO tem evento
+     de pré-edição de arquivo (a lista publicada traz `beforeReadFile` e
+     `afterFileEdit`) — https://cursor.com/docs/hooks.md. Bloquear a edição
+     do próprio gate antes que ela ocorra não vale nos três agentes, e a
+     regra 10 da skill não admite enforcement que só funciona em um. Por
+     isso: prevenção onde é portátil (shell), DETECÇÃO onde não é (42.4).
+
+     A TENSÃO QUE PRECISA DE DECISÃO SUA — ver 42.1. Tirar os padrões de
+     dentro do script e pô-los num JSON torna o gate configurável por repo,
+     que é o que resolve o falso bloqueio. Mas um registro que o agente pode
+     editar é um registro que ele pode enfraquecer: bastaria acrescentar uma
+     exceção para liberar o que o gate existe para barrar. O contra-argumento
+     é que isso não é capacidade nova — o agente já pode editar o script
+     hoje, com shell. A mitigação real não é o formato do arquivo, é a 42.4:
+     a DoD passa a EXECUTAR o gate e exigir exit 2. Se você preferir manter
+     os padrões no script e aceitar menos configurabilidade, é a 42.1 que
+     muda. -->
+- [x] 42.1 `.harness/gate-rules.json` com três níveis. `permitir` tem
+      precedência sobre `bloquear`, senão a exceção nunca abriria caminho num
+      padrão amplo e o registro seria decorativo. Fallback embutido quando o
+      arquivo some, fica ilegível **ou perde todas as regras de bloqueio** —
+      este último caso não estava previsto e é o drible mais curto que existe
+- [x] 42.2 Exceções ancoradas em `^...$`, proibindo `;`, `|`, `&`, `$` e
+      crase no caminho. **Isto é o grupo inteiro:** sem âncora,
+      `rm -rf node_modules && rm -rf /` casa a exceção pelo começo e o gate
+      libera a segunda metade. Ancorar é o que separa exceção de buraco
+- [x] 42.3 Nível `avisar` grava `risco` no trace, não em stderr. A
+      classificação roda sobre o comando **inteiro**, antes da redação —
+      `--no-verify` é exatamente o que a redação joga fora, e classificar
+      depois faria o nível inteiro ser decorativo. Uma chamada de awk, não um
+      grep por regra: o hook dispara em toda chamada de ferramenta
+- [x] 42.4 Regras `G01`/`G02` no `arch-rules.json`, executando o gate na
+      cadeia da DoD. Vêm em par porque a G01 sozinha é satisfeita por um gate
+      que bloqueia TUDO — passa na checagem e torna o agente inútil
+- [x] 42.5 63 testes novos (`test_gate.py` 29, `test_trace.py` +11, mais o
+      ajuste dos existentes). Provados por mutação: tirar a âncora final das
+      exceções reprova 5; abrir uma exceção `^rm.*$` reprova 11
+Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py` —
+789 testes (+38), limpos, `medicao.json` byte a byte idêntico.
+
+Três coisas que só apareceram ao rodar:
+
+- **A sonda do `verificar-harness.sh` usava `/tmp/sonda-gate`** — e `/tmp/`
+  virou exceção declarada nesta mudança. O gate passou a liberá-la com razão,
+  e o verificador reportava "gate não bloqueia" numa geração correta. Uma
+  exceção nova redefine o que as sondas antigas medem; alvo trocado para
+  `/alvo-inexistente`.
+- **O primeiro ataque que testei falhou sozinho.** Trocar todo `bloquear` por
+  `permitir` deixa o registro sem regra de bloqueio, o gate cai no fallback e
+  continua barrando. A G01 passou — corretamente, porque o gate não foi
+  enfraquecido. Foi o que motivou testar o ataque que funciona: manter os
+  bloqueios e abrir uma exceção larga por cima.
+- **O gate deste repositório bloqueou a prova do gate.** Montar a bateria
+  exigiu construir `rm -rf` em partes, como o `verificar-harness.sh` já fazia
+  — o mesmo modo de falha registrado no defeito 5 do nível D.

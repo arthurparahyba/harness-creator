@@ -3,18 +3,42 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: Grupo 41 na `feature/eval-aderencia` — **não publicado**
-  (ninguém pediu push). Quatro commits acumulados nela. Antes: `c9bf6e2` na
+- Commit verificado: Grupo 42 na `feature/eval-aderencia` — **não publicado**
+  (ninguém pediu push). Cinco commits acumulados nela. Antes: `c9bf6e2` na
   `main`, CI verde — Grupo 39.
-- Testes: 751/751 + 4 skips explícitos; ruff e mypy strict limpos; score da
+- Testes: 789/789 + 4 skips explícitos; ruff e mypy strict limpos; score da
   geração **+67** em todos os ecossistemas (+52 no `sem-sensores`) — o
   `tests/medicao.json` saiu byte a byte idêntico ao baseline, sem regressão.
 - Change/plano ativo: `TASKS.md` na raiz — **só o Grupo 26 aberto, e
-  BLOQUEADO** (ver pendências). Grupos 25, 27 a 41 concluídos.
-- Em andamento: nada — fronteira limpa. **Próximo: lacuna 4** (approval
-  tiers) do `docs/intersecao-harness-engineering-x-skill.md`, proposta como
-  grupo no `TASKS.md` antes de implementar. A lacuna 2 foi cancelada (era
-  erro de documentação, ver abaixo); 5 e 6 o usuário decidiu não implementar.
+  BLOQUEADO** (ver pendências). Grupos 25, 27 a 42 concluídos.
+- Em andamento: nada — fronteira limpa. **A sequência de lacunas pedida pelo
+  usuário terminou**: 1 (Grupo 40), 2 (cancelada — erro de documentação),
+  3 (Grupo 41) e 4 (Grupo 42). As lacunas 5 e 6 ele decidiu não implementar
+  por ora. Próximo passo é decisão dele — publicar a branch é o candidato
+  óbvio, com cinco grupos acumulados e nenhum push.
+
+## O que mudou nesta sessão (Grupo 42)
+Gate deixou de ser binário. `.harness/gate-rules.json` com `permitir` /
+`bloquear` / `avisar`; exceções ancoradas em `^...$`; `avisar` grava `risco`
+no trace e vira a medida 6 do `medir-aderencia.sh`; regras `G01`/`G02`
+executam o gate na cadeia da DoD.
+
+**A decisão de arquitetura foi do usuário**, apresentada com o contra: mover
+padrões de segurança de código para dado permite ao agente editá-los. O
+contra-argumento aceito foi que ele já podia editar o script, e que a defesa
+real é a detecção na DoD, não o formato do arquivo.
+
+**Prevenção onde é portátil, detecção onde não é.** O Cursor não tem evento
+de pré-edição de arquivo (só `beforeReadFile` e `afterFileEdit`,
+https://cursor.com/docs/hooks.md), então bloquear a edição do gate antes que
+ela ocorra violaria a regra 10. Daí a G01.
+
+**Interações que só apareceram rodando:**
+- A sonda do `verificar-harness.sh` usava `/tmp/sonda-gate`, que virou
+  exceção declarada. Uma exceção nova redefine o que as sondas antigas medem.
+- O primeiro ataque testado (trocar todo `bloquear` por `permitir`) falha
+  sozinho: sem regra de bloqueio, o gate cai no fallback. O ataque que
+  funciona é manter os bloqueios e abrir uma exceção larga por cima.
 
 ## O que mudou nesta sessão (Grupo 41)
 `registrar-sessao.sh`: hook de observação registrado nos três agentes, ao

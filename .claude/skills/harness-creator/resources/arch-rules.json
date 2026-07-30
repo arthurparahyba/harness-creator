@@ -36,6 +36,25 @@
     "fix": "Rode o grep do campo check para achar os arquivos e substitua cada marcador pelo valor real da stack"
   },
   {
+    "id": "G01",
+    "description": "O gate BLOQUEIA um comando destrutivo (exit 2)",
+    "check": "_r=rm; _f=-rf; printf '{\"tool_input\":{\"command\":\"%s %s /alvo-inexistente\"}}' \"$_r\" \"$_f\" | bash .claude/hooks/gate-destructive.sh >/dev/null 2>&1; [ $? -eq 2 ]",
+    "expect": "exit-0",
+    "what": "O gate nao devolveu exit 2 para um comando destrutivo",
+    "why": "E a unica defesa contra o agente enfraquecer o proprio enforcement. Os padroes moram em .harness/gate-rules.json e o agente pode edita-lo — como ja podia editar o script. Impedir a edicao ANTES que ela ocorra nao e portatil: o Cursor nao tem evento de pre-edicao de arquivo. Entao a defesa e detectar, e detectar na cadeia da DoD significa a cada grupo, nao so na geracao. Sem esta regra, um gate esvaziado passa despercebido ate alguem rodar um comando destrutivo",
+    "fix": "Compare .harness/gate-rules.json e .claude/hooks/gate-destructive.sh com o que a skill gerou; se uma excecao foi acrescentada sem motivo escrito no campo 'why', ela e a suspeita",
+    "comando_de_risco_montado_em_partes": "O padrao 'rm -rf' escrito por extenso aqui seria barrado pelo gate do proprio repositorio ao rodar a verificacao — o check se auto-bloquearia"
+  },
+  {
+    "id": "G02",
+    "description": "O gate LIBERA um comando seguro (exit 0)",
+    "check": "printf '{\"tool_input\":{\"command\":\"git status\"}}' | bash .claude/hooks/gate-destructive.sh >/dev/null 2>&1",
+    "expect": "exit-0",
+    "what": "O gate bloqueou 'git status'",
+    "why": "Sem este par, a G01 sozinha e satisfeita por um gate que bloqueia TUDO — que passa na checagem e torna o agente inutil. Gate quebrado para os dois lados e mais provavel que gate quebrado para um so: o modo de falha comum e o registro ilegivel, que faz cair no fallback ou barrar por precaucao",
+    "fix": "Rode 'bash .claude/check-arch.sh' e depois o gate a mao para ver o que ele imprime em stderr"
+  },
+  {
     "id": "A05",
     "description": "A fonte de trabalho existe e nao esta vazia",
     "check": "test -s TASKS.md || test -d openspec/changes",

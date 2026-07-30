@@ -261,7 +261,7 @@ def test_sem_fonte_de_trabalho_alerta_mas_nao_derruba(tmp_path: Path) -> None:
     _commit(repo, "checkpoint: objetivo 1", {"SESSION_STATE.md": "- x\n"})
     saida = _json(repo)
     assert _alerta(saida, "Grupos concluidos")
-    assert saida["medidas"] == 5
+    assert saida["medidas"] == 6
 
 
 # --------------------------------------------- medida 5: sessões sem commit

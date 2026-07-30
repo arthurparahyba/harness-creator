@@ -112,6 +112,62 @@ escapa_json() {
   printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g' | tr -d '\n\r' 2>/dev/null
 }
 
+# Classifica o comando contra `.harness/gate-rules.json` — o MESMO registro
+# que o gate usa. Um registro, dois consumidores: o gate decide passar ou
+# barrar, este anota o que passou.
+#
+# O nivel `avisar` existe porque o gate so sabe dizer sim ou nao, e ha
+# comandos que nao merecem bloqueio e nao deveriam sumir em silencio —
+# `git commit --no-verify` e o agente desligando o pre-commit do proprio
+# harness. Antes disto, ele passava e ninguem ficava sabendo.
+#
+# O AVISO VAI PARA O TRACE, NAO PARA stderr: o que um hook que sai 0
+# efetivamente entrega ao modelo varia entre os tres agentes-alvo, e uma
+# garantia que vale num so nao e garantia. O trace e nosso.
+#
+# UMA chamada de awk, nao um `grep` por regra: este hook dispara em TODA
+# chamada de ferramenta, e 14 subprocessos por comando seriam um imposto
+# permanente sobre a sessao. O comando vai por ENVIRON, nao por `-v`, porque
+# `-v` interpreta sequencias de escape e o comando pode conter barras.
+classifica() {
+  _regras="${HARNESS_GATE_RULES:-.harness/gate-rules.json}"
+  if [ ! -f "$_regras" ]; then
+    printf 'baixo'
+    return 0
+  fi
+  HARNESS_CMD="$1" awk '
+    function limpa(s) {
+      sub(/^[^:]*:[[:space:]]*"/, "", s)
+      sub(/",?[[:space:]]*$/, "", s)
+      gsub(/\\"/, "\"", s)
+      gsub(/\\\\/, "\\", s)
+      return s
+    }
+    /"nivel"[[:space:]]*:/  { nivel = limpa($0) }
+    /"padrao"[[:space:]]*:/ {
+      if (nivel != "") { k++; niveis[k] = nivel; padroes[k] = limpa($0); nivel = "" }
+    }
+    END {
+      cmd = ENVIRON["HARNESS_CMD"]
+      for (i = 1; i <= k; i++) {
+        if (cmd ~ padroes[i]) {
+          if (niveis[i] == "permitir") { permitido = 1 }
+          else if (niveis[i] == "bloquear") { alto = 1 }
+          else if (niveis[i] == "avisar") { medio = 1 }
+        }
+      }
+      # Mesma precedencia do gate: excecao declarada ganha de padrao amplo.
+      # Sem isso, `rm -rf node_modules` — que o gate LIBERA — apareceria no
+      # trace como risco alto, e o relatorio acusaria o que ele proprio
+      # autorizou.
+      if (permitido) print "baixo"
+      else if (alto) print "alto"
+      else if (medio) print "medio"
+      else print "baixo"
+    }
+  ' "$_regras" 2>/dev/null || printf 'baixo'
+}
+
 registrar() {
   comando="$(extrai command)"
   arquivo="$(extrai file_path)"
@@ -124,9 +180,13 @@ registrar() {
   if [ -n "$comando" ]; then
     evento=shell
     alvo="$(reduz_comando "$comando")"
+    # Classificado com o comando INTEIRO, antes da reducao — `--no-verify` e
+    # exatamente o que a reducao joga fora, e e o que interessa aqui.
+    risco="$(classifica "$comando")"
   elif [ -n "$arquivo" ]; then
     evento=edit
     alvo="$arquivo"
+    risco=baixo
   else
     # Outro evento, outra ferramenta: nada de util a registrar.
     return 0
@@ -145,10 +205,11 @@ registrar() {
     esac
   fi
 
-  printf '{"ts":"%s","evento":"%s","alvo":"%s","sessao":"%s"}\n' \
+  printf '{"ts":"%s","evento":"%s","alvo":"%s","risco":"%s","sessao":"%s"}\n' \
     "$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null)" \
     "$evento" \
     "$(escapa_json "$alvo")" \
+    "${risco:-baixo}" \
     "$(escapa_json "$sessao")" \
     >> "$arq" 2>/dev/null || return 0
 }
