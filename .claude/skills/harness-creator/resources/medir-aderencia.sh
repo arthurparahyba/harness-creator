@@ -99,6 +99,17 @@ escapar() {
   printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g' | tr '\n' ' '
 }
 
+# Toda escrita em stdout passa por aqui, e o motivo e o `trap ... EXIT` que
+# este script instala para limpar os temporarios. Com um trap de EXIT
+# registrado, o shell SOBREVIVE ao SIGPIPE em vez de morrer calado, e o
+# printf passa a reportar `write error: Broken pipe` no stderr. Quem faz
+# `medir-aderencia.sh | head` — o uso mais natural de um relatorio — recebia
+# um erro no terminal. Ferramenta de diagnostico nao pode sujar a saida de
+# quem a usa do jeito obvio.
+diz() {
+  printf "$@" 2>/dev/null || exit 0
+}
+
 # Cada medida imprime WHAT/WHY/FIX quando alerta, no mesmo formato que o
 # `arch-rules.json` usa. Numero solto ("aderencia: 43%") nao diz a ninguem o
 # que fazer na segunda-feira; agente que ve numero ruim sem receita tende a
@@ -114,28 +125,70 @@ medida() {
     SEP=","
   else
     if [ "$_alerta" -eq 0 ]; then _st="[ok    ]"; else _st="[ALERTA]"; fi
-    printf '%s %-38s %s\n' "$_st" "$_nome" "$_valor"
+    diz '%s %-38s %s\n' "$_st" "$_nome" "$_valor"
     if [ "$_alerta" -ne 0 ]; then
-      printf '         WHAT: %s\n' "$_what"
-      printf '         WHY:  %s\n' "$_why"
-      printf '         FIX:  %s\n' "$_fix"
+      diz '         WHAT: %s\n' "$_what"
+      diz '         WHY:  %s\n' "$_why"
+      diz '         FIX:  %s\n' "$_fix"
     fi
-    printf '         (nao ve: %s)\n' "$_cego"
+    diz '         (nao ve: %s)\n' "$_cego"
   fi
 }
 
 # ------------------------------------------------------------- janela de log
-# `%x09` e TAB: o assunto do commit pode conter qualquer coisa, e um
-# separador que aparece no proprio texto quebraria a leitura campo a campo.
+# A JANELA COMECA QUANDO O HARNESS CHEGOU, e este e o ponto do arquivo que
+# mais custou para descobrir. Sem isso, a medida 1 pergunta "que fracao dos
+# commits segue o protocolo?" e aplica a pergunta a commits feitos ANTES de o
+# protocolo existir. Rodando no spring-petclinic — anos de historico do time
+# do Spring — ela reportava `0 de 1 (0%)` e ALERTA, sobre um commit que trata
+# de um bug de PostgreSQL e nunca teve como se chamar `checkpoint: Grupo N`.
+#
+# E instalar um relogio de ponto hoje e emitir relatorio dizendo que os
+# funcionarios nao bateram ponto nos ultimos tres anos: o numero esta
+# aritmeticamente certo e a conclusao e absurda. E o custo e concreto — a
+# primeira coisa que alguem le depois de instalar o harness passa a ser um
+# vermelho acusando o time de algo que ele nao teve como fazer. Alarme falso
+# e o que faz o sensor ser ignorado, e sensor ignorado leva o relatorio junto.
+#
+# A data sai do manifesto, que a skill grava na geracao.
+INSTALADO_EM=""
+if [ -f .claude/harness.json ]; then
+  INSTALADO_EM=$(awk '
+    match($0, /"gerado_em"[ \t]*:[ \t]*"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]"/) {
+      campo = substr($0, RSTART, RLENGTH)
+      sub(/^.*"[ \t]*:[ \t]*"/, "", campo)
+      sub(/"$/, "", campo)
+      print campo
+      exit
+    }' .claude/harness.json 2>/dev/null)
+fi
+
 LOG=$(mktemp 2>/dev/null || printf '/tmp/medir-aderencia-log.%s' $$)
-git log -n "$JANELA" --no-merges --format='%H%x09%s' > "$LOG" 2>/dev/null
+if [ -n "$INSTALADO_EM" ]; then
+  git log -n "$JANELA" --no-merges --since="$INSTALADO_EM" \
+    --format='%H%x09%s' > "$LOG" 2>/dev/null
+else
+  git log -n "$JANELA" --no-merges --format='%H%x09%s' > "$LOG" 2>/dev/null
+fi
 trap 'rm -f "$LOG" ${BUFFER:-}' EXIT INT TERM
 
 N_COMMITS=$(awk 'END {print NR}' "$LOG")
 BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
 
+# Sem manifesto legivel a janela volta a ser o historico inteiro. Isso e
+# DECLARADO em cada medida que depende dela, nao silencioso: trocar um alarme
+# falso conhecido por um numero que ninguem sabe interpretar nao e conserto.
+if [ -n "$INSTALADO_EM" ]; then
+  JANELA_DESC="desde a instalacao do harness ($INSTALADO_EM)"
+  CEGO_JANELA="commit de merge, e commit anterior a $INSTALADO_EM — de proposito"
+else
+  JANELA_DESC="historico completo (sem .claude/harness.json legivel)"
+  CEGO_JANELA="QUANDO o harness foi instalado: sem manifesto, commits anteriores a ele entram na conta e derrubam a proporcao"
+fi
+
 if [ "$FORMATO" != json ]; then
-  printf 'ADERENCIA AO PROTOCOLO — %s commit(s) em %s\n\n' "$N_COMMITS" "$BRANCH"
+  diz 'ADERENCIA AO PROTOCOLO — %s commit(s) em %s, %s\n\n' \
+    "$N_COMMITS" "$BRANCH" "$JANELA_DESC"
 fi
 
 # --------------------------------------------- 1. proporcao de checkpoints
@@ -144,19 +197,30 @@ fi
 # fronteira de grupo — e a fronteira e o que torna o reset de contexto
 # seguro. Sem ela o WIP=1 vira texto.
 N_CHECK=$(awk -F'\t' '$2 ~ /^checkpoint:/ {n++} END {print n+0}' "$LOG")
-if [ "$N_COMMITS" -gt 0 ]; then
-  PCT=$(( N_CHECK * 100 / N_COMMITS ))
+if [ "$N_COMMITS" -eq 0 ]; then
+  # Zero commit na janela nao e indisciplina, e ausencia de dados — e a
+  # medida 5 ja tratava o caso equivalente assim desde o Grupo 41 (sem
+  # trace, ela imprime "sem trace" e se declara cega). Eram duas medidas do
+  # mesmo script tratando a mesma situacao de formas opostas; agora nao sao.
+  if [ -n "$INSTALADO_EM" ]; then
+    _valor="nenhum commit desde $INSTALADO_EM"
+    _cego="tudo: o harness foi instalado e ainda nao houve commit para julgar"
+  else
+    _valor="repositorio sem commit na janela"
+    _cego="tudo: nao ha commit nos ultimos $JANELA"
+  fi
+  medida "Commits de checkpoint" 0 "$_valor" "" "" "" "$_cego"
 else
-  PCT=0
+  PCT=$(( N_CHECK * 100 / N_COMMITS ))
+  # 50% e um limiar declarado, nao descoberto: abaixo dele a maior parte do
+  # trabalho nao passou por checkpoint, e a fronteira deixou de ser a regra.
+  if [ "$PCT" -lt 50 ]; then _a=1; else _a=0; fi
+  medida "Commits de checkpoint" "$_a" "$N_CHECK de $N_COMMITS ($PCT%)" \
+    "a maioria dos commits nao segue 'checkpoint: <nome do grupo>'" \
+    "sem a fronteira de grupo nao ha ponto limpo para reiniciar contexto — o beneficio central do WIP=1 nao esta acontecendo" \
+    "feche o proximo grupo com a DoD e commite com o prefixo 'checkpoint: '" \
+    "$CEGO_JANELA"
 fi
-# 50% e um limiar declarado, nao descoberto: abaixo dele a maior parte do
-# trabalho nao passou por checkpoint, e a fronteira deixou de ser a regra.
-if [ "$PCT" -lt 50 ]; then _a=1; else _a=0; fi
-medida "Commits de checkpoint" "$_a" "$N_CHECK de $N_COMMITS ($PCT%)" \
-  "a maioria dos commits nao segue 'checkpoint: <nome do grupo>'" \
-  "sem a fronteira de grupo nao ha ponto limpo para reiniciar contexto — o beneficio central do WIP=1 nao esta acontecendo" \
-  "feche o proximo grupo com a DoD e commite com o prefixo 'checkpoint: '" \
-  "commit de merge e commit fora da janela de $JANELA"
 
 # ------------------------------- 2. grupo concluido sem commit de checkpoint
 # Fonte de trabalho na precedencia do AGENTS.md: change ativa do OpenSpec
@@ -396,9 +460,9 @@ if [ "$FORMATO" = json ]; then
   cat "$BUFFER"
   printf '\n  ]\n}\n'
 else
-  printf '\n%s de %s medida(s) em alerta.\n' "$ALERTAS" "$TOTAL"
-  printf 'Diagnostico, nao gate: o exit e 0 mesmo com alerta.\n'
-  printf 'Medidas 1-4 leem o historico do git; a 5 le o trace dos hooks.\n'
+  diz '\n%s de %s medida(s) em alerta.\n' "$ALERTAS" "$TOTAL"
+  diz 'Diagnostico, nao gate: o exit e 0 mesmo com alerta.\n'
+  diz 'Medidas 1-4 leem o historico do git; a 5 le o trace dos hooks.\n'
 fi
 
 exit 0

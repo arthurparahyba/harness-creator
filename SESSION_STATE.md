@@ -3,18 +3,43 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `58ef747` na `main` — merge de `feature/eval-aderencia`
-  (Grupos 40, 41 e 42), **publicado**, CI verde nos 8 steps antes do merge.
-- Testes: 789/789 + 4 skips explícitos; ruff e mypy strict limpos; score da
+- Commit verificado: Grupo 43 na `feature/janela-do-medidor`, publicado.
+  Antes: `58ef747` na `main` — merge dos Grupos 40, 41 e 42, CI verde.
+- Testes: 794/794 + 4 skips explícitos; ruff e mypy strict limpos; score da
   geração **+67** em todos os ecossistemas (+52 no `sem-sensores`) — o
   `tests/medicao.json` saiu byte a byte idêntico ao baseline, sem regressão.
 - Change/plano ativo: `TASKS.md` na raiz — **só o Grupo 26 aberto, e
-  BLOQUEADO** (ver pendências). Grupos 25, 27 a 42 concluídos.
-- Em andamento: nada — fronteira limpa. **A sequência de lacunas pedida pelo
-  usuário terminou**: 1 (Grupo 40), 2 (cancelada — erro de documentação),
-  3 (Grupo 41) e 4 (Grupo 42). As lacunas 5 e 6 ele decidiu não implementar
-  por ora. Próximo passo é decisão dele — publicar a branch é o candidato
-  óbvio, com cinco grupos acumulados e nenhum push.
+  BLOQUEADO** (ver pendências). Grupos 25, 27 a 43 concluídos.
+- Em andamento: nada — fronteira limpa. A sequência de lacunas terminou:
+  1 (Grupo 40), 2 (cancelada — erro de documentação), 3 (Grupo 41), 4
+  (Grupo 42). As lacunas 5 e 6 o usuário decidiu não implementar por ora.
+  O Grupo 43 veio depois, de um defeito achado ao validar no PetClinic.
+- **`feature/janela-do-medidor` publicada e NÃO mergeada** — o merge dos
+  Grupos 40-42 foi pedido explicitamente; este não. Decisão do usuário.
+
+## O que mudou nesta sessão (Grupo 43)
+Dois defeitos do `medir-aderencia.sh`, os dois achados ao rodar o harness no
+clone real do spring-petclinic depois do merge — mesma fonte de valor da
+rodada anterior: repo de verdade encontra o que fixture não encontra.
+
+1. **Alarme falso em repositório preexistente.** A medida 1 perguntava "que
+   fração dos commits segue o protocolo?" e aplicava isso a commits feitos
+   antes de o protocolo existir. A janela do `git log` passou a começar em
+   `gerado_em`, e sem commit posterior à instalação a medida se declara cega
+   — como a medida 5 já fazia. Eram duas medidas do mesmo script tratando a
+   mesma situação de formas opostas; era isso que tornava o caso um defeito.
+2. **SIGPIPE.** A causa não era óbvia: sem trap, o shell morre calado no
+   `head`; é o `trap ... EXIT` do próprio script que o faz sobreviver, e aí
+   o `printf` reporta. `trap '' PIPE` PIORA — testado.
+
+Revalidado no PetClinic: **0 de 6 medidas em alerta** num harness
+recém-instalado, contra 2 de 6 antes.
+
+**Armadilha de método:** `tests/gerar.py` grava `gerado_em` com a constante
+fixa `2026-07-27`, anterior ao commit do PetClinic. Com ela, o alerta
+persistia mesmo com o conserto certo, e por um momento pareceu que a correção
+não funcionava. Fixture com data congelada mede outra coisa que não a
+realidade — vale para o próximo grupo que mexer em janela de tempo.
 
 ## O que mudou nesta sessão (Grupo 42)
 Gate deixou de ser binário. `.harness/gate-rules.json` com `permitir` /
@@ -59,8 +84,6 @@ dois lados escritos juntos, concordando por engano:
 2. O leitor da medida 5 quebrava com espaço depois dos dois-pontos e
    reportava "trace vazio" em vez de erro — quem lesse concluiria que não
    houve sessão.
-
-## O que mudou nesta sessão (Grupo 40 + pesquisa)
 
 ## O que mudou nesta sessão (Grupo 40 + pesquisa)
 Duas coisas, nesta ordem:
@@ -206,7 +229,7 @@ buraco em `target && /`); trace classificando risco; e a senha de teste
 `SPRING_DATASOURCE_PASSWORD=s3nh4-real` **não chegou ao disco**. Geração sem
 `format-on-edit.sh`, que é o correto para `spring-javaformat`.
 
-### DEFEITO ENCONTRADO — medida 1 alarme falso em repo preexistente
+### DEFEITO ENCONTRADO E CORRIGIDO no Grupo 43 — medida 1 alarme falso
 Num repositório que acabou de receber o harness, TODO o histórico é anterior
 a ele e portanto não tem como conter commits `checkpoint:`. A medida 1
 reporta **0% e ALERTA**, acusando o time de indisciplina por um período em
@@ -216,20 +239,22 @@ que o protocolo não existia.
 declara cega em vez de alertar) e exatamente o modo de falha contra o qual o
 próprio Grupo 42 argumenta: alarme falso é o que faz o sensor ser ignorado.
 
-O dado para consertar já existe: `.claude/harness.json` tem `gerado_em`. A
-janela da medida 1 deveria começar ali, e a medida deveria se declarar cega
-quando não há commit posterior à instalação. **NÃO consertado** — fora do
-escopo do Grupo 42, que já está commitado e mergeado.
+**Corrigido no Grupo 43**: a janela do `git log` passou a começar em
+`gerado_em`, e sem commit posterior à instalação a medida se declara cega.
+Revalidado no PetClinic: **0 de 6 medidas em alerta**, contra 2 de 6 antes.
 
-### Defeito menor
-`medir-aderencia.sh` emite `printf: write error: Broken pipe` no stderr
-quando a saída é truncada por `head`. Cosmético, mas é uma ferramenta de
-diagnóstico sujando o terminal de quem a usa do jeito mais natural.
+Armadilha de método que quase escondeu o conserto: `tests/gerar.py` grava
+`gerado_em` com a constante fixa `2026-07-27`, anterior ao commit do
+PetClinic. Com ela o alerta persistia mesmo com a correção certa. Fixture com
+data congelada mede outra coisa que não a realidade.
+
+### Defeito menor, também corrigido no Grupo 43
+`printf: write error: Broken pipe` no stderr ao truncar com `head`. A causa
+não era óbvia: sem trap o shell morre calado; é o `trap ... EXIT` do próprio
+script que o faz sobreviver ao SIGPIPE, e aí o printf reporta. E `trap '' PIPE`
+PIORA — produz o erro em vez de evitá-lo.
 
 ## Pendências
-- **Medida 1 do `medir-aderencia.sh` alarma falso em repo preexistente** —
-  ver acima. É o candidato natural a Grupo 43.
-- **`medir-aderencia.sh` e o SIGPIPE** — ver acima.
 - **A lacuna 2 do doc de interseção foi CANCELADA, não implementada.** Era
   erro de documentação: `propor-regra-arch` já é um controle inferencial
   gerado, e o revisor com veredito foi removido no Grupo 28 por decisão do
