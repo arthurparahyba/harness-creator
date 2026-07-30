@@ -3,6 +3,13 @@
 > Analisado em 2026-07-30, contra a skill `harness-creator` v2.5.
 > As características vêm do glossário de [harness-engineering.md](harness-engineering.md);
 > a coluna da skill foi verificada lendo `SKILL.md`, `references/` e `resources/`.
+>
+> **Revisado em 2026-07-30**, depois de duas imprecisões achadas ao tentar
+> transformar as lacunas em trabalho. As duas eram do mesmo tipo — eu marquei
+> como ausência o que era, num caso, medição que existe e mora noutro lugar; no
+> outro, decisão explícita do usuário. O registro de ambas ficou no texto em vez
+> de ser apagado: uma análise que esconde as próprias correções não serve para
+> decidir nada. Ver "Correções" no fim.
 
 Legenda de cobertura:
 
@@ -51,7 +58,7 @@ Legenda de cobertura:
 | **Architecture fitness functions** | `check-arch.sh` roda as regras do `arch-rules.json` e entra na cadeia da DoD. Shell puro, portátil aos três agentes | **Coberto** |
 | **Maintainability harness** | `format-on-edit.sh` (hook de edição) + pre-commit | **Coberto**, com exceção documentada: formatter que não escopa por arquivo vira item do Plano em vez de hook |
 | **Behaviour harness** — corretude funcional | Depende inteiramente dos testes do repo | **Proposto** — mesma lacuna que a literatura chama de "categoria menos madura" |
-| **Controles inferenciais** — revisão semântica por IA | Nenhum revisor inferencial é gerado | **Ausente** |
+| **Controles inferenciais** — revisão semântica por IA | O subagente `propor-regra-arch`: lê o diff do grupo, aplica julgamento semântico ("não o erro pontual — a *classe* dele") e devolve rascunhos de regra. Um revisor que emite **veredito** foi removido no Grupo 28, por decisão do usuário | **Parcial** — o controle existe, mas só para Claude Code (ver §5) |
 
 ---
 
@@ -102,7 +109,7 @@ fornecedor do agente, não do repositório.
 | **Human-in-the-loop** | Uma pausa de aprovação na FASE 4; no harness gerado, o "PARE após o commit" e o gate de proposta de plano | **Coberto** |
 | **Observability / tracing do agente** | Nada | **Ausente** |
 | **Telemetry-driven development** | Nada | **Ausente** |
-| **Evals do harness** | Nada no repo alvo. (Existe a skill `exp-nivel-c` *neste* repositório, mas ela não é gerada para o alvo) | **Ausente** — a lacuna mais cara |
+| **Evals do harness** | `medir-aderencia.sh`, entregue no Grupo 40: lê git log, fonte de trabalho e SESSION_STATE, e reporta quatro medidas de aderência ao protocolo. Diagnóstico, não gate | **Parcial** — mede aderência do histórico commitado, não eficácia; sessão que não commitou é invisível |
 
 ---
 
@@ -131,9 +138,9 @@ contribuição própria:
 | Cobertura | Nº de características |
 |---|---|
 | Coberto | 21 |
-| Parcial | 8 |
+| Parcial | 10 |
 | Proposto (diagnosticado, não gerado) | 2 |
-| Ausente | 8 |
+| Ausente | 6 |
 | Fora de escopo (deliberado) | 3 |
 
 O padrão é nítido: **a skill é forte onde o harness é de repositório**
@@ -149,16 +156,20 @@ as que valem discutir.
 Ordenadas pelo que destrava outra coisa, seguindo a mesma regra do Plano de
 Remediação da própria skill:
 
-1. **Evals do harness gerado** — hoje não há como responder "este harness
-   melhorou o comportamento do agente?" para o repo alvo. Sem isso, toda
-   mudança na skill é achismo. É a lacuna que torna as outras difíceis de
-   priorizar.
-2. **Controles inferenciais** — nenhum revisor semântico é gerado. É a
-   metade do eixo de Böckeler que está totalmente vazia, e é justamente a
-   que pega o que linter não pega.
+1. ~~**Evals do harness gerado**~~ — **fechada na forma estreita pelo Grupo
+   40.** A forma larga que eu havia escrito era falsa (ver Correções). O que
+   faltava era um eval que *viajasse* com o harness: `medir-aderencia.sh`
+   agora vai no repo alvo. Continua fora: eficácia comportamental, que exige
+   A/B com modelo real e não cabe num script de histórico.
+2. ~~**Controles inferenciais**~~ — **não era lacuna** (ver Correções). O
+   `propor-regra-arch` é gerado e é inferencial; o revisor com veredito foi
+   removido por decisão do usuário no Grupo 28, com o custo medido.
+   Resíduo legítimo, menor: a camada inferencial vale só para Claude Code.
 3. **Observability do agente** — sem trace, um grupo que descarrilha só
    deixa o `SESSION_STATE.md`, que é escrito pelo próprio agente que
-   descarrilhou.
+   descarrilhou. O `medir-aderencia.sh` reduziu isso, mas só para o que
+   virou commit: sessão que rodou duas horas e desistiu continua invisível.
+   **É a lacuna nº 1 hoje.**
 4. **Approval tiers** — o gate é binário. Uma gradação por risco reduziria
    tanto o falso bloqueio quanto o falso verde.
 5. **Progressive disclosure no repo alvo** — a skill aplica o princípio em
@@ -166,5 +177,48 @@ Remediação da própria skill:
 6. **Sandbox** — provavelmente fora de escopo de verdade (é do runtime),
    mas hoje isso não está registrado como decisão em lugar nenhum.
 
-Nenhuma destas está na fonte de trabalho ativa. Este documento é análise,
-não plano — virar plano exige `/opsx:propose`.
+O usuário decidiu implementar até a 4 e deixar 5 e 6 em aberto.
+
+---
+
+## Correções
+
+Duas linhas deste documento estavam erradas, e as duas erravam do mesmo
+jeito: marcavam como **ausência** o que era outra coisa. Ficam registradas
+porque uma análise que apaga os próprios erros não serve para decidir nada
+— e porque o modo de errar se repete, o que é informação sobre como ler o
+resto da tabela.
+
+**Lacuna 1, forma larga (errada):** *"não há como responder se este harness
+melhorou o comportamento do agente"*. Falso. Este repositório tem cinco
+níveis de eval: A e B em [`eval/score-harness.sh`](../eval/score-harness.sh)
+(36 capacidades), C em [`eval/nivel-c/`](../eval/nivel-c/README.md) (A/B no
+Spring PetClinic: falso "pronto" em 3 de 4 sessões sem harness contra 0 de 4
+com), D em `evals/gradua.py` e E em `evals/triggering.json`. A pergunta *é*
+respondida, com evidência. A lacuna estreita e correta: nenhum deles viaja
+junto com o harness — todos medem a skill, rodam aqui, e são operados por
+quem a escreve.
+
+**Lacuna 2, como escrita (errada):** *"nenhum revisor semântico é gerado; é
+a metade do eixo de Böckeler que está totalmente vazia"*. Duas falhas. O
+`propor-regra-arch` é gerado e é um controle inferencial — e o próprio
+documento o registrava como existente na §5, contradizendo a §3. E o revisor
+com veredito não está ausente por esquecimento: foi removido no Grupo 28 a
+pedido do usuário, com a ressalva apresentada antes e o custo medido sem
+maquiagem (`V6` de `eq` para `fail`, score de +67 para +62). Os Grupos 31 e
+32 devolveram o `V6` a `pass` pelo registro de regras, com cobertura melhor
+que a anterior — [`mapa-equivalencias.md`](../eval/mapa-equivalencias.md):
+"revisor julga caso a caso e esquece, registro acumula". A classificação
+correta é **Fora de escopo (decisão explícita)**, não Ausente.
+
+**O padrão:** as duas linhas foram escritas olhando só para o repositório
+alvo e para o `resources/` da skill. Nenhuma consultou `eval/`, `evals/` nem
+o histórico de decisões no `TASKS.md`. Uma tabela de cobertura montada assim
+enxerga ausência onde há trabalho que mora fora do recorte — vale conferir
+as demais linhas marcadas **Ausente** contra as mesmas fontes antes de
+transformá-las em plano.
+
+---
+
+Este documento é análise, não plano. Cada lacuna vira grupo no `TASKS.md`
+antes de qualquer implementação.

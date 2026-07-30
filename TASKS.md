@@ -788,3 +788,62 @@ corrigido porque quebrava a DoD: o hook de formatação deste repo colapsou o
 bloco `openspec/config.yaml` do `gerar.py` em linhas de 159 chars, e o
 `ruff check` reprovou — `ruff format` e `ruff check` discordando, com o hook
 aplicando a metade que quebra. Resolvido parentetizando os valores.
+
+## Grupo 41 - Trace de sessão: o que aconteceu quando nada foi commitado
+<!-- Origem: docs/intersecao-harness-engineering-x-skill.md, lacuna 3.
+
+     Antes de propor, as três fontes que a Correção do doc manda conferir:
+     `eval/` tem trace de sessão, mas só das 8 sessões headless do nível C,
+     neste repositório, produzido pelo `claude -p --output-format json`.
+     `evals/` mede a skill. Nada disso viaja com o harness. O repo alvo não
+     ganha observabilidade nenhuma hoje.
+
+     O Grupo 40 fechou metade do problema e DECLAROU a outra metade no
+     próprio script: "sessao que descarrilhou e nao commitou nada e
+     invisivel". Duas horas de agente rodando em circulos e desistindo nao
+     deixam rastro. Este grupo cobre exatamente esse buraco.
+
+     POR QUE OS HOOKS, E NAO OUTRO MECANISMO
+     Eles já disparam a cada comando de shell e a cada edição, nos três
+     agentes-alvo, e já estão registrados. É a única superfície de
+     observação que a skill controla e que roda independentemente de o
+     agente commitar, cooperar ou sequer chegar ao fim. Mesma epistemologia
+     do git no Grupo 40 — subproduto, não auto-relato.
+
+     O RISCO QUE DECIDE O DESENHO
+     Hook de trace quebrado NAO PODE derrubar o gate. No Claude Code e no
+     Devin um hook que morre some em silêncio; no Cursor, com `failClosed`,
+     ele bloqueia o shell inteiro. Por isso o trace é um script SEPARADO que
+     sai 0 sempre — nunca embutido no `gate-destructive.sh`, e nunca
+     registrado com `failClosed`. Enforcement e observação não podem
+     compartilhar destino.
+
+     LIMITES, a declarar no script como o Grupo 40 fez:
+       - Vê o que os HOOKS veem: chamadas de ferramenta. Raciocínio do
+         agente, tokens e custo são invisíveis.
+       - Sessão que não roda ferramenta nenhuma não deixa linha.
+       - Não é APM: sem spans, sem correlação entre eventos. -->
+- [ ] 41.1 `resources/hooks/registrar-sessao.sh` — hook que **sai 0 sempre**,
+      registrado nos três agentes ao lado do gate e **nunca** com
+      `failClosed`. Uma linha por evento em `.harness/trace/AAAA-MM-DD.jsonl`.
+      Custo por evento perto de zero: append e sai. Falha ao gravar (disco
+      cheio, diretório read-only) é engolida — observação não pode custar o
+      enforcement
+- [ ] 41.2 O que a linha contém e o que ela NÃO contém: timestamp, evento,
+      ferramenta e o alvo **reduzido** (dois primeiros tokens do comando; o
+      caminho, na edição). Comando completo fica de fora por decisão, não
+      por economia: `export TOKEN=...` e `curl -H "Authorization: ..."` são
+      comandos comuns, e um trace em disco com segredo em claro é pior que
+      não ter trace. Rotação por dia e teto de tamanho
+- [ ] 41.3 `.harness/trace/` entra no `.gitignore` gerado. É dado de sessão
+      local: commitá-lo publica o que cada dev rodou e gera conflito em toda
+      sessão paralela
+- [ ] 41.4 A leitura, que é o ponto do grupo: `medir-aderencia.sh` ganha a
+      medida que hoje ele declara não ver — quantas sessões houve, quantas
+      terminaram sem commit, e quantas foram barradas pelo gate. Sem o
+      leitor, o trace é um arquivo que ninguém abre
+- [ ] 41.5 Testes: hook exercitado nos **três formatos de payload** (Cursor
+      manda `command` no topo, os outros dois em `tool_input`); prova de que
+      ele sai 0 com o diretório de trace não-gravável; prova de que segredo
+      em comando não chega ao arquivo; regressão do `python3 tests/medir.py`
+Verificação: `pytest -q && ruff check . && mypy && python3 tests/medir.py`
