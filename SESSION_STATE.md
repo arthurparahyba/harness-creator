@@ -3,8 +3,9 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: Grupo 43 na `feature/janela-do-medidor`, publicado.
-  Antes: `58ef747` na `main` — merge dos Grupos 40, 41 e 42, CI verde.
+- Commit verificado: `937b66b` na `main` — merge de
+  `feature/janela-do-medidor` (Grupo 43), publicado, CI verde na branch
+  antes do merge. Antes dele: `58ef747`, merge dos Grupos 40, 41 e 42.
 - Testes: 794/794 + 4 skips explícitos; ruff e mypy strict limpos; score da
   geração **+67** em todos os ecossistemas (+52 no `sem-sensores`) — o
   `tests/medicao.json` saiu byte a byte idêntico ao baseline, sem regressão.
@@ -14,8 +15,7 @@
   1 (Grupo 40), 2 (cancelada — erro de documentação), 3 (Grupo 41), 4
   (Grupo 42). As lacunas 5 e 6 o usuário decidiu não implementar por ora.
   O Grupo 43 veio depois, de um defeito achado ao validar no PetClinic.
-- **`feature/janela-do-medidor` publicada e NÃO mergeada** — o merge dos
-  Grupos 40-42 foi pedido explicitamente; este não. Decisão do usuário.
+- Tudo mergeado e publicado na `main`. Nenhuma branch de trabalho pendente.
 
 ## O que mudou nesta sessão (Grupo 43)
 Dois defeitos do `medir-aderencia.sh`, os dois achados ao rodar o harness no
