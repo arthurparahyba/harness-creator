@@ -1,0 +1,41 @@
+{
+  "harness": {
+    "skill": "harness-creator",
+    "versao": "2.5",
+    "gerado_em": "2026-07-31",
+    "ecossistema": "python-pip",
+    "dod": "pytest -q && ruff check . && mypy && bash .claude/check-arch.sh",
+    "arquivos": [
+      ".claude/agents/propor-regra-arch.md",
+      ".claude/check-arch.sh",
+      ".claude/commands/dod.md",
+      ".claude/hooks/format-on-edit.sh",
+      ".claude/hooks/gate-destructive.sh",
+      ".claude/hooks/registrar-sessao.sh",
+      ".claude/medir-aderencia.sh",
+      ".claude/settings.json",
+      ".claude/skills/executar-grupo/SKILL.md",
+      ".claude/skills/harness-creator/AGENTS.md",
+      ".claude/skills/harness-creator/CLAUDE.md",
+      ".claude/verificar-harness.sh",
+      ".cursor/hooks.json",
+      ".devin/hooks.v1.json",
+      ".editorconfig",
+      ".github/workflows/harness-dod.yml",
+      ".gitignore",
+      ".harness/arch-rules.json",
+      ".harness/gate-rules.json",
+      ".pre-commit-config.yaml",
+      "AGENTS.md",
+      "CLAUDE.md",
+      "LICENSE",
+      "README.md",
+      "SESSION_STATE.md",
+      "TASKS.md",
+      "init.sh"
+    ],
+    "recusados": [
+      "Step de check-arch no CI existente — a skill nao edita pipeline (FASE 3); apresentado como sugestao na FASE 4"
+    ]
+  }
+}

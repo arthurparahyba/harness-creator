@@ -3,19 +3,68 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `937b66b` na `main` — merge de
-  `feature/janela-do-medidor` (Grupo 43), publicado, CI verde na branch
-  antes do merge. Antes dele: `58ef747`, merge dos Grupos 40, 41 e 42.
-- Testes: 794/794 + 4 skips explícitos; ruff e mypy strict limpos; score da
+- Commit verificado: Grupo 44 na `feature/harness-do-proprio-repo`, NÃO
+  publicado. Antes: `937b66b` na `main` (Grupo 43), CI verde.
+- Testes: 843/843 + 4 skips explícitos; ruff e mypy strict limpos; score da
   geração **+67** em todos os ecossistemas (+52 no `sem-sensores`) — o
   `tests/medicao.json` saiu byte a byte idêntico ao baseline, sem regressão.
 - Change/plano ativo: `TASKS.md` na raiz — **só o Grupo 26 aberto, e
-  BLOQUEADO** (ver pendências). Grupos 25, 27 a 43 concluídos.
+  BLOQUEADO** (ver pendências). Grupos 25, 27 a 44 concluídos.
 - Em andamento: nada — fronteira limpa. A sequência de lacunas terminou:
   1 (Grupo 40), 2 (cancelada — erro de documentação), 3 (Grupo 41), 4
   (Grupo 42). As lacunas 5 e 6 o usuário decidiu não implementar por ora.
   O Grupo 43 veio depois, de um defeito achado ao validar no PetClinic.
-- Tudo mergeado e publicado na `main`. Nenhuma branch de trabalho pendente.
+- **`feature/harness-do-proprio-repo` NÃO publicada** — nada foi pedido.
+
+## O que mudou nesta sessão (Grupo 44) — a skill rodada neste repositório
+Pedido do usuário, para consertar por regeneração o `AGENTS.md` que estava
+desatualizado. **O harness deste repositório foi trocado inteiro.**
+
+O que entrou: `.cursor/hooks.json` (o Cursor rodava SEM enforcement nenhum
+aqui), `registrar-sessao.sh`, `verificar-harness.sh`, `medir-aderencia.sh`,
+`check-arch.sh`, `.harness/arch-rules.json` + `gate-rules.json`, o subagente
+`propor-regra-arch`, a skill `executar-grupo`, o manifesto, e a ponte
+`CLAUDE.md` que faltava ao lado do AGENTS.md com escopo — **a regra
+inviolável nº 9 estava violada no próprio repo da skill**.
+
+O gate instalado tinha 59 linhas e nenhuma `awk`: era anterior ao Grupo 6.
+Isso explica os dois falsos bloqueios que aconteceram nesta sessão (um
+scratchpad e uma mensagem de commit): já estavam corrigidos no Grupo 42, só
+não aqui.
+
+**Correção de premissa registrada:** o SESSION_STATE dizia que isto seria o
+teste do catálogo `atualizacao.md`. NÃO FOI — `atualizacao.md` exige
+`.claude/harness.json`, que não existia. O que a rodada exercitou foi a
+FASE 3. E isso revelou um vão: repositório com harness ANTERIOR ao manifesto
+não é geração limpa (os arquivos existem) nem atualização (não há manifesto),
+e a skill não tem caminho para ele. Foi resolvido por decisão do usuário na
+FASE 4, não por regra.
+
+### Quatro defeitos da skill, três corrigidos
+1. **`tests/test_skill.py` não fixava `HARNESS_GATE_RULES`** — o veredito
+   dependia de o repositório onde o pytest roda ter um registro instalado.
+   17 testes reprovaram ao instalar o harness. Eles nunca estiveram testando
+   o que diziam; passavam por acidente de ambiente. E a expectativa estava
+   velha: caminho temporário virou exceção no Grupo 42 e ninguém atualizou,
+   justamente porque o fallback mascarava.
+2. **`A04` sem a exclusão de `.claude/skills/`** que o `verificar-harness.sh`
+   ganhou no Grupo 35 — a correção foi aplicada a uma das duas checagens
+   irmãs e não à outra.
+3. **`arch-rules.json` não carrega barra invertida no `check`**: o `@tsv` do
+   jq re-escapa `\\` e o fallback em awk não desfaz. Descoberto ao tentar
+   corrigir o defeito 2. Regra com `\\.` falha em silêncio — pior que não
+   existir, porque parece que verifica. Documentado no próprio JSON.
+4. **PENDÊNCIA — o verificador é cego para o repositório DA skill.** Acusa a
+   fixture `com-preexistentes` (repo de ENTRADA: não ter ponte é o ponto
+   dela) e marcadores em `tests/gerar.py`, `TASKS.md` e `evals/`, que
+   legitimamente falam sobre eles. A exclusão do Grupo 35 cobre "skill
+   instalada num alvo", não "este é o repo da skill". Fica em 9/11, e NÃO
+   foi remendado: scanner ajustado para preservar a nota deixa de medir.
+
+### Não feito, por regra da FASE 3
+O CI existente não roda `bash .claude/check-arch.sh`, que agora faz parte da
+DoD. A skill não edita pipeline existente — o step fica como sugestão,
+registrado em `recusados` no manifesto.
 
 ## O que mudou nesta sessão (Grupo 43)
 Dois defeitos do `medir-aderencia.sh`, os dois achados ao rodar o harness no

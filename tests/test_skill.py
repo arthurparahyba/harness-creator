@@ -127,12 +127,28 @@ def _rodar_gate(comando: str, *, cursor: bool = False, path: str | None = None) 
 
 
 def _rodar_gate_bruto(entrada: str, *, path: str | None = None) -> int:
+    """O registro de risco é FIXADO no do template, sempre.
+
+    Sem isto, o gate lê `.harness/gate-rules.json` do diretório de onde o
+    pytest roda — e o resultado do teste passa a depender de o repositório
+    ter, ou não, um registro instalado. Foi o que aconteceu ao rodar a skill
+    neste próprio repositório: `rm -rf /tmp/x` era esperado como bloqueio,
+    o registro instalado declara caminho temporário como exceção (P03), e
+    17 testes reprovaram de uma vez.
+
+    Eles não estavam certos antes e errados depois: **nunca estiveram
+    testando o que diziam**. Passavam porque o repo não tinha o registro,
+    então o gate caía no fallback embutido. Teste cujo veredito depende do
+    ambiente não é teste — é uma medição do ambiente.
+    """
+    env = {"PATH": path or os.environ["PATH"]}
+    env["HARNESS_GATE_RULES"] = str(RESOURCES / "gate-rules.json")
     return subprocess.run(
         ["bash", str(RESOURCES / "hooks" / "gate-destructive.sh")],
         input=entrada,
         capture_output=True,
         text=True,
-        env={"PATH": path} if path else None,
+        env=env,
         check=False,
     ).returncode
 
@@ -140,7 +156,10 @@ def _rodar_gate_bruto(entrada: str, *, path: str | None = None) -> int:
 @pytest.mark.parametrize(
     "comando",
     [
-        "rm -rf /tmp/x",
+        # NÃO usar caminho sob /tmp aqui: desde o Grupo 42 ele é exceção
+        # declarada (P03 do gate-rules.json), e o gate o libera com razão.
+        "rm -rf /etc",
+        "rm -rf src",
         "git push origin main --force",
         "git reset --hard HEAD~3",
         "DROP TABLE users",
@@ -167,6 +186,11 @@ def test_gate_bloqueia_destrutivo(comando: str) -> None:
         "pytest",
         "ruff check .",
         "git status",
+        # Exceções declaradas do Grupo 42. Bloqueá-las ensina a driblar o
+        # gate, e o drible aprendido num caso obviamente errado depois passa
+        # por cima dos bloqueios certos.
+        "rm -rf /tmp/x",
+        "rm -rf node_modules",
         # Um gate que bloqueia o dia a dia é desligado pelo time na primeira
         # semana — o falso positivo custa tanto quanto o falso negativo.
         "npm test",
@@ -188,8 +212,12 @@ def test_gate_libera_comando_seguro(comando: str) -> None:
 @pytest.mark.parametrize(
     ("comando", "esperado"),
     [
-        ("rm -rf /tmp/x", 2),
+        ("rm -rf /etc", 2),
         ("git push origin main --force", 2),
+        # O par: sem Python, o parser em awk precisa ler tanto o bloqueio
+        # quanto a EXCEÇÃO do registro. Só o lado que bloqueia passaria num
+        # gate que ignora o `permitir` e barra tudo.
+        ("rm -rf /tmp/x", 0),
         ("npm test", 0),
         ("go build ./...", 0),
     ],

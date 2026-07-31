@@ -209,12 +209,29 @@ def test_ponte_nao_duplica_o_protocolo(repo: tuple[Path, Stack, str]) -> None:
 
 
 @pytest.mark.parametrize(
-    "comando", ["rm -rf /tmp/x", "git push --force", "npm publish", "dotnet nuget push p.nupkg"]
+    "comando", ["rm -rf /etc", "git push --force", "npm publish", "dotnet nuget push p.nupkg"]
 )
 def test_gate_gerado_bloqueia(repo: tuple[Path, Stack, str], comando: str) -> None:
     destino, _, _ = repo
     r = _roda_hook(destino / ".claude/hooks/gate-destructive.sh", entrada_do_hook("Bash", comando))
     assert r.returncode == 2, "exit != 2 significa gate falhando ABERTO"
+
+
+@pytest.mark.parametrize("comando", ["rm -rf /tmp/x", "rm -rf node_modules", "rm -rf dist"])
+def test_gate_gerado_respeita_a_excecao_declarada(
+    repo: tuple[Path, Stack, str], comando: str
+) -> None:
+    """O par do teste acima, e ele faltava.
+
+    Sem este lado, um gate que bloqueia TUDO passa nos testes e torna o
+    agente inútil — e o `gate-rules.json` gerado poderia nem estar sendo
+    lido, que foi exatamente o que aconteceu: até o Grupo 42 estes casos
+    eram testados como bloqueio, e continuaram passando depois da mudança
+    porque o gate caía no fallback embutido em vez de ler o registro.
+    """
+    destino, _, _ = repo
+    r = _roda_hook(destino / ".claude/hooks/gate-destructive.sh", entrada_do_hook("Bash", comando))
+    assert r.returncode == 0, f"exceção declarada bloqueada: {comando}"
 
 
 def test_gate_gerado_libera_a_dod_da_stack(repo: tuple[Path, Stack, str]) -> None:
