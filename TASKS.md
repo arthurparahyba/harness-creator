@@ -1001,3 +1001,73 @@ Um detalhe de método que quase escondeu o defeito: `tests/gerar.py` grava
 Só ajustando o manifesto para a data real de instalação o comportamento
 correto apareceu. Fixture com data congelada mede outra coisa que não a
 realidade — vale para o próximo grupo que mexer em janela de tempo.
+
+## Grupo 44 - Rodar a skill no próprio repositório ✅
+<!-- Pedido do usuário, e a origem é a pendência registrada há várias
+     sessões: o `AGENTS.md` daqui foi escrito à mão e nunca regenerado, e por
+     isso manda `git checkout develop` (só existe `main`) e citar
+     `/opsx:propose` (não há `openspec/`). Consertar à mão de novo repetiria a
+     causa.
+
+     CORREÇÃO DA PREMISSA. O SESSION_STATE dizia que isto seria "o teste real
+     do catálogo `atualizacao.md`". NÃO É: `atualizacao.md` só vale quando há
+     `.claude/harness.json`, e aqui não há — o harness deste repo é anterior
+     ao manifesto. O que a rodada exercita de verdade é a **FASE 3**,
+     resolução de conflito com repo existente, hoje coberta só pela fixture
+     `com-preexistentes`. Continua valendo a pena, só não pelo motivo escrito.
+
+     O QUE A DESCOBERTA JÁ MOSTROU. Este repositório, que constrói o gerador,
+     roda um harness bem atrás do que a skill entrega: sem `.cursor/hooks.json`
+     (o Cursor está sem enforcement nenhum), sem `registrar-sessao.sh`, sem
+     verificador, sem medidor, sem `check-arch.sh`, sem os dois registros em
+     `.harness/`, sem manifesto e sem `AGENTS.md` com escopo. O gate instalado
+     é a versão de padrões embutidos, anterior ao Grupo 42.
+
+     O RISCO QUE GOVERNA O GRUPO. O `AGENTS.md` daqui tem convenções REAIS
+     que não estão em nenhum template: proibição de CRLF, transcrição verbatim
+     de `resources/`, a definição de grupo como checkpoint. Regeneração que as
+     perca troca um harness desatualizado por um harness errado. A FASE 3
+     existe para isso, e é exatamente ela que esta rodada põe à prova. -->
+- [x] 44.1 Skill rodada do início ao fim. 10 artefatos novos, 3 hooks
+      substituídos, 4 arquivos do usuário alterados por merge/diff
+- [x] 44.2 Convenções preservadas: os 4 `MUST NOT` (CRLF e verbatim
+      inclusive), descrição do projeto, "Fontes de trabalho", "Estrutura do
+      plano" e "Ao concluir cada grupo" saíram intactos
+- [x] 44.3 Corrigidos POR DESCOBERTA: `main` veio de
+      `git symbolic-ref refs/remotes/origin/HEAD`, o prefixo `feature/` de 23
+      ocorrências no histórico, e a política de entrega (merge direto, sem
+      PR) de `git log --merges` + ausência de PULL_REQUEST_TEMPLATE. Esta
+      última **contradizia** o AGENTS.md, que mandava conferir se o CI abre
+      PR — nenhum workflow daqui faz isso
+- [x] 44.4 **Quatro defeitos**, os três primeiros corrigidos aqui porque
+      deixavam a DoD vermelha:
+      1. `tests/test_skill.py` rodava o gate sem fixar `HARNESS_GATE_RULES`.
+         O veredito dependia de o repositório ter um registro instalado —
+         17 testes reprovaram ao instalar o harness. Não estavam certos
+         antes e errados depois: **nunca estiveram testando o que diziam**.
+         E a expectativa em si estava velha: `rm -rf /tmp/x` virou exceção no
+         Grupo 42 e ninguém atualizou, porque o fallback mascarava
+      2. `A04` do `arch-rules.json` não tinha a exclusão de
+         `.claude/skills/` que o `verificar-harness.sh` ganhou no Grupo 35 —
+         correção aplicada a uma das duas checagens irmãs e não à outra.
+         Ao consertar, apareceu um segundo defeito embutido: **campo `check`
+         não pode conter barra invertida**, porque o `@tsv` do jq re-escapa
+         `\` e o fallback em awk não desfaz. Regra com `\.` falha em
+         silêncio, que é pior que não existir — parece que está verificando
+      3. `test_geracao.py` testava só o lado que bloqueia. Ganhou o par que
+         faltava: exceção declarada tem de passar, senão um gate que bloqueia
+         TUDO aprova nos testes e torna o agente inútil
+      4. **PENDÊNCIA, não corrigido**: o verificador é cego para o
+         repositório DA skill. Acusa a fixture `com-preexistentes` (repo de
+         entrada — não ter ponte é o ponto dela) e marcadores em
+         `tests/gerar.py`, `TASKS.md` e `evals/`, que legitimamente falam
+         sobre eles. Exige desenho, não conserto
+- [x] 44.5 `check-arch` 7/7, gate provado nos dois caminhos, medidor
+      funcionando. O `verificar-harness.sh` fica em 9/11 pelo defeito 4 —
+      NÃO remendado para ficar verde, pela mesma razão registrada no Grupo
+      28: scanner que se ajusta para preservar a nota deixa de medir
+Verificação: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
+— 843 testes (+49), ruff e mypy limpos, check-arch 7/7. O
+`verificar-harness.sh` ficou FORA da linha de verificação de propósito: os
+dois falsos positivos dele são o defeito 4, e pôr um vermelho conhecido na
+cadeia treina o time a ignorá-la.

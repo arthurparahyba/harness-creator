@@ -12,9 +12,9 @@ O plano de trabalho vive em UM destes lugares — use o primeiro que existir:
 1. `openspec/changes/<change-ativa>/tasks.md`
 2. `TASKS.md` na raiz do repositório
 
-Para criar ou modificar planos (proposals, specs, tasks), use os comandos
-OpenSpec (`/opsx:propose`, `/opsx:apply`) — nunca edite artefatos de
-`openspec/` manualmente. Nunca invente tarefas fora da fonte de trabalho ativa.
+Para criar ou modificar o plano, acrescente o grupo ao `TASKS.md` no
+formato descrito abaixo e confirme com o usuário antes de executá-lo.
+Nunca invente tarefas fora da fonte de trabalho ativa.
 
 ## Início de nova funcionalidade/tarefa (OBRIGATÓRIO, antes de qualquer ação)
 1. Se ainda não fez nesta conversa: rode `./init.sh` — instala deps, roda
@@ -23,14 +23,16 @@ OpenSpec (`/opsx:propose`, `/opsx:apply`) — nunca edite artefatos de
    implementação com grupo em andamento (não commitado), termine esse
    grupo antes de qualquer outra coisa, inclusive antes do pedido novo
 3. O pedido está coberto pela fonte de trabalho ativa (grupo já
-   planejado)? Se NÃO estiver, pare — não implemente direto. Proponha via
-   `/opsx:propose` (ou adicione a TASKS.md) antes de editar qualquer
-   arquivo.
+   planejado)? Se NÃO estiver, pare — não implemente direto. Proponha
+   antes de editar qualquer arquivo, do jeito descrito em "Fontes de
+   trabalho".
 4. Antes de implementar qualquer coisa nova (primeiro grupo de uma
    funcionalidade nova), crie e mude para uma feature branch atualizada a
-   partir de `develop`:
+   partir de `main`:
    ```
-   git checkout develop && git pull && git checkout -b feature/<nome-da-funcionalidade>
+   git checkout main
+   git remote | grep -q . && git pull        # repo sem remoto: pular
+   git checkout -b feature/<nome-da-funcionalidade>
    ```
    Não é necessário criar branch nova para continuar um grupo já em
    andamento na branch atual (ver passo 2).
@@ -65,16 +67,24 @@ onde vive, o plano segue este formato:
 ## Definition of Done
 Concluído = TODOS passam:
 ```
-pytest && ruff check . && mypy
+pytest -q && ruff check . && mypy && bash .claude/check-arch.sh
 ```
 Saída de comando é evidência; "parece funcionar" não é.
+
+## Ferramentas deste harness
+- Para fechar um grupo do plano: skill `executar-grupo` (passo a passo).
+- Para verificar a Definition of Done: comando `/dod`.
+- Hooks de agent loop ativos: gate de comandos destrutivos, formatação
+  automática a cada edição, e registro de sessão.
+- Para conferir se o protocolo vem sendo seguido:
+  `sh .claude/medir-aderencia.sh` (diagnóstico, não gate).
 
 ## Commits
 - Um commit por grupo concluído: `checkpoint: <nome do grupo>`
 - Nunca commitar com verificação falhando.
-- Após `git push` de uma feature branch, verifique antes de abrir PR
-  manualmente (`gh pr create`): muitos repos têm workflow de CI que
-  valida a branch e cria o PR automaticamente.
+- Política de entrega: push da feature branch, CI verde, e merge direto
+  `--no-ff` na `main`. Este repositório não usa PR (fonte: `git log
+  --merges`, ausência de PULL_REQUEST_TEMPLATE e de CODEOWNERS).
 
 ## Ao concluir cada grupo (OBRIGATÓRIO)
 Não existe um evento de "fim de sessão" que o agente consiga detectar —

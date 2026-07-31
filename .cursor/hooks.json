@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "./.claude/hooks/gate-destructive.sh",
+        "failClosed": true
+      },
+      {
+        "command": "./.claude/hooks/registrar-sessao.sh"
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "./.claude/hooks/format-on-edit.sh"
+      },
+      {
+        "command": "./.claude/hooks/registrar-sessao.sh"
+      }
+    ]
+  }
+}

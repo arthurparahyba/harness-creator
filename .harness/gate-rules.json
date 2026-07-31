@@ -1,0 +1,114 @@
+[
+  {
+    "id": "P01",
+    "nivel": "permitir",
+    "padrao": "^rm[[:space:]]+-[rR]f?[[:space:]]+[^[:space:];|&$`]*(node_modules|__pycache__|\\.pytest_cache|\\.mypy_cache)/?$",
+    "what": "rm -rf de diretorio de dependencia ou cache reconstruivel",
+    "why": "Bloquear isto ensina a driblar o gate. E um comando de rotina — o diretorio se refaz com um install — e o gate que erra em caso obvio perde a autoridade nos casos em que ele esta certo",
+    "fix": ""
+  },
+  {
+    "id": "P02",
+    "nivel": "permitir",
+    "padrao": "^rm[[:space:]]+-[rR]f?[[:space:]]+[^[:space:];|&$`]*(dist|build|target|out|\\.venv|coverage)/?$",
+    "what": "rm -rf de diretorio de saida de build",
+    "why": "Artefato de build e reconstruivel por definicao; limpar antes de reconstruir e passo normal de qualquer stack",
+    "fix": ""
+  },
+  {
+    "id": "P03",
+    "nivel": "permitir",
+    "padrao": "^rm[[:space:]]+-[rR]f?[[:space:]]+(/tmp/|/private/tmp/|/var/folders/)[^[:space:];|&$`]*$",
+    "what": "rm -rf sob o diretorio temporario do sistema",
+    "why": "Foi o falso bloqueio que motivou este registro: o gate barrou uma limpeza de scratchpad, e a saida foi contornar o comando. Drible aprendido num caso errado depois passa por cima dos casos certos",
+    "fix": ""
+  },
+  {
+    "id": "B01",
+    "nivel": "bloquear",
+    "padrao": "rm[[:space:]]+-rf?[[:space:]]",
+    "what": "remocao recursiva forcada fora dos caminhos descartaveis declarados",
+    "why": "Nao ha desfazer. Um caminho digitado errado apaga trabalho nao commitado, e o agente nao tem como avaliar o que estava ali",
+    "fix": "Se o alvo e descartavel e se repete, acrescente a excecao em .harness/gate-rules.json com o motivo escrito"
+  },
+  {
+    "id": "B02",
+    "nivel": "bloquear",
+    "padrao": "git[[:space:]]+push[[:space:]].*(--force|[[:space:]]-f[[:space:]])",
+    "what": "push forcado",
+    "why": "Reescreve o historico remoto: o trabalho de quem ja tinha puxado a branch some, e nao ha registro de que sumiu",
+    "fix": "Use --force-with-lease, ou combine com quem mais trabalha na branch antes"
+  },
+  {
+    "id": "B03",
+    "nivel": "bloquear",
+    "padrao": "git[[:space:]]+reset[[:space:]]+--hard",
+    "what": "reset destrutivo da arvore de trabalho",
+    "why": "Descarta tudo que nao foi commitado, inclusive o que o agente acabou de escrever e ainda nao verificou",
+    "fix": "git stash guarda o mesmo estado e permite voltar atras"
+  },
+  {
+    "id": "B04",
+    "nivel": "bloquear",
+    "padrao": "git[[:space:]]+clean[[:space:]]+-[a-z]*f",
+    "what": "remocao de arquivos nao rastreados",
+    "why": "Arquivo nao rastreado inclui .env e configuracao local que ninguem tem copia",
+    "fix": "git clean -n lista o que seria removido, sem remover"
+  },
+  {
+    "id": "B05",
+    "nivel": "bloquear",
+    "padrao": "git[[:space:]]+branch[[:space:]]+-D",
+    "what": "remocao forcada de branch",
+    "why": "-D apaga branch com commit nao mesclado, e o commit fica alcancavel so pelo reflog, que expira",
+    "fix": "git branch -d recusa apagar o que nao foi mesclado — use ele"
+  },
+  {
+    "id": "B06",
+    "nivel": "bloquear",
+    "padrao": "(DROP[[:space:]]+(TABLE|SCHEMA|DATABASE)|TRUNCATE[[:space:]]+TABLE|drop[[:space:]]+database)",
+    "what": "destruicao de estrutura ou de dados em banco",
+    "why": "Nao ha desfazer, e o agente nao tem como saber se aquele banco e descartavel ou e producao",
+    "fix": "Rode contra um banco de teste explicito, ou peca a operacao ao humano"
+  },
+  {
+    "id": "B07",
+    "nivel": "bloquear",
+    "padrao": "(npm[[:space:]]+publish|(yarn|pnpm)[[:space:]]+publish|mvn[[:space:]]+.*(deploy|release:perform)|gradle(w)?[[:space:]]+.*publish|dotnet[[:space:]]+nuget[[:space:]]+push|cargo[[:space:]]+publish|gem[[:space:]]+push|twine[[:space:]]+upload)",
+    "what": "publicacao de artefato em registry",
+    "why": "Versao publicada nao se despublica. Universal de proposito: ter o padrao de npm num repo Go nao custa nada e evita esquecer de ativar",
+    "fix": "Publicacao e decisao de release — leve ao humano"
+  },
+  {
+    "id": "B08",
+    "nivel": "bloquear",
+    "padrao": "(terraform[[:space:]]+destroy|go[[:space:]]+clean[[:space:]]+.*-modcache|mkfs\\.|dd[[:space:]]+if=.*of=/dev/|:\\(\\)\\{.*\\};:)",
+    "what": "destruicao de infraestrutura, de cache global ou do dispositivo",
+    "why": "Efeito fora do repositorio: atinge o ambiente, as outras pessoas e as outras sessoes",
+    "fix": "Nenhum destes pertence a um grupo de tarefas — leve ao humano"
+  },
+  {
+    "id": "A01",
+    "nivel": "avisar",
+    "padrao": "(--no-verify|--no-gpg-sign)",
+    "what": "commit que pula o pre-commit do proprio harness",
+    "why": "E o agente desligando o enforcement que deveria verifica-lo. Passa em silencio hoje: nao e destrutivo, entao o gate nao ve razao para barrar, e o resultado e um commit que nunca foi checado",
+    "fix": "Rode a DoD e corrija o que ela apontar, em vez de pular o hook"
+  },
+  {
+    "id": "A02",
+    "nivel": "avisar",
+    "padrao": "chmod[[:space:]]+(-[a-zA-Z]+[[:space:]]+)?777",
+    "what": "permissao 777",
+    "why": "Quase sempre e contorno de um problema de permissao que tem causa outra; o arquivo fica gravavel por qualquer processo da maquina",
+    "fix": "Descubra qual usuario precisa do acesso e ajuste so ele"
+  },
+  {
+    "id": "A03",
+    "nivel": "avisar",
+    "padrao": "(curl|wget)[^|]*\\|[[:space:]]*(sudo[[:space:]]+)?(sh|bash)",
+    "what": "script baixado da rede executado direto",
+    "why": "O conteudo executado nunca foi lido por ninguem, e muda entre uma execucao e a seguinte sem aviso",
+    "fix": "Baixe para um arquivo, leia, e so entao execute"
+  }
+]

@@ -16,3 +16,6 @@ __pycache__/
 .env
 .env.*
 !.env.example
+
+# Agent session trace (local, never commit)
+.harness/trace/

@@ -10,7 +10,7 @@ Run the Definition of Done checks for this repository and report the result as e
 Execute exactly:
 
 ```
-pytest && ruff check . && mypy
+pytest -q && ruff check . && mypy && bash .claude/check-arch.sh
 ```
 
 Rules:
