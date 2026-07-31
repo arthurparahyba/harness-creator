@@ -86,7 +86,8 @@ do trabalho. Quando você pede "implementa login com JWT":
 - **Continuidade entre sessões**: estado persistido, não recomeça do zero
 - **Escopo controlado**: agente não avança sem verificar, não inventa tarefas
 - **Sensores rodando**: testes, lint e build como gate antes de commitar
-- **Review automatizado**: subagente de code review antes de commitar
+- **Regras que acumulam**: cada erro encontrado vira uma checagem executável
+  em `.harness/arch-rules.json`, cobrada a cada grupo
 - **Multi-linguagem**: mesma skill funciona em Python, .NET, Java, JS/TS,
   Go, Rust, Ruby e PHP — sem adaptação manual
 
