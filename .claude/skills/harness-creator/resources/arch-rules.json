@@ -29,13 +29,13 @@
   {
     "id": "A04",
     "description": "Nenhum marcador de template sobreviveu na geracao",
-    "check": "grep -rlE '<(dod-command|branch-base|file_glob|formatter_bin|formatter_command|ferramentas-do-harness)>' AGENTS.md .claude/ | grep -v '^.claude/skills/[^/]*/'",
+    "check": "grep -rlE '<(dod-command|branch-base|file_glob|formatter_bin|formatter_command|ferramentas-do-harness)>' AGENTS.md .claude/ | grep -v '^\\.claude/skills/[^/]*/'",
     "expect": "exit-nonzero",
     "what": "Sobrou marcador <...> nao preenchido em AGENTS.md ou em .claude/",
     "why": "Marcador sobrevivente vira texto literal: a DoD deixa de ser um comando executavel e o hook deixa de casar com os arquivos do projeto, ambos sem erro visivel",
     "fix": "Rode o grep do campo check para achar os arquivos e substitua cada marcador pelo valor real da stack",
     "por_que_a_exclusao": "Pacote de skill instalado no repositorio tem marcador POR CONSTRUCAO — os templates em resources/ existem para ser preenchidos. O verificar-harness.sh ja ignorava esse caminho desde o Grupo 35; esta regra fazia a mesma varredura e nao ignorava. A correcao tinha sido aplicada a uma das duas checagens irmas e nao a outra, e o defeito so apareceu ao rodar a skill no proprio repositorio dela",
-    "sem_barra_invertida_no_check": "O `.` antes de `claude` e coringa, nao ponto literal, e isso e deliberado: campo `check` NAO pode conter barra invertida. O caminho com jq passa por `@tsv`, que re-escapa `\\` para `\\\\`; o fallback em awk tambem nao desfaz. Regex com `\\.` ou `\\d` chega ao shell quebrada e a regra falha em silencio — que e pior que nao existir, porque parece que esta verificando"
+    "barra_invertida_no_check": "O `\\.` aqui e ponto LITERAL, e ele funciona porque o Grupo 45 deu ao check-arch.sh a paridade que o parser do gate ja tinha: jq passou a usar `join` em vez de `@tsv`, e o fallback em awk passou a desfazer `\\\\`. Antes disso o padrao chegava ao shell como `\\\\.` e a regra passava sempre, sem verificar nada. `tests/test_arch_rules.py` cobre o round-trip pelos dois caminhos"
   },
   {
     "id": "G01",

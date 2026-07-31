@@ -3,18 +3,50 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: Grupo 44 na `feature/harness-do-proprio-repo`, NÃO
-  publicado. Antes: `937b66b` na `main` (Grupo 43), CI verde.
-- Testes: 843/843 + 4 skips explícitos; ruff e mypy strict limpos; score da
+- Commit verificado: Grupo 45 na `feature/sensor-barra-invertida`, NÃO
+  publicado. Antes: `e8211ff` na `main` — merge do Grupo 44, CI verde.
+- Testes: 850/850 + 4 skips explícitos; ruff e mypy strict limpos; score da
   geração **+67** em todos os ecossistemas (+52 no `sem-sensores`) — o
   `tests/medicao.json` saiu byte a byte idêntico ao baseline, sem regressão.
 - Change/plano ativo: `TASKS.md` na raiz — **só o Grupo 26 aberto, e
-  BLOQUEADO** (ver pendências). Grupos 25, 27 a 44 concluídos.
+  BLOQUEADO** (ver pendências). Grupos 25, 27 a 45 concluídos.
 - Em andamento: nada — fronteira limpa. A sequência de lacunas terminou:
   1 (Grupo 40), 2 (cancelada — erro de documentação), 3 (Grupo 41), 4
   (Grupo 42). As lacunas 5 e 6 o usuário decidiu não implementar por ora.
   O Grupo 43 veio depois, de um defeito achado ao validar no PetClinic.
-- **`feature/harness-do-proprio-repo` NÃO publicada** — nada foi pedido.
+- **`feature/sensor-barra-invertida` NÃO publicada.** O Grupo 44 já está
+  mergeado na `main` (`e8211ff`), com CI verde.
+
+## O que mudou nesta sessão (Grupo 45)
+Dois itens pequenos que viraram um achado grande.
+
+**O planejado era PROIBIR barra invertida no `check` do `arch-rules.json`**,
+porque o Grupo 44 descobriu que ela era perdida. A task 45.2 mandava
+verificar, e não presumir, se o `gate-rules.json` sofria do mesmo — e a
+resposta foi NÃO. O parser do gate (`_le_registro`, Grupo 42) desfaz o
+escape; o do `check-arch` (`_campos`, mais antigo) não. Assimetria entre
+irmãos, de novo. Isso mudou o conserto: em vez de proibir, dar paridade.
+Agora o `jq` usa `join("\t")` no lugar de `@tsv`, e o awk desfaz `\\`.
+
+### O achado que ninguém procurava
+Ao escrever o teste que força o caminho SEM jq, ele reprovou com
+`awk: illegal statement`. **O fallback em awk do `check-arch.sh` nunca
+funcionou** — usa `exp` como nome de variável, que é função embutida do awk.
+Desde o Grupo 31, que o criou.
+
+O efeito: em qualquer máquina sem `jq`, o runner imprimia
+`check-arch: 0 regra(s), nenhuma violada` e saía 0. Verde total, zero regras
+executadas. E o fallback existe exatamente para quem não tem jq — era essa
+pessoa, e só ela, que recebia o falso verde.
+
+Ninguém viu porque `jq` está instalado aqui e no CI: **o caminho que existe
+para o ambiente que não temos era justamente o que nunca era exercitado.**
+`tests/test_arch_rules.py` agora roda tudo nos dois caminhos, com um PATH
+que tira `jq` e só ele.
+
+### Também
+- README da skill parou de anunciar o subagente de code review removido no
+  Grupo 28 — pendência aberta desde então, baixada aqui.
 
 ## O que mudou nesta sessão (Grupo 44) — a skill rodada neste repositório
 Pedido do usuário, para consertar por regeneração o `AGENTS.md` que estava
@@ -164,10 +196,6 @@ medidor rodado contra este repo hoje dá 2 alertas de 4 (grupos concluídos
 - Em andamento: nada — fronteira limpa.
 - Não commitado: nada. O `-c` da raiz (lixo de execução manual antiga) foi
   apagado nesta sessão.
-- Pendência achada e NÃO consertada (fora do escopo): o README da skill, em
-  "O que você ganha concretamente", ainda anuncia "Review automatizado:
-  subagente de code review" — o Grupo 28 removeu esse subagente, e
-  `grep -r code-review .claude/skills/harness-creator/` não retorna nada.
 - Execução em série foi autorizada pelo usuário nesta sessão: a regra "PARE
   após o grupo" do AGENTS.md ficou suspensa, com push e relatório por grupo.
 

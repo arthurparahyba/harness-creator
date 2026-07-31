@@ -43,10 +43,29 @@ fi
 # sensor em bloqueio em toda maquina que nao o tem — o mesmo erro que os
 # hooks ja cometeram exigindo Python. O formato e uma lista de objetos
 # planos, sem aninhamento, o que torna o fallback viavel.
+#
+# BARRA INVERTIDA NO `check` PRECISA SOBREVIVER AOS DOIS CAMINHOS, e os dois
+# a perdiam de formas diferentes:
+#   jq   `@tsv` re-escapa `\` para `\\`. Uma regra com `mkfs\.` chegava ao
+#        shell como `mkfs\\.` — regex que casa barra invertida seguida de
+#        qualquer coisa, ou seja, nada. `join("\t")` emite o valor cru; o
+#        formato e uma lista de objetos planos sem tab nem quebra de linha
+#        nos campos, entao o separador continua inequivoco.
+#   awk  `limpa()` desfazia `\"` e nao desfazia `\\`.
+# E o fallback em awk NUNCA TINHA RODADO: usava `exp` como nome de variavel,
+# que e funcao embutida do awk — erro de sintaxe. Em maquina sem jq o runner
+# imprimia "0 regra(s), nenhuma violada" e saia 0. Verde total, zero regras
+# executadas, desde o Grupo 31 que o criou. Ninguem viu porque jq estava
+# instalado aqui e no CI: o caminho que existe para quem NAO tem jq era
+# justamente o que nunca era exercitado.
+# O resultado era uma regra que imprimia `[ok]` em toda execucao sem nunca
+# ter verificado nada — pior que regra ausente, porque compra confianca. O
+# parser do gate (`_le_registro`, Grupo 42) ja fazia certo; este, mais
+# antigo, nao. Assimetria entre irmaos, de novo.
 _campos() {
   if command -v jq >/dev/null 2>&1; then
     jq -r '.[] | [.id, .description, .check, (.expect // "exit-0"), .what, .why, .fix]
-           | @tsv' "$REGRAS"
+           | join("\t")' "$REGRAS"
     return
   fi
   awk '
@@ -54,19 +73,20 @@ _campos() {
       sub(/^[^:]*:[[:space:]]*"/, "", s)
       sub(/",?[[:space:]]*$/, "", s)
       gsub(/\\"/, "\"", s)
+      gsub(/\\\\/, "\\", s)
       return s
     }
     /"id"[[:space:]]*:/          { id   = limpa($0) }
     /"description"[[:space:]]*:/ { desc = limpa($0) }
     /"check"[[:space:]]*:/       { chk  = limpa($0) }
-    /"expect"[[:space:]]*:/      { exp  = limpa($0) }
+    /"expect"[[:space:]]*:/      { esperado = limpa($0) }
     /"what"[[:space:]]*:/        { what = limpa($0) }
     /"why"[[:space:]]*:/         { why  = limpa($0) }
     /"fix"[[:space:]]*:/ {
       fix = limpa($0)
-      if (exp == "") exp = "exit-0"
-      printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\n", id, desc, chk, exp, what, why, fix
-      id = desc = chk = exp = what = why = fix = ""
+      if (esperado == "") esperado = "exit-0"
+      printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\n", id, desc, chk, esperado, what, why, fix
+      id = desc = chk = esperado = what = why = fix = ""
     }
   ' "$REGRAS"
 }

@@ -1071,3 +1071,55 @@ Verificação: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
 `verificar-harness.sh` ficou FORA da linha de verificação de propósito: os
 dois falsos positivos dele são o defeito 4, e pôr um vermelho conhecido na
 cadeia treina o time a ignorá-la.
+
+## Grupo 45 - Sensor para a barra invertida, e o README que mente ✅
+<!-- Dois itens pequenos, e o primeiro fecha uma classe inteira.
+
+     ITEM 1. O Grupo 44 descobriu que o campo `check` do `arch-rules.json`
+     nao carrega barra invertida: o `@tsv` do jq re-escapa `\` e o fallback
+     em awk nao desfaz. A regra chega ao shell quebrada e PASSA SEMPRE.
+
+     Eu documentei isso em prosa dentro do proprio JSON. Prosa nao reprova
+     nada. Quem escrever `"check": "grep -q '\.py$' src/"` — que e a coisa
+     mais natural do mundo em regex — recebe uma regra que imprime `[ok]` em
+     toda execucao e nunca verificou nada. Regra que sempre passa e pior que
+     regra ausente: ocupa a linha e compra confianca.
+
+     E o padrao que este repositorio ja puniu varias vezes: documentado e
+     nao sensoreado. O Grupo 33 (formatter inerte em Java), o Grupo 35
+     (verificador cego) e o proprio Grupo 44 (teste que media o ambiente)
+     sao todos a mesma forma — a regra existia no texto e nao existia em
+     comando.
+
+     ITEM 2. O README da skill anuncia, na linha 89, "Review automatizado:
+     subagente de code review antes de commitar". O Grupo 28 removeu esse
+     subagente a pedido do usuario, com o custo medido e registrado. A
+     vitrine vende ha varias sessoes uma funcionalidade que nao existe. Esta
+     pendencia esta no SESSION_STATE desde entao. -->
+- [x] 45.1 **O conserto planejado estava errado, e a 45.2 é que revelou.**
+      Em vez de PROIBIR barra invertida, o `check-arch.sh` ganhou a paridade
+      que o parser do gate já tinha: `jq` passou a usar `join("\t")` no lugar
+      de `@tsv` (que re-escapa), e o awk passou a desfazer `\\`. A `A04`
+      voltou a usar ponto literal, que é o que ela sempre quis dizer
+- [x] 45.2 Verificado, não presumido — e a resposta foi **NÃO**: o
+      `gate-rules.json` não sofre. O `_le_registro` do gate (Grupo 42) desfaz
+      o escape; o `_campos` do check-arch (mais antigo) não desfazia.
+      Assimetria entre irmãos pela terceira vez nesta sessão
+- [x] 45.3 README da skill parou de anunciar o subagente de code review
+      removido no Grupo 28. As duas menções restantes na skill são ao
+      CONCEITO de revisão (contrastando registro vs. revisor), corretas
+- [x] 45.4 Pendência do README baixada do `SESSION_STATE.md`
+- [x] 45.5 **NÃO PLANEJADO — o fallback em awk do `check-arch.sh` nunca
+      funcionou.** Apareceu ao escrever o teste que força o caminho sem
+      `jq`: `awk: illegal statement`. A variável se chamava `exp`, que é
+      função embutida do awk. Desde o Grupo 31, que criou o arquivo.
+      Em máquina sem `jq` o runner imprimia `check-arch: 0 regra(s),
+      nenhuma violada` e saía 0 — verde total, zero regras executadas. E o
+      fallback existe exatamente para quem não tem jq: era essa pessoa, e
+      só ela, que recebia o falso verde. Ninguém viu porque `jq` está
+      instalado aqui e no CI — **o caminho que existe para o ambiente que
+      não temos era justamente o que nunca era exercitado**
+Verificacao: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
+— 850 testes (+7), limpos, check-arch 7/7 nos DOIS caminhos do parser.
+Provado por mutação: voltar o `@tsv` reprova 2, tirar o desfaz-escape do awk
+reprova 2, e voltar o nome `exp` reprova 3.
