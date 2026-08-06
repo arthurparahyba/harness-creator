@@ -13,6 +13,9 @@ TypeScript, .NET/C#, Java, Go, Rust, Ruby, PHP e outras.
 
 ## Conteúdo
 
+**Começar**
+- [Instalação](#instalação) — onde copiar este diretório e como invocar a skill
+
 **Por que usar**
 - [Para desenvolvedores: o que muda no seu dia a dia com IA](#para-desenvolvedores-o-que-muda-no-seu-dia-a-dia-com-ia)
 
@@ -34,6 +37,38 @@ TypeScript, .NET/C#, Java, Go, Rust, Ruby, PHP e outras.
 - [Benefícios por conceito de Harness Engineering](#benefícios-por-conceito-de-harness-engineering)
 
 ---
+
+## Instalação
+
+Este diretório **é** a skill. Instalar é copiá-lo para onde o Claude Code
+procura skills — não há build, dependência nem passo de registro.
+
+| Onde | Caminho | Quem recebe |
+|---|---|---|
+| No projeto | `<seu-repo>/.claude/skills/harness-creator/` | o time inteiro, pelo git |
+| Na sua máquina | `~/.claude/skills/harness-creator/` | só você, em todos os projetos |
+
+```bash
+# a partir de um clone deste repositório
+cp -r .claude/skills/harness-creator <seu-repo>/.claude/skills/
+
+# ou sem clonar nada antes
+git clone --depth 1 https://github.com/arthurparahyba/harness-creator.git /tmp/harness-creator
+cp -r /tmp/harness-creator/.claude/skills/harness-creator ~/.claude/skills/
+```
+
+Depois, no repositório alvo, **peça pelo nome da skill**:
+
+> use a skill harness-creator para preparar este repositório para agentes de IA
+
+O nome explícito é o caminho que não depende de sorte: a bateria de disparo
+mediu pedidos indiretos acionando a skill em quase 0 de 10 casos — o agente
+tende a achar que resolve sozinho e escreve um `AGENTS.md` de improviso.
+
+**Quem lê `SKILL.md` é o Claude Code.** Copiar este diretório para o Cursor ou
+o Devin não faz nada. O que vale nos três agentes é o harness *gerado*: rode a
+skill uma vez, commite o resultado, e quem usa Cursor ou Devin recebe o mesmo
+protocolo e os mesmos hooks pelo git.
 
 ## Para desenvolvedores: o que muda no seu dia a dia com IA
 

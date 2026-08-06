@@ -3,19 +3,55 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: Grupo 45 na `feature/sensor-barra-invertida`, NÃO
-  publicado. Antes: `e8211ff` na `main` — merge do Grupo 44, CI verde.
-- Testes: 850/850 + 4 skips explícitos; ruff e mypy strict limpos; score da
-  geração **+67** em todos os ecossistemas (+52 no `sem-sensores`) — o
-  `tests/medicao.json` saiu byte a byte idêntico ao baseline, sem regressão.
+- Commit verificado: Grupo 46 na `feature/instalacao-visivel`, NÃO publicado.
+  Antes: `6fc7ca8` na `main` (merge do Grupo 45) e `c7fc0ae`, também local,
+  com a pesquisa de loop engineering que estava solta na árvore.
+- Testes: 859/859 + 4 skips explícitos; ruff e mypy strict limpos;
+  check-arch 7/7.
 - Change/plano ativo: `TASKS.md` na raiz — **só o Grupo 26 aberto, e
-  BLOQUEADO** (ver pendências). Grupos 25, 27 a 45 concluídos.
+  BLOQUEADO** (ver pendências). Grupos 25, 27 a 46 concluídos.
 - Em andamento: nada — fronteira limpa. A sequência de lacunas terminou:
   1 (Grupo 40), 2 (cancelada — erro de documentação), 3 (Grupo 41), 4
   (Grupo 42). As lacunas 5 e 6 o usuário decidiu não implementar por ora.
   O Grupo 43 veio depois, de um defeito achado ao validar no PetClinic.
 - **`feature/sensor-barra-invertida` NÃO publicada.** O Grupo 44 já está
   mergeado na `main` (`e8211ff`), com CI verde.
+
+## O que mudou nesta sessão (Grupo 46)
+Pedido do usuário: quem chega ao repositório não identifica onde a skill
+está, e instalar a skill no próprio projeto é o que ele precisa saber
+primeiro.
+
+A instrução existia — `## Como usar`, linha 59 do README — e tinha **três
+defeitos somados**, sendo o terceiro o que importa:
+
+1. O `cp -r` só funciona de dentro de um clone deste repo, e nada dizia isso.
+2. O README **da skill** não tinha instalação nenhuma — e é justamente ele
+   que viaja junto quando alguém copia o diretório.
+3. A instrução terminava em *"peça o harness"*. O nível E mediu pedidos
+   indiretos acionando a skill em quase 0 de 10 casos. Quem seguia o README
+   instalava certo e a skill não disparava.
+
+Agora: `## Instalação` logo depois da evidência nos dois READMEs, com os três
+caminhos (projeto, `~/.claude/skills`, clone existente), o pedido literal que
+invoca a skill pelo nome, e `tests/test_instalacao.py` (9 testes) exigindo
+que o caminho citado exista.
+
+**Ordem do README decidida com o usuário:** `## Isso funciona?` continua
+sendo a primeira seção. O teste do Grupo 37 exige isso e a razão dele
+continua valendo — quem abre está decidindo se adota. A localização da skill
+coube em uma linha na abertura, acima da primeira seção, e tem sensor
+próprio.
+
+**Fronteira que faltava, corrigida também no `compatibility`:** a skill é
+artefato do Claude Code; o harness *gerado* é que vale nos três agentes. O
+campo listava três agentes sem dizer onde a SKILL roda — leitura errada no
+campo que o cliente exibe.
+
+**Honestidade preservada onde dava para vender melhor:** o texto podia dizer
+"medimos, use o nome". Mas o detector do nível E não acende nem no teste de
+sanidade (Grupo 25.5), então o README diz as duas coisas — o que foi medido
+e que a medição está em aberto.
 
 ## O que mudou nesta sessão (Grupo 45)
 Dois itens pequenos que viraram um achado grande.

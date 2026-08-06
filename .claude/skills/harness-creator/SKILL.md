@@ -20,9 +20,10 @@ allowed-tools: >
   Bash(bash .claude/verificar-harness.sh*) Bash(bash .claude/check-arch.sh*)
   Bash(bash .claude/hooks/gate-destructive.sh*) Read Grep Glob
 compatibility: >
-  Gera harness para Claude Code, Devin CLI e Cursor. Requer git e shell POSIX
-  no repositorio alvo. A camada de instrucao e os hooks valem para os tres;
-  skills e subagentes gerados valem so para o Claude Code.
+  Esta skill roda no Claude Code, que e quem le SKILL.md. O harness que ela
+  GERA vale para Claude Code, Devin CLI e Cursor: a camada de instrucao e os
+  hooks valem para os tres; skills e subagentes gerados valem so para o
+  Claude Code. Requer git e shell POSIX no repositorio alvo.
 metadata:
   author: squad-harness
   version: "2.5"

@@ -1123,3 +1123,64 @@ Verificacao: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
 — 850 testes (+7), limpos, check-arch 7/7 nos DOIS caminhos do parser.
 Provado por mutação: voltar o `@tsv` reprova 2, tirar o desfaz-escape do awk
 reprova 2, e voltar o nome `exp` reprova 3.
+
+## Grupo 46 - Onde a skill esta e como instala-la
+<!-- Pedido do usuario: quem chega neste repositorio nao identifica de cara
+     onde a skill vive, e instalar a skill no proprio projeto e o que ele
+     precisa saber primeiro.
+
+     O QUE EXISTE HOJE. Uma secao "Como usar" na linha 59 do README, com
+     `cp -r .claude/skills/harness-creator <seu-repo>/.claude/skills/`. Ela
+     tem tres problemas somados:
+
+     1. O comando so funciona de DENTRO de um clone deste repo, e nada diz
+        isso. Quem achou o projeto no GitHub nao tem de onde copiar.
+     2. O README da SKILL nao tem secao de instalacao nenhuma -- e ele e
+        justamente o que viaja junto quando alguem copia o diretorio.
+     3. A instrucao termina em "peca o harness". O nivel E mediu SUBDISPARO
+        real desta skill (positivas ~0/10, reproduzido em 3 configuracoes,
+        Grupo 20.4). Quem seguir o README instala certo e a skill nao
+        dispara. A instrucao esta incompleta contra evidencia que este
+        repositorio ja tem.
+
+     ORDEM NO README, decidida com o usuario. `## Isso funciona?` continua
+     sendo a PRIMEIRA secao -- o teste do Grupo 37 (test_nivel_c.py) exige
+     isso, e a razao dele continua valendo: quem abre esta decidindo se o
+     projeto resolve um problema dele. A instalacao vem imediatamente
+     depois, porque e a pergunta seguinte de quem se convenceu. -->
+- [x] 46.1 Secao de instalacao no README da raiz, logo apos `## Isso
+      funciona?`, com os tres caminhos reais e o comando exato: clone raso
+      do repo publico, instalacao pessoal em `~/.claude/skills/`, e copia de
+      dentro de um clone existente (o caso de hoje). Uma linha no topo diz
+      onde a skill vive
+- [x] 46.2 Como INVOCAR, com a razao dita: pedido explicito pelo nome da
+      skill, porque o subdisparo esta medido. Instrucao que termina em "peca
+      o harness" ja foi medida e nao basta
+- [x] 46.3 A mesma secao no README da skill -- quem recebe so o diretorio
+      copiado nao tem o README da raiz
+- [x] 46.4 Fronteira declarada: a SKILL e artefato do Claude Code; o HARNESS
+      GERADO e que vale nos tres agentes. Verificar como o `compatibility` do
+      frontmatter esta escrito e corrigir o texto se induzir a ler que a
+      skill se instala nos tres
+- [x] 46.5 Sensor: teste que reprova README sem secao de instalacao e que
+      exige que o caminho citado nela exista no repositorio. Renomear ou
+      mover a skill passa a quebrar o build. Documentado-e-nao-sensoreado e
+      o padrao que os Grupos 33, 35, 44 e 45 ja puniram aqui
+Verificacao: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
+— 859 testes (+9) e 4 skips, ruff e mypy limpos, check-arch 7/7.
+Provado por mutacao: renomear a secao para `## Como usar` reprova 3, tirar
+o caminho da abertura do README reprova 1, e voltar o `compatibility` para
+a forma antiga reprova 1.
+
+Duas decisoes tomadas na execucao, e nenhuma e cosmetica:
+
+- **A secao antiga `## Como usar` foi REMOVIDA, nao mantida ao lado.** Ela
+  dizia a mesma coisa pior (um `cp -r` que so funciona de dentro de um
+  clone). Duas instrucoes de instalacao no mesmo arquivo divergem na
+  primeira mudanca -- e assimetria entre irmaos foi o achado dos Grupos 44
+  e 45.
+- **O texto admite que o instrumento do subdisparo esta sob suspeita.** A
+  tentacao era vender "medimos, use o nome"; o numero vem de uma bateria
+  cujo detector nao acende no teste de sanidade (Grupo 25.5). O README diz
+  as duas coisas: o que foi medido e que a medicao esta em aberto.
+
