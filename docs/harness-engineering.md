@@ -91,6 +91,10 @@ A análise característica a característica — o que a literatura exige × o q
 skill `harness-creator` de fato gera, com placar e lacunas priorizadas — está em
 [intersecao-harness-engineering-x-skill.md](intersecao-harness-engineering-x-skill.md).
 
+A disciplina irmã — o *loop* que o harness cerca, com sua própria literatura,
+taxonomia e modos de falha — está em
+[loop-engineering.md](loop-engineering.md).
+
 ---
 
 ## Fontes
