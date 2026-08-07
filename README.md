@@ -4,6 +4,10 @@ Prepara um repositório para trabalho com agentes de IA de código — contexto,
 protocolo de sessão, guardrails de runtime e sensores, adaptados à stack que
 o repositório de fato usa.
 
+O produto é uma skill, e ela vive em
+[.claude/skills/harness-creator/](.claude/skills/harness-creator/). Para usá-la
+no seu projeto, veja **[Instalação](#instalação)**.
+
 ## Isso funciona?
 
 Você pede uma correção. O agente reescreve o javadoc **descrevendo o bug como
@@ -39,6 +43,61 @@ transcript e o que a rodada **não** prova está em
 A bateria é reexecutável em qualquer repositório pelo comando `/exp-nivel-c`
 (ver [eval/nivel-c/](eval/nivel-c/README.md)).
 
+## Instalação
+
+A skill é o diretório
+[.claude/skills/harness-creator/](.claude/skills/harness-creator/). Instalar é
+copiar esse diretório para onde o Claude Code procura skills — não há build,
+dependência nem passo de registro.
+
+**No projeto**, para o time inteiro receber pelo git:
+
+```bash
+git clone --depth 1 https://github.com/arthurparahyba/harness-creator.git /tmp/harness-creator
+mkdir -p <seu-repo>/.claude/skills
+cp -r /tmp/harness-creator/.claude/skills/harness-creator <seu-repo>/.claude/skills/
+```
+
+**Só na sua máquina**, valendo em todos os seus projetos:
+
+```bash
+mkdir -p ~/.claude/skills
+cp -r /tmp/harness-creator/.claude/skills/harness-creator ~/.claude/skills/
+```
+
+Se você já está dentro de um clone deste repositório, pule o `git clone` e
+copie daqui mesmo:
+`cp -r .claude/skills/harness-creator <seu-repo>/.claude/skills/`
+
+### Como pedir o harness
+
+Abra o Claude Code no repositório alvo e **peça pelo nome da skill**:
+
+> use a skill harness-creator para preparar este repositório para agentes de IA
+
+Nomear a skill não é preciosismo. A bateria de disparo deste repositório
+mediu pedidos indiretos — "prepare este repo para IA" — acionando a skill em
+quase 0 de 10 casos: o agente tende a achar que resolve sozinho e escreve um
+`AGENTS.md` de improviso. O instrumento dessa medição está sob suspeita e a
+investigação continua aberta (ver [evals/README.md](evals/README.md)), mas o
+caminho que não depende disso custa três palavras.
+
+A skill investiga a stack, mostra o que vai gravar e **para uma vez** para
+você aprovar. Depois grava, executa o que gerou e cola a saída.
+
+Ela não presume: cada informação do harness cita o arquivo do seu repositório
+de onde veio. Onde não há evidência, ela escreve que não encontrou em vez de
+inventar — um `AGENTS.md` com o comando de teste errado bloqueia todo commit
+do time.
+
+### A skill roda no Claude Code; o harness vale nos três
+
+Quem lê `SKILL.md` é o Claude Code — instalar este diretório no Cursor ou no
+Devin não faz nada. O que vale nos três agentes é o **harness gerado**: o
+mesmo protocolo e os mesmos hooks são gravados para Claude Code, Devin CLI e
+Cursor. Rode a skill uma vez, commite o resultado, e quem usa Cursor ou Devin
+no time recebe o harness pelo git sem nunca instalar skill nenhuma.
+
 ## O que muda no seu projeto
 
 Não é uma lista de arquivos — é o que deixa de dar errado:
@@ -56,24 +115,6 @@ Não é uma lista de arquivos — é o que deixa de dar errado:
 O detalhamento de **cada alteração que ela cria, modifica ou propõe** está em
 [MUDANCAS-NO-REPOSITORIO.md](.claude/skills/harness-creator/MUDANCAS-NO-REPOSITORIO.md).
 
-## Como usar
-
-Instale a skill no repositório alvo e peça o harness:
-
-```bash
-cp -r .claude/skills/harness-creator <seu-repo>/.claude/skills/
-cd <seu-repo>
-# no Claude Code: "prepare este repositório para agentes de IA"
-```
-
-A skill investiga a stack, mostra o que vai gravar e **para uma vez** para
-você aprovar. Depois grava, executa o que gerou e cola a saída.
-
-Ela não presume: cada informação do harness cita o arquivo do seu repositório
-de onde veio. Onde não há evidência, ela escreve que não encontrou em vez de
-inventar — um `AGENTS.md` com o comando de teste errado bloqueia todo commit
-do time.
-
 ## Maturidade
 
 O repositório alvo é medido com
@@ -90,9 +131,8 @@ Numa execução real sobre o spring-petclinic, o repositório saiu de
 
 ## Trabalhar neste repositório
 
-A skill vive em
-[.claude/skills/harness-creator/](.claude/skills/harness-creator/) e tem seu
-próprio [README](.claude/skills/harness-creator/README.md).
+A skill tem seu próprio
+[README](.claude/skills/harness-creator/README.md), com as 6 fases por dentro.
 
 ```bash
 ./init.sh                # instala deps, roda o baseline, mostra o estado
