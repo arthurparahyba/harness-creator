@@ -3,9 +3,10 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: Grupo 46 na `feature/instalacao-visivel`, NÃO publicado.
-  Antes: `6fc7ca8` na `main` (merge do Grupo 45) e `c7fc0ae`, também local,
-  com a pesquisa de loop engineering que estava solta na árvore.
+- Commit verificado: `fce6d58` na `main` — merge do Grupo 46
+  (`feature/instalacao-visivel`), publicado, CI verde na branch antes do
+  merge. Junto foi `c7fc0ae`, a pesquisa de loop engineering que estava
+  solta na árvore e não tem relação com o grupo.
 - Testes: 859/859 + 4 skips explícitos; ruff e mypy strict limpos;
   check-arch 7/7.
 - Change/plano ativo: `TASKS.md` na raiz — **só o Grupo 26 aberto, e
