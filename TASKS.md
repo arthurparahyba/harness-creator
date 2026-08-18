@@ -1234,7 +1234,7 @@ Duas decisoes tomadas na execucao, e nenhuma e cosmetica:
       reprova detecção de CLI por `npx`
 Verificação: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
 
-## Grupo 48 - Estudar antes de propor
+## Grupo 48 - Estudar antes de propor ✅
 <!-- Depende do Grupo 47: o texto da variante OpenSpec só existe depois dele.
 
      O ALVO É A SKILL, não um subcomando. Conferido no 1.9.0: `explore` não
@@ -1251,13 +1251,13 @@ Verificação: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
      O gatilho "pedido sem detalhes" é fuzzy demais para o agente aplicar.
      Ancorar no passo 3 do "Início de nova funcionalidade", que já diz "se não
      estiver coberto, pare e proponha": vira "antes de propor, estude". -->
-- [ ] 48.1 Passo 3 do AGENTS.md gerado: antes de propor um plano para pedido
+- [x] 48.1 Passo 3 do AGENTS.md gerado: antes de propor um plano para pedido
       não coberto pela fonte ativa, estudar o repositório e apresentar o
       achado junto da proposta. Exigência vale nas DUAS variantes
-- [ ] 48.2 Variante OpenSpec nomeia o modo explore, com o nome exato
+- [x] 48.2 Variante OpenSpec nomeia o modo explore, com o nome exato
       verificado contra o que o `openspec init` instala na versão corrente
-- [ ] 48.3 Variante TASKS.md: mesma exigência de estudar antes, sem depender
+- [x] 48.3 Variante TASKS.md: mesma exigência de estudar antes, sem depender
       do OpenSpec — a fase de estudo não é privilégio de quem tem o CLI
-- [ ] 48.4 Sensor: reprova AGENTS.md gerado cujo passo 3 permita propor sem
+- [x] 48.4 Sensor: reprova AGENTS.md gerado cujo passo 3 permita propor sem
       estudo prévio, nas duas variantes
 Verificação: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`

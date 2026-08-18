@@ -1152,3 +1152,32 @@ def test_agents_md_gerado_tem_um_plano_ativo_por_vez() -> None:
     assert "a ÚNICA fonte em uso agora" in estado, (
         "o SESSION_STATE.md não obriga a declarar qual fonte está ativa"
     )
+
+
+def test_explore_e_nomeado_pela_skill_e_nao_pelo_comando() -> None:
+    """Comando de um agente só é instrução morta nos outros dois.
+
+    Verificado com o CLI 1.9.0: o `openspec init` grava a skill com o MESMO
+    nome nos três agentes-alvo, enquanto o comando muda de forma em cada um.
+    O harness gerado vale nos três — o texto tem de nomear o invariante.
+    """
+    fase2 = (REFERENCES / "02-preenchimento-templates.md").read_text()
+    assert "skill `openspec-explore`" in fase2, "a FASE 2 não nomeia a skill de exploração"
+    assert "Nomeie a SKILL, não o comando" in fase2, (
+        "a FASE 2 não registra por que o nome citado é o da skill"
+    )
+    for caminho in (".cursor/skills/openspec-explore/", ".devin/skills/openspec-explore/"):
+        assert caminho in fase2, f"a evidência de que a skill é a mesma nos três omite {caminho}"
+    assert "`openspec explore` não\n  existe" in fase2, (
+        "nada impede citar `openspec explore`, que não é subcomando do CLI"
+    )
+
+
+def test_protocolo_exige_estudo_antes_da_proposta() -> None:
+    """O passo 3 é onde o pedido fora do plano para. Se ele deixar propor
+    direto, o estudo vira boa intenção — e o plano sai de memória."""
+    agents = (RESOURCES / "AGENTS.md").read_text()
+    assert "Estude\n   antes de propor" in agents, "o passo 3 do template não exige o estudo"
+    assert "Apresente o\n   achado junto da proposta" in agents, (
+        "o estudo não precisa ser mostrado — vira etapa não verificável"
+    )

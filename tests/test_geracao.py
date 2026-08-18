@@ -722,3 +722,32 @@ def test_agents_md_manda_o_comando_de_plano_certo(repo: tuple[Path, Stack, str])
         assert "/opsx:propose" not in agents, (
             f"{nome}: manda usar /opsx:propose sem openspec/ — comando inexistente"
         )
+
+
+def test_protocolo_gerado_exige_estudo_antes_de_propor(repo: tuple[Path, Stack, str]) -> None:
+    """Pedido fora do plano para no passo 3 — e é ali que o estudo entra.
+
+    Sem a exigência, o agente que recebe "implementa X" sem detalhe escreve o
+    plano de memória: o grupo sai plausível e erra onde a mudança encosta. A
+    forma de estudar depende da fonte, a obrigação não.
+    """
+    destino, _, nome = repo
+    agents = (destino / "AGENTS.md").read_text()
+    assert "Estude\n   antes de propor" in agents, f"{nome}: passo 3 permite propor sem estudo"
+
+    if (destino / "openspec").is_dir():
+        # A SKILL tem o mesmo nome nos três agentes-alvo; o comando não. E
+        # `openspec explore` não existe como subcomando do CLI (1.9.0).
+        assert "skill `openspec-explore`" in agents, (
+            f"{nome}: tem OpenSpec e não direciona para a skill de exploração"
+        )
+        assert "openspec explore" not in agents, (
+            f"{nome}: cita `openspec explore`, que não é subcomando do CLI"
+        )
+    else:
+        assert "openspec-explore" not in agents, (
+            f"{nome}: manda usar a skill do OpenSpec num repo que não a tem"
+        )
+        assert "a fase de estudo não depende de ferramenta nenhuma" in agents, (
+            f"{nome}: sem OpenSpec, o estudo antes de propor sumiu do AGENTS.md"
+        )

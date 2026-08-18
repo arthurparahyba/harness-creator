@@ -115,6 +115,11 @@ no repositório do usuário: cria `openspec/`, instala as skills `openspec-*`
 e os comandos `/opsx:*` de cada ferramenta escolhida, e altera os arquivos
 de instrução dela. A skill não reverte nada disso.
 
+O que a aceitação **ganha**, além da segunda fonte de plano: a skill
+`openspec-explore`, que é o modo de estudo antes de propor exigido pelo
+passo 3 do protocolo. Sem o `init`, ela não existe — e o estudo continua
+obrigatório, só que sem ferramenta.
+
 Aceito o item, `openspec/` passa a existir: gerar o `openspec/config.yaml`
 (condição do catálogo) e usar a variante de duas fontes em
 `<como-propor-mudanca-de-plano>` — mesma regra do "aceitou sensores, refaz

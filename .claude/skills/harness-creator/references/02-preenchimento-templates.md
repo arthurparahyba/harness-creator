@@ -112,16 +112,31 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
     outra: a tabela acima já está no contexto e não se repete a cada
     pedido. Registre a escolha no `SESSION_STATE.md` — ela vale para a
     funcionalidade inteira, não por grupo. Confirme antes de executar.
+
+    Para o estudo que o passo 3 exige, use a skill `openspec-explore`
+    (no Claude Code também como `/opsx:explore`): é modo de exploração e
+    não escreve código. Estudar não é propor — a proposta vem depois.
     ```
   - **Sem `openspec/`** (o repo só tem o `TASKS.md`), transcrever:
     ```
     Para criar ou modificar o plano, acrescente o grupo ao `TASKS.md` no
     formato descrito abaixo e confirme com o usuário antes de executá-lo.
+    Antes de propor, estude o repositório (passo 3) e apresente o achado
+    junto do grupo — a fase de estudo não depende de ferramenta nenhuma.
     ```
   Mandar usar `/opsx:propose` num repo sem OpenSpec é instruir o agente a
   chamar um comando que não existe: ele para no meio do fluxo ou inventa
   um caminho. A skill `executar-grupo` já resolve essa bifurcação em tempo
   de execução; o AGENTS.md tem de concordar com ela.
+  **Nomeie a SKILL, não o comando, ao citar o explore.** Verificado com o
+  CLI 1.9.0: `openspec init` grava a skill com o mesmo nome nos três
+  agentes-alvo (`.claude/skills/openspec-explore/`,
+  `.cursor/skills/openspec-explore/`, `.devin/skills/openspec-explore/`),
+  enquanto o comando muda de forma em cada um (`/opsx:explore`,
+  `opsx-explore`, `.devin/workflows/opsx-explore.md`). O harness gerado vale
+  nos três; nome de comando de um só agente vira instrução morta nos outros
+  dois. E `explore` **não** é subcomando do CLI — `openspec explore` não
+  existe.
   **Com as duas fontes o risco troca de lugar**: deixa de ser comando
   inexistente e passa a ser o agente abrir grupo numa fonte enquanto o
   humano atualiza a outra. Quem impede isso é o plano ativo declarado no

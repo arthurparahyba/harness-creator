@@ -391,10 +391,20 @@ def gerar(nome: str, destino: Path) -> Stack:
                     "Diga a recomendação em UMA linha, com o porquê, e a alternativa em\n"
                     "outra: a tabela acima já está no contexto e não se repete a cada\n"
                     "pedido. Registre a escolha no `SESSION_STATE.md` — ela vale para a\n"
-                    "funcionalidade inteira, não por grupo. Confirme antes de executar."
+                    "funcionalidade inteira, não por grupo. Confirme antes de executar.\n"
+                    "\n"
+                    # A SKILL tem o mesmo nome nos tres agentes-alvo; o COMANDO
+                    # muda de forma em cada um (`/opsx:explore`, `opsx-explore`,
+                    # `.devin/workflows/opsx-explore.md`). Nomear o comando de um
+                    # so agente vira instrucao morta nos outros dois.
+                    "Para o estudo que o passo 3 exige, use a skill `openspec-explore`\n"
+                    "(no Claude Code também como `/opsx:explore`): é modo de exploração e\n"
+                    "não escreve código. Estudar não é propor — a proposta vem depois."
                     if usa_openspec
                     else "Para criar ou modificar o plano, acrescente o grupo ao `TASKS.md` no\n"
-                    "formato descrito abaixo e confirme com o usuário antes de executá-lo."
+                    "formato descrito abaixo e confirme com o usuário antes de executá-lo.\n"
+                    "Antes de propor, estude o repositório (passo 3) e apresente o achado\n"
+                    "junto do grupo — a fase de estudo não depende de ferramenta nenhuma."
                 ),
                 # Fixtures não têm histórico git: o prefixo cai no default
                 # declarado e a política pede a decisão ao usuário, que é o
