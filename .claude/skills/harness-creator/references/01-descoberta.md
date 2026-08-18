@@ -87,11 +87,20 @@ genérica ("escreva testes") não é acionável.
 6. **Banco/migrations**: ferramenta, ORM, padrão de acesso a dados
 7. **Tipo de aplicação**: API, frontend, CLI, lib, monorepo → implicações
    para verificação
-8. **OpenSpec** ([Fission-AI/OpenSpec](https://github.com/Fission-AI/OpenSpec),
-   CLI `npx @fission-ai/openspec`): o diretório `openspec/` existe? Tem
-   `config.yaml` ou
-   `project.md` (legado)? Se `project.md`: avisar que `openspec update`
-   faz a migração; não gerar config.yaml por cima sem avisar.
+8. **OpenSpec** ([Fission-AI/OpenSpec](https://github.com/Fission-AI/OpenSpec)):
+   são **duas perguntas separadas**, e cada resposta leva a um lugar
+   diferente do fluxo. Confundi-las é o erro: diretório ausente não quer
+   dizer ferramenta indisponível.
+   - **O diretório `openspec/` existe?** Tem `config.yaml` ou
+     `project.md` (legado)? Se `project.md`: avisar que `openspec update`
+     faz a migração; não gerar config.yaml por cima sem avisar.
+   - **O CLI está instalado?** `command -v openspec`. Se estiver e o
+     diretório não existir, o repositório pode passar a ter as **duas**
+     fontes de plano — isso vira item do Plano de Remediação
+     ([remediacoes.md](remediacoes.md)), nunca ação da própria descoberta.
+     **Nunca detecte com `npx`**: `npx -y @fission-ai/openspec` *instala* o
+     pacote antes de responder, então o teste dá positivo sempre e a
+     detecção vira instalação silenciosa no ambiente do usuário.
    - **O validador exige estrutura em inglês**, mesmo com o conteúdo em outro
      idioma: `## Why` e `## What Changes` no proposal, e `MUST`/`SHALL` em
      toda requirement. Verificado com o CLI 1.7.0 — `## Por que` e `DEVE`
@@ -248,6 +257,7 @@ Apresentar ao usuário antes de qualquer geração:
 - Ferramenta de migration:      (fonte)
 - Convenções já documentadas:   (fonte)
 - OpenSpec presente:            (sim/não; config.yaml ou project.md)
+- OpenSpec CLI instalado:       (sim/não; fonte: `command -v openspec`)
 - Funções puras candidatas a teste: (nomes + arquivo, se faltam sensores)
 - Imports de sistema no entrypoint: (exigem stub nos testes? sim/não)
 - Lacunas (NÃO ENCONTRADO):

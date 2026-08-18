@@ -21,17 +21,19 @@ este arquivo é só a sequência de execução.
 2. **Ler estado**: leia `SESSION_STATE.md`. Se houver grupo em andamento
    não commitado, é ele que você termina — antes de qualquer pedido novo.
 3. **Escolher o grupo**: primeiro grupo desmarcado na fonte de trabalho
-   ativa, na ordem de precedência do `AGENTS.md` — use a primeira que
-   existir:
-   - `openspec/changes/<change>/tasks.md`, se o repo tiver OpenSpec
-   - `TASKS.md` na raiz, caso contrário
+   ativa — a que o `SESSION_STATE.md` declara em "Change/plano ativo".
+   As fontes possíveis são `openspec/changes/<change>/tasks.md` e o
+   `TASKS.md` da raiz; havendo grupo desmarcado nas duas e nenhuma
+   declarada, PERGUNTE qual seguir em vez de decidir por ordem de arquivo.
 
    Se o pedido do usuário não estiver coberto por nenhum grupo, PARE e
    proponha antes de editar qualquer arquivo. **Como propor depende da
-   fonte**: com OpenSpec, use `/opsx:propose` — nunca edite arquivos de
-   `openspec/` à mão, porque são artefatos gerenciados pela ferramenta.
-   Sem OpenSpec, acrescente o grupo ao `TASKS.md` e confirme com o
-   usuário antes de executá-lo.
+   fonte escolhida**: em OpenSpec, use `/opsx:propose` — nunca edite
+   arquivos de `openspec/` à mão, porque são artefatos gerenciados pela
+   ferramenta. No `TASKS.md`, acrescente o grupo e confirme com o usuário
+   antes de executá-lo. Com as duas disponíveis, recomende uma (contrato,
+   comportamento observável ou migração → OpenSpec; o resto → `TASKS.md`),
+   deixe a escolha com o usuário e registre-a no `SESSION_STATE.md`.
 4. **Implementar**: só as tasks deste grupo. Problema fora do escopo vira
    pendência no `SESSION_STATE.md`, não conserto agora.
 5. **Verificar**: rode a linha `Verificação:` do grupo e depois a

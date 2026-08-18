@@ -1184,3 +1184,80 @@ Duas decisoes tomadas na execucao, e nenhuma e cosmetica:
   cujo detector nao acende no teste de sanidade (Grupo 25.5). O README diz
   as duas coisas: o que foi medido e que a medicao esta em aberto.
 
+
+## Grupo 47 - As duas fontes de plano, e quem escolhe ✅
+<!-- Pedido do usuário. Hoje as variantes são MUTUAMENTE EXCLUSIVAS por
+     detecção: `02-preenchimento-templates.md:92-108` e
+     `arquivos-gerados.md:27-28` fazem a presença do diretório `openspec/`
+     escolher pelo agente — ele nunca decide. O usuário quer as duas
+     disponíveis, com o agente induzindo e ele decidindo.
+
+     TRÊS FATOS APURADOS CONTRA O CLI 1.9.0, e cada um muda uma task:
+     1. `openspec init --tools claude,cursor,devin` é não interativo. SEM
+        `--tools` o init abre prompts e `confirm()` — rodar assim trava a
+        sessão do agente esperando input que nunca chega.
+     2. Detectar o CLI por `npx` não detecta nada: `npx -y` INSTALA o pacote,
+        então o teste sempre dá positivo e vira instalação silenciosa no repo
+        do usuário. A detecção honesta é `command -v openspec`.
+     3. O `init` escreve bastante coisa de terceiro no repo (`openspec/`,
+        skills `openspec-*`, comandos `/opsx:*`, arquivos de instrução por
+        ferramenta). Decisão do usuário: PROPOR na FASE 4 com o comando
+        exato, rodar só com o ok — não rodar automático.
+
+     O RISCO QUE GOVERNA O GRUPO é a precedência. Com as duas fontes
+     presentes, a regra atual ("1. openspec/changes/<ativa>/tasks.md, 2.
+     TASKS.md") torna INVISÍVEL um grupo planejado no TASKS.md sempre que
+     houver change ativa. Sem 47.4, habilitar as duas fontes cria um modo de
+     falha que não existia. -->
+- [x] 47.1 Fase 1: a descoberta passa a distinguir DIRETÓRIO `openspec/`
+      presente de CLI instalado. Detecção por `command -v openspec`, com a
+      razão escrita (nunca `npx`, que instala). Relatório de Descoberta ganha
+      a linha "OpenSpec CLI: instalado/ausente"
+- [x] 47.2 Fase 4: CLI presente e `openspec/` ausente → propor
+      `openspec init --tools claude,cursor,devin` com a lista do que ele
+      escreve, e rodar só com o ok. `--tools` é obrigatório: sem ele o init é
+      interativo e trava. Repo com `project.md` legado continua indo para
+      `openspec update` (já coberto na Fase 1)
+- [x] 47.3 AGENTS.md gerado: `<como-propor-mudanca-de-plano>` deixa de ser
+      variante exclusiva quando as duas fontes existem. O agente RECOMENDA
+      pela natureza da mudança (contrato, comportamento observável ou
+      migração → OpenSpec; o resto → TASKS.md) em UMA linha, dá a alternativa
+      em outra, e o usuário decide. Os prós/contras ficam escritos uma vez no
+      AGENTS.md, não são reemitidos a cada pedido
+- [x] 47.4 Escolha registrada no `SESSION_STATE.md` e válida para a
+      funcionalidade inteira — perguntar uma vez por funcionalidade, não por
+      grupo. "Fontes de trabalho" passa de ordem fixa para "um plano ativo
+      por vez", declarado no SESSION_STATE.md (WIP=1 já implica)
+- [x] 47.5 Sensor: reprova AGENTS.md gerado que mande usar `/opsx:*` num repo
+      sem OpenSpec (garantia atual, não pode regredir); reprova o par de
+      fontes habilitado sem critério de escolha nem plano ativo declarado; e
+      reprova detecção de CLI por `npx`
+Verificação: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
+
+## Grupo 48 - Estudar antes de propor
+<!-- Depende do Grupo 47: o texto da variante OpenSpec só existe depois dele.
+
+     O ALVO É A SKILL, não um subcomando. Conferido no 1.9.0: `explore` não
+     está entre os comandos do CLI (init/update/list/view/change/archive/spec/
+     config/schema/store/doctor/context/workset/validate/show/status/
+     instructions/templates/schemas/new) — é um workflow que o `init` INSTALA
+     como skill: nome `openspec-explore`, "Enter explore mode… you must NEVER
+     write code". Duas consequências para a implementação: a skill só existe
+     se o init tiver rodado (Grupo 47), e o direcionamento tem de morar no
+     AGENTS.md gerado — não é chamada de shell. Transcrever o nome do que o
+     init grava na versão corrente, não de memória: mandar invocar algo
+     inexistente é o erro que `02-preenchimento:105` já documenta.
+
+     O gatilho "pedido sem detalhes" é fuzzy demais para o agente aplicar.
+     Ancorar no passo 3 do "Início de nova funcionalidade", que já diz "se não
+     estiver coberto, pare e proponha": vira "antes de propor, estude". -->
+- [ ] 48.1 Passo 3 do AGENTS.md gerado: antes de propor um plano para pedido
+      não coberto pela fonte ativa, estudar o repositório e apresentar o
+      achado junto da proposta. Exigência vale nas DUAS variantes
+- [ ] 48.2 Variante OpenSpec nomeia o modo explore, com o nome exato
+      verificado contra o que o `openspec init` instala na versão corrente
+- [ ] 48.3 Variante TASKS.md: mesma exigência de estudar antes, sem depender
+      do OpenSpec — a fase de estudo não é privilégio de quem tem o CLI
+- [ ] 48.4 Sensor: reprova AGENTS.md gerado cujo passo 3 permita propor sem
+      estudo prévio, nas duas variantes
+Verificação: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`

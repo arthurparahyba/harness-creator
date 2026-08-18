@@ -626,25 +626,50 @@ def test_formatter_de_modulo_inteiro_nao_vira_hook_de_edicao() -> None:
     assert "gate-destructive" in (destino / ".claude/settings.json").read_text()
 
 
-def test_fonte_de_trabalho_e_exclusiva(repo: tuple[Path, Stack, str]) -> None:
-    """`openspec/config.yaml` e `TASKS.md` não coexistem.
+def test_as_duas_fontes_de_plano_coexistem(repo: tuple[Path, Stack, str]) -> None:
+    """`TASKS.md` sempre; `openspec/config.yaml` se soma onde há OpenSpec.
 
-    O catálogo (`arquivos-gerados.md`) declara os dois como exclusivos, e a
-    razão é operacional: duas fontes de trabalho no mesmo repositório fazem o
-    agente escolher a errada em metade das sessões, e o plano que ele lê não
-    é o que o humano atualiza.
+    Eram exclusivos, e a exclusividade tirava a escolha do usuário: o
+    repositório com `openspec/` empurrava para proposal+specs até no grupo de
+    duas tasks. O risco que a exclusividade evitava — o agente abrir grupo
+    numa fonte enquanto o humano atualiza a outra — passa a ser coberto pelo
+    plano ativo único do `SESSION_STATE.md`, testado logo abaixo.
     """
     destino, _, nome = repo
     tem_openspec = (destino / "openspec").is_dir()
     config = destino / "openspec/config.yaml"
-    tasks = destino / "TASKS.md"
 
+    assert (destino / "TASKS.md").is_file(), f"{nome}: sem TASKS.md — repo sem plano simples"
     if tem_openspec:
         assert config.is_file(), f"{nome}: tem openspec/ e não recebeu config.yaml"
-        assert not tasks.exists(), f"{nome}: recebeu TASKS.md tendo openspec/"
     else:
-        assert tasks.is_file(), f"{nome}: sem openspec/ e sem TASKS.md — sem plano"
         assert not config.exists(), f"{nome}: config.yaml sem openspec/"
+
+
+def test_plano_ativo_unico_em_vez_de_precedencia_fixa(repo: tuple[Path, Stack, str]) -> None:
+    """Com duas fontes, ordem fixa esconde plano.
+
+    A regra antiga ("use a primeira que existir") tornava invisível qualquer
+    grupo do `TASKS.md` enquanto houvesse change ativa. Agora vale um plano
+    ativo por vez, declarado no `SESSION_STATE.md` — e o AGENTS.md, o
+    SESSION_STATE.md e a skill de execução têm de dizer a MESMA coisa, senão
+    o agente segue a que ler primeiro.
+    """
+    destino, _, nome = repo
+    agents = (destino / "AGENTS.md").read_text()
+    estado = (destino / "SESSION_STATE.md").read_text()
+    skill = (destino / ".claude/skills/executar-grupo/SKILL.md").read_text()
+
+    assert "ordem de precedência" not in agents, f"{nome}: AGENTS.md mantém precedência fixa"
+    assert "use o primeiro que existir" not in agents, f"{nome}: AGENTS.md escolhe por ordem"
+    assert "MÁXIMO UM plano ativo" in agents, f"{nome}: AGENTS.md não declara plano ativo único"
+    assert "Change/plano ativo" in agents and "Change/plano ativo" in estado, (
+        f"{nome}: o campo que declara o plano ativo não é citado dos dois lados"
+    )
+    assert "use a primeira que\n   existir" not in skill, (
+        f"{nome}: a skill executar-grupo ainda escolhe a fonte por ordem de arquivo"
+    )
+    assert "PERGUNTE" in skill, f"{nome}: a skill não manda perguntar com as duas fontes abertas"
 
 
 def test_config_do_openspec_nao_tem_placeholder_em_prosa() -> None:
@@ -680,10 +705,20 @@ def test_agents_md_manda_o_comando_de_plano_certo(repo: tuple[Path, Stack, str])
     """
     destino, _, nome = repo
     agents = (destino / "AGENTS.md").read_text()
+    assert "TASKS.md" in agents, f"{nome}: AGENTS.md não cita o TASKS.md, que vai sempre"
     if (destino / "openspec").is_dir():
         assert "/opsx:propose" in agents, f"{nome}: tem OpenSpec e não o usa"
+        # Duas fontes sem critério é escolha por ordem de arquivo — o que o
+        # plano ativo único proíbe. O critério e o registro da escolha andam
+        # juntos: sem registrar, o agente reabre a decisão a cada grupo.
+        assert "RECOMENDE uma fonte" in agents, (
+            f"{nome}: duas fontes disponíveis e nenhum critério de escolha"
+        )
+        assert "Muda contrato" in agents, f"{nome}: critério de escolha sem a natureza da mudança"
+        assert "Registre a escolha no `SESSION_STATE.md`" in agents, (
+            f"{nome}: a escolha da fonte não é registrada — vira decisão por grupo"
+        )
     else:
         assert "/opsx:propose" not in agents, (
             f"{nome}: manda usar /opsx:propose sem openspec/ — comando inexistente"
         )
-        assert "TASKS.md" in agents

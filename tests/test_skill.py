@@ -1103,3 +1103,52 @@ def test_frontmatter_declara_compatibilidade() -> None:
     assert len(compat) <= 500, "compatibility passa do limite de 500 chars da spec"
     for agente in ("Claude Code", "Devin", "Cursor"):
         assert agente in compat, f"compatibility não menciona {agente}"
+
+
+def test_deteccao_do_cli_do_openspec_nao_usa_npx() -> None:
+    """`npx -y` instala antes de responder — detectar assim é instalar.
+
+    A FASE 1 passou a distinguir duas coisas que não são a mesma: o diretório
+    `openspec/` presente e o CLI disponível. A segunda só vale se a detecção
+    for um teste, e não uma instalação silenciosa no ambiente do usuário.
+    """
+    fase1 = (REFERENCES / "01-descoberta.md").read_text()
+    assert "command -v openspec" in fase1, "FASE 1 não detecta o CLI do OpenSpec"
+    assert "Nunca detecte com `npx`" in fase1, (
+        "FASE 1 não proíbe detectar por npx, que instala o pacote antes de responder"
+    )
+    assert "- OpenSpec CLI instalado:" in fase1, (
+        "o Relatório de Descoberta não registra o CLI separado do diretório"
+    )
+
+
+def test_openspec_init_e_recomendado_e_nao_executado() -> None:
+    """O `init` escreve no repositório do usuário: é item do Plano, não efeito
+    colateral da descoberta. E sem `--tools` ele abre prompt e trava a sessão
+    do agente esperando input que não chega."""
+    catalogo = (REFERENCES / "remediacoes.md").read_text()
+    assert "### OpenSpec disponível, repositório só com `TASKS.md`" in catalogo, (
+        "propor o `openspec init` não virou item do grupo B"
+    )
+    assert "openspec init --tools" in catalogo, "o comando recomendado omite --tools"
+    assert "Nunca rodar o `init` antes da decisão" in catalogo, (
+        "nada impede a skill de rodar o init por conta própria"
+    )
+    fase1 = (REFERENCES / "01-descoberta.md").read_text()
+    assert "nunca ação da própria descoberta" in fase1, (
+        "a FASE 1 não diz que a decisão sobre o init é do usuário"
+    )
+
+
+def test_agents_md_gerado_tem_um_plano_ativo_por_vez() -> None:
+    """Duas fontes disponíveis com precedência fixa escondem plano: qualquer
+    grupo do `TASKS.md` some enquanto houver change ativa. O template tem de
+    declarar o plano ativo único e mandar perguntar no empate."""
+    agents = (RESOURCES / "AGENTS.md").read_text()
+    assert "ordem de precedência" not in agents, "template mantém precedência fixa entre fontes"
+    assert "MÁXIMO UM plano ativo por vez" in agents, "template não declara plano ativo único"
+    assert "PERGUNTE qual seguir" in agents, "template decide a fonte sem perguntar"
+    estado = (RESOURCES / "SESSION_STATE.md").read_text()
+    assert "a ÚNICA fonte em uso agora" in estado, (
+        "o SESSION_STATE.md não obriga a declarar qual fonte está ativa"
+    )

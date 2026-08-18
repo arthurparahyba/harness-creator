@@ -4,10 +4,15 @@
 <2-3 linhas: o que é a aplicação, stack com versões exatas>
 <Preencher via descoberta — nunca de memória. Fontes: manifestos, CI>
 
-## Fontes de trabalho (nesta ordem de precedência)
-O plano de trabalho vive em UM destes lugares — use o primeiro que existir:
-1. `openspec/changes/<change-ativa>/tasks.md`
-2. `TASKS.md` na raiz do repositório
+## Fontes de trabalho
+Existe no MÁXIMO UM plano ativo por vez (WIP=1), e o `SESSION_STATE.md`
+declara qual, no campo "Change/plano ativo". Enquanto ele estiver ativo é a
+única fonte: não abra grupo na outra. As fontes possíveis são:
+- `openspec/changes/<change-ativa>/tasks.md`
+- `TASKS.md` na raiz do repositório
+
+Se o `SESSION_STATE.md` não declarar nenhum e as duas tiverem grupo
+desmarcado, PERGUNTE qual seguir — ordem de arquivo não é decisão.
 
 <como-propor-mudanca-de-plano>
 Nunca invente tarefas fora da fonte de trabalho ativa.

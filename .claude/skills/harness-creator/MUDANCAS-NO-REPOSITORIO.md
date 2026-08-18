@@ -90,12 +90,14 @@ de trabalho em grupos de 2 a 5 tarefas, cada grupo terminando com um
 comando que o valida. O grupo — não a tarefa — é a fronteira de
 verificação, de commit e de reinício de sessão.
 
-O harness não depende do OpenSpec: a fonte de trabalho tem precedência
-(`openspec/changes/<change>/tasks.md` → `TASKS.md` na raiz) e a skill
-`executar-grupo` resolve isso na hora de executar. Com OpenSpec, ela
-propõe pelo `/opsx:propose` e nunca edita `openspec/` à mão; sem, ela
-acrescenta o grupo ao `TASKS.md`. Se você remover o OpenSpec do
-repositório, tudo continua funcionando.
+O harness não depende do OpenSpec. O `TASKS.md` vai sempre, e onde há
+OpenSpec ele se soma como segunda fonte — não como substituto. Vale no
+máximo UM plano ativo por vez, declarado no `SESSION_STATE.md`; o agente
+recomenda a fonte pela natureza da mudança (contrato, comportamento
+observável ou migração → OpenSpec; o resto → `TASKS.md`) e quem escolhe é
+você. Com OpenSpec, ele propõe pelo `/opsx:propose` e nunca edita
+`openspec/` à mão. Se você remover o OpenSpec do repositório, tudo continua
+funcionando.
 
 ### Camada 2 — enforcement (o agente é obrigado a fazer)
 
