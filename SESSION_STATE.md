@@ -3,16 +3,42 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `72edff4` na `feature/duas-fontes-de-plano` — Grupo 47.
-  **Branch NÃO publicada e NÃO mergeada na `main`.**
-- Testes: 877/877 + 4 skips explícitos (+18 no grupo); ruff e mypy strict
-  limpos; check-arch 7/7.
-- Change/plano ativo: `TASKS.md` na raiz — Grupo 48 desmarcado (depende do
-  47, já concluído) e Grupo 26 aberto e BLOQUEADO (ver pendências). Grupos
-  25, 27 a 47 concluídos.
+- Commit verificado: `ee98942` na `feature/duas-fontes-de-plano` — Grupo 48.
+  **Branch NÃO publicada e NÃO mergeada na `main`.** Junto vêm `72edff4`
+  (Grupo 47) e `fbb19dd` (handoff do 47).
+- Testes: 894/894 + 4 skips explícitos (+35 nos dois grupos); ruff e mypy
+  strict limpos; check-arch 7/7.
+- Change/plano ativo: `TASKS.md` na raiz — só o Grupo 26 aberto, e BLOQUEADO
+  (ver pendências). Grupos 25, 27 a 48 concluídos.
 - Em andamento: nada — fronteira limpa.
-- Próxima ação: publicar a branch e mergear com `--no-ff` na `main`, ou
-  seguir para o Grupo 48 ("Estudar antes de propor") na mesma branch.
+- Próxima ação: publicar a branch e mergear com `--no-ff` na `main`.
+
+## O que mudou nesta sessão (Grupo 48)
+Pedido do usuário: quando ele pede uma funcionalidade sem passar detalhes, o
+agente deveria estudar o repositório antes de propor.
+
+O passo 3 do protocolo gerado é onde o pedido fora do plano ativo para — e
+era ali que faltava a exigência. Agora ele obriga a investigar onde a mudança
+encosta, o que já existe e o que o pedido não diz, e a **apresentar o achado
+junto da proposta**: estudo que não é mostrado não é verificável.
+
+**A obrigação vale nas duas fontes; a ferramenta é que depende.** Com
+OpenSpec, o texto direciona para a skill `openspec-explore`. Sem OpenSpec, a
+mesma exigência sem ferramenta nenhuma — a fase de estudo não é privilégio de
+quem tem o CLI.
+
+**Por que a SKILL e não o comando, com evidência.** Rodando `openspec init`
+1.9.0 nos três agentes-alvo: a skill sai com o mesmo nome nos três
+(`.claude/skills/openspec-explore/`, `.cursor/skills/openspec-explore/`,
+`.devin/skills/openspec-explore/`), enquanto o comando muda de forma em cada
+um (`/opsx:explore`, `opsx-explore`, `.devin/workflows/opsx-explore.md`). O
+harness gerado vale nos três; nome de comando de um agente só é instrução
+morta nos outros dois. E `openspec explore` **não existe** como subcomando do
+CLI — a premissa do pedido era a skill, e é ela que está no texto.
+
+Provado por mutação: tirar a exigência do passo 3 reprova 16; nomear o
+comando em vez da skill reprova 1; tirar o estudo da variante sem OpenSpec
+reprova 14; tirar a razão do nome na FASE 2 reprova 1.
 
 ## O que mudou nesta sessão (Grupo 47)
 Pedido do usuário: o `TASKS.md` e o OpenSpec eram **mutuamente exclusivos por
@@ -405,6 +431,13 @@ script que o faz sobreviver ao SIGPIPE, e aí o printf reporta. E `trap '' PIPE`
 PIORA — produz o erro em vez de evitá-lo.
 
 ## Pendências
+- **`/opsx:propose` e `/opsx:apply` no AGENTS.md gerado são nomes de
+  comando do Claude Code, e o harness vale em três agentes.** Descoberto ao
+  fechar o Grupo 48, ao provar o nome do explore: no Cursor o comando é
+  `opsx-propose` e no Devin é `.devin/workflows/opsx-propose.md`, enquanto as
+  skills (`openspec-propose`, `openspec-apply-change`) têm o mesmo nome nos
+  três. O texto do explore já usa a forma invariante; o de propose/apply não
+  foi tocado (fora do escopo do grupo, WIP=1).
 - **O harness DESTE repositório ficou atrás do produto (Grupo 47).** O
   `AGENTS.md` da raiz ainda diz "Fontes de trabalho (nesta ordem de
   precedência) — use o primeiro que existir", e o `.claude/skills/
