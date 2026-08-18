@@ -3,20 +3,56 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `fce6d58` na `main` — merge do Grupo 46
-  (`feature/instalacao-visivel`), publicado, CI verde na branch antes do
-  merge. Junto foi `c7fc0ae`, a pesquisa de loop engineering que estava
-  solta na árvore e não tem relação com o grupo.
-- Testes: 859/859 + 4 skips explícitos; ruff e mypy strict limpos;
-  check-arch 7/7.
-- Change/plano ativo: `TASKS.md` na raiz — **só o Grupo 26 aberto, e
-  BLOQUEADO** (ver pendências). Grupos 25, 27 a 46 concluídos.
-- Em andamento: nada — fronteira limpa. A sequência de lacunas terminou:
-  1 (Grupo 40), 2 (cancelada — erro de documentação), 3 (Grupo 41), 4
-  (Grupo 42). As lacunas 5 e 6 o usuário decidiu não implementar por ora.
-  O Grupo 43 veio depois, de um defeito achado ao validar no PetClinic.
-- **`feature/sensor-barra-invertida` NÃO publicada.** O Grupo 44 já está
-  mergeado na `main` (`e8211ff`), com CI verde.
+- Commit verificado: `72edff4` na `feature/duas-fontes-de-plano` — Grupo 47.
+  **Branch NÃO publicada e NÃO mergeada na `main`.**
+- Testes: 877/877 + 4 skips explícitos (+18 no grupo); ruff e mypy strict
+  limpos; check-arch 7/7.
+- Change/plano ativo: `TASKS.md` na raiz — Grupo 48 desmarcado (depende do
+  47, já concluído) e Grupo 26 aberto e BLOQUEADO (ver pendências). Grupos
+  25, 27 a 47 concluídos.
+- Em andamento: nada — fronteira limpa.
+- Próxima ação: publicar a branch e mergear com `--no-ff` na `main`, ou
+  seguir para o Grupo 48 ("Estudar antes de propor") na mesma branch.
+
+## O que mudou nesta sessão (Grupo 47)
+Pedido do usuário: o `TASKS.md` e o OpenSpec eram **mutuamente exclusivos por
+detecção** — a presença do diretório `openspec/` escolhia pelo agente, que
+nunca decidia. Ele quer as duas fontes disponíveis, com o agente induzindo e
+o usuário escolhendo.
+
+Agora: `TASKS.md` vai **sempre**, e o `openspec/config.yaml` se soma a ele
+onde houver `openspec/`. Com as duas, o AGENTS.md gerado recomenda pela
+natureza da mudança (contrato, comportamento observável ou migração →
+OpenSpec; o resto → `TASKS.md`), em uma linha com o porquê e outra com a
+alternativa; a tabela de prós e contras fica escrita **uma vez** no AGENTS.md
+e não se repete a cada pedido; a escolha é registrada no `SESSION_STATE.md` e
+vale para a funcionalidade inteira, não por grupo.
+
+**O risco que o grupo teve de fechar junto, e que não estava no pedido:** a
+precedência fixa ("use a primeira que existir") tornava INVISÍVEL qualquer
+grupo do `TASKS.md` enquanto houvesse change ativa. Habilitar as duas fontes
+sem mexer nisso criaria um modo de falha novo. No lugar: um plano ativo por
+vez, declarado no `SESSION_STATE.md`, com AGENTS.md, template de estado e
+skill `executar-grupo` dizendo a mesma coisa — se divergirem, o agente segue
+o que ler primeiro.
+
+**Três fatos apurados contra o CLI 1.9.0**, cada um decidindo uma task:
+`openspec init --tools claude,cursor,devin` é não interativo (sem `--tools`
+abre prompt e trava a sessão do agente); detectar o CLI por `npx` não detecta
+nada, porque `npx -y` **instala** antes de responder — a detecção honesta é
+`command -v openspec`; e o `init` escreve bastante coisa de terceiro no repo,
+então virou item do Plano de Remediação (grupo B), nunca ação da descoberta.
+
+Provado por mutação, seis vezes: trocar `command -v` por `npx` reprova 1;
+voltar a precedência fixa reprova 16; tornar o `TASKS.md` exclusivo de novo
+reprova 1; tirar o item do catálogo reprova 1; tirar o critério de escolha da
+variante reprova 1; tirar o `PERGUNTE` da skill de execução reprova 15.
+
+**Incidente desta sessão, sem perda permanente:** o laço de mutação rodou
+`git checkout -- .` com o grupo inteiro ainda não commitado e apagou todo o
+trabalho da árvore, inclusive os Grupos 47 e 48 recém-escritos no `TASKS.md`.
+Foi refeito integralmente e só então commitado. A lição operacional: mutação
+só depois do commit, e revertendo **o arquivo mutado**, nunca `-- .`.
 
 ## O que mudou nesta sessão (Grupo 46)
 Pedido do usuário: quem chega ao repositório não identifica onde a skill
@@ -369,6 +405,13 @@ script que o faz sobreviver ao SIGPIPE, e aí o printf reporta. E `trap '' PIPE`
 PIORA — produz o erro em vez de evitá-lo.
 
 ## Pendências
+- **O harness DESTE repositório ficou atrás do produto (Grupo 47).** O
+  `AGENTS.md` da raiz ainda diz "Fontes de trabalho (nesta ordem de
+  precedência) — use o primeiro que existir", e o `.claude/skills/
+  executar-grupo/SKILL.md` ainda escolhe a fonte por ordem de arquivo. O
+  template já mudou; este repo não foi regenerado (fora do escopo do grupo,
+  WIP=1). Enquanto isso não for feito, o repositório que constrói o gerador
+  segue uma regra que o gerador não ensina mais.
 - **A lacuna 2 do doc de interseção foi CANCELADA, não implementada.** Era
   erro de documentação: `propor-regra-arch` já é um controle inferencial
   gerado, e o revisor com veredito foi removido no Grupo 28 por decisão do
