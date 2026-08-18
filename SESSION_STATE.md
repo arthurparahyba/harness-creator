@@ -3,15 +3,75 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `ee98942` na `feature/duas-fontes-de-plano` — Grupo 48.
+- Commit verificado: `47b723e` na `feature/duas-fontes-de-plano` — Grupo 49.
   **Branch NÃO publicada e NÃO mergeada na `main`.** Junto vêm `72edff4`
-  (Grupo 47) e `fbb19dd` (handoff do 47).
-- Testes: 894/894 + 4 skips explícitos (+35 nos dois grupos); ruff e mypy
-  strict limpos; check-arch 7/7.
-- Change/plano ativo: `TASKS.md` na raiz — só o Grupo 26 aberto, e BLOQUEADO
-  (ver pendências). Grupos 25, 27 a 48 concluídos.
+  (Grupo 47), `ee98942` (Grupo 48) e os dois handoffs.
+- Testes: 909/909 + 4 skips explícitos (+15 no grupo); ruff e mypy strict
+  limpos; check-arch 7/7.
+- Change/plano ativo: `TASKS.md` na raiz — **Grupo 50 proposto e NÃO
+  executado**, e o Grupo 26 aberto e BLOQUEADO (ver pendências). Grupos 25,
+  27 a 49 concluídos.
 - Em andamento: nada — fronteira limpa.
-- Próxima ação: publicar a branch e mergear com `--no-ff` na `main`.
+- Próxima ação: Grupo 50 (detector determinístico), ou publicar a branch e
+  mergear com `--no-ff` na `main`.
+
+## O que mudou nesta sessão (Grupo 49) — e a rodada no PetClinic que o achou
+Pedido do usuário: testar a execução da skill num repositório Java de exemplo
+e validar a mensagem de escolha entre OpenSpec e `TASKS.md`.
+
+**A skill foi aplicada ao `spring-petclinic` (`88e37c1`, clone raso), por mim
+— não por sessão limpa.** Vale como teste da geração, não do disparo. FASE 1
+descobriu Java 17 / Spring Boot / Maven (`./mvnw -B verify`, fonte
+`.github/workflows/maven-build.yml:29`) e `spring-javaformat-maven-plugin`
+(`pom.xml:207`), que formata o módulo inteiro — por isso, corretamente, o
+harness saiu **sem** `format-on-edit.sh`. O CLI do OpenSpec foi instalado num
+prefixo do scratchpad (nada foi mexido no ambiente global), a FASE 1 o
+detectou por `command -v`, e o item novo do Plano de Remediação
+(`openspec init --tools claude,cursor,devin`) foi aceito. Resultado:
+verificador **11/11**, check-arch **7/7**, nenhum marcador sobrevivente.
+`./mvnw -B verify` **não rodou — não há JDK nesta máquina**, então a DoD do
+alvo continua não exercitada, como desde o Grupo 42.
+
+**O DEFEITO QUE A RODADA ACHOU, e que virou este grupo.** Com as duas fontes
+presentes, o `init.sh` gerado imprimia:
+
+```
+Changes OpenSpec ativas:
+(vazio)
+```
+
+O `TASKS.md` existia, tinha o plano, e era invisível no único passo que o
+agente lê em toda sessão. O `medir-aderencia.sh` tinha a mesma precedência
+fixa: grupos fechados no `TASKS.md` contavam zero enquanto houvesse change
+ativa, e o diagnóstico mentia para baixo. Os dois são a lacuna do Grupo 47 —
+cujo sensor olhou só arquivos de texto (AGENTS.md, SESSION_STATE.md,
+SKILL.md) e por isso passou verde sobre dois scripts errados.
+
+Agora os dois leem o campo "Change/plano ativo" do `SESSION_STATE.md` e
+mostram as duas fontes. O `sed` usa `|` como delimitador em vez de `/`: com
+`/`, a barra invertida de escape entrava no texto e o próprio sensor não
+reconhecia a string — a lição de barra invertida do Grupo 45, de novo.
+
+Provado por mutação: voltar o `elif` do init reprova 15; tirar a leitura do
+plano ativo reprova 15; voltar a precedência fixa no medidor reprova 15.
+
+## A validação comportamental, em sessão limpa (autorizada pelo usuário)
+`claude -p` no PetClinic com o harness instalado, **sem linha de
+autorização** (ela deixaria o agente aprovar em nome do usuário e
+contaminaria justamente a decisão medida). Pedido: *"Quero implementar
+agendamento de consultas para os pets: o dono escolhe um veterinário e um
+horário. Pode implementar?"*. 10 turnos, US$ 0,45, exit 0.
+
+A resposta **não implementou nada** e fez o que o protocolo novo manda:
+recomendou **OpenSpec** com o porquê ("muda contrato e exige migração nos 3
+dialetos"), ofereceu `TASKS.md` como alternativa mais leve, disse que
+registraria a escolha no `SESSION_STATE.md`, e pediu a decisão antes de
+seguir para `/opsx:propose`. Também mostrou estudo prévio real — citou a
+entidade `Visit` existente e os três dialetos SQL, que é o passo 3 do Grupo
+48 acontecendo.
+
+É UMA rodada, não uma taxa: serve como prova de que o caminho funciona
+ponta a ponta, não como medida de confiabilidade. Medir taxa é o Grupo 50.4.
 
 ## O que mudou nesta sessão (Grupo 48)
 Pedido do usuário: quando ele pede uma funcionalidade sem passar detalhes, o
