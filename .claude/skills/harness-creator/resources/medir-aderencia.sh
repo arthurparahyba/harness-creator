@@ -223,18 +223,33 @@ else
 fi
 
 # ------------------------------- 2. grupo concluido sem commit de checkpoint
-# Fonte de trabalho na precedencia do AGENTS.md: change ativa do OpenSpec
-# primeiro, TASKS.md depois. Medir a fonte errada produziria zero grupos e
-# um falso ok.
-FONTE=""
+# Fonte de trabalho: a ATIVA, declarada no SESSION_STATE.md (AGENTS.md,
+# "Fontes de trabalho"). Precedencia fixa media a fonte errada quando as duas
+# existem — grupos fechados no TASKS.md contavam zero enquanto houvesse change
+# ativa, e o diagnostico mentia para baixo. Sem declaracao, medir TODAS: o
+# medidor mostra, nao decide qual vale.
+ATIVO=$(sed -n 's|^- Change/plano ativo:[[:space:]]*||p' SESSION_STATE.md 2>/dev/null | head -1)
+TODAS=""
 if [ -d openspec/changes ]; then
   for d in openspec/changes/*/; do
     [ -d "$d" ] || continue
     case "$d" in */archive/) continue ;; esac
-    [ -f "$d/tasks.md" ] && FONTE="$FONTE $d/tasks.md"
+    [ -f "$d/tasks.md" ] && TODAS="$TODAS $d/tasks.md"
   done
 fi
-if [ -z "$FONTE" ] && [ -f TASKS.md ]; then FONTE="TASKS.md"; fi
+[ -f TASKS.md ] && TODAS="$TODAS TASKS.md"
+
+FONTE=""
+if [ -n "$ATIVO" ]; then
+  for f in $TODAS; do
+    case "$f" in
+      TASKS.md) case "$ATIVO" in *TASKS.md*) FONTE="$f" ;; esac ;;
+      *) _nome=$(basename "$(dirname "$f")")
+         case "$ATIVO" in *"$_nome"*) FONTE="$f" ;; esac ;;
+    esac
+  done
+fi
+if [ -z "$FONTE" ]; then FONTE="$TODAS"; fi
 
 if [ -z "$FONTE" ]; then
   medida "Grupos concluidos com checkpoint" 1 "sem fonte de trabalho" \

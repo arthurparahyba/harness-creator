@@ -751,3 +751,30 @@ def test_protocolo_gerado_exige_estudo_antes_de_propor(repo: tuple[Path, Stack, 
         assert "a fase de estudo não depende de ferramenta nenhuma" in agents, (
             f"{nome}: sem OpenSpec, o estudo antes de propor sumiu do AGENTS.md"
         )
+
+
+def test_init_e_medidor_mostram_as_duas_fontes(repo: tuple[Path, Stack, str]) -> None:
+    """Fonte escondida atrás de `elif` é plano que o agente não sabe que existe.
+
+    Achado rodando a skill no spring-petclinic com as duas fontes presentes: o
+    `init.sh` imprimia "Changes OpenSpec ativas:" e uma lista vazia, e o
+    `TASKS.md` com o plano não aparecia no único passo que o agente lê em toda
+    sessão. O sensor do Grupo 47 olhou só os arquivos de texto e passou verde.
+    """
+    destino, _, nome = repo
+    init = (destino / "init.sh").read_text()
+    medidor = (destino / ".claude/medir-aderencia.sh").read_text()
+
+    for arquivo, corpo in (("init.sh", init), ("medir-aderencia.sh", medidor)):
+        assert "TASKS.md" in corpo and "openspec/changes" in corpo, (
+            f"{nome}: {arquivo} não considera as duas fontes"
+        )
+        assert "Change/plano ativo" in corpo, (
+            f"{nome}: {arquivo} não lê o plano ativo declarado no SESSION_STATE.md"
+        )
+    assert "elif [ -f TASKS.md ]" not in init, (
+        f"{nome}: init.sh voltou a esconder o TASKS.md atrás de elif"
+    )
+    assert 'if [ -z "$FONTE" ] && [ -f TASKS.md ]' not in medidor, (
+        f"{nome}: o medidor voltou a medir por precedência fixa"
+    )

@@ -1261,3 +1261,66 @@ Verificação: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
 - [x] 48.4 Sensor: reprova AGENTS.md gerado cujo passo 3 permita propor sem
       estudo prévio, nas duas variantes
 Verificação: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
+
+## Grupo 49 - A precedencia que sobrou nos scripts (lacuna do Grupo 47) ✅
+<!-- ACHADO AO RODAR A SKILL NO SPRING-PETCLINIC (88e37c1), com as duas
+     fontes presentes. O Grupo 47 trocou a precedencia fixa por "um plano
+     ativo por vez" no AGENTS.md, no SESSION_STATE.md e na skill
+     executar-grupo -- e deixou de fora os DOIS scripts que decidem a mesma
+     coisa em shell:
+
+     - `resources/init.sh:39-45`: `if [ -d openspec/changes ] ... elif
+       [ -f TASKS.md ]`. Com as duas presentes, o init imprime "Changes
+       OpenSpec ativas:" e uma lista vazia. O TASKS.md com o plano fica
+       INVISIVEL na primeira coisa que o agente roda em toda sessao.
+       Reproduzido no petclinic, saida colada acima no relatorio.
+     - `resources/medir-aderencia.sh:226-237`: mesma precedencia. Grupos
+       fechados no TASKS.md contam zero quando existe change ativa, e o
+       diagnostico de aderencia mente para baixo.
+
+     Isto NAO e escopo novo: e a lacuna do Grupo 47, achada por execucao.
+     O sensor daquele grupo olhou texto (AGENTS.md, SESSION_STATE.md,
+     SKILL.md) e nao olhou os scripts -- e foi por isso que passou verde. -->
+- [x] 49.1 `resources/init.sh` mostra as DUAS fontes quando as duas existem,
+      marcando qual esta ativa segundo o campo "Change/plano ativo" do
+      SESSION_STATE.md. Sem `elif`: fonte escondida no passo [4/4] e um plano
+      que o agente nao sabe que existe
+- [x] 49.2 `resources/medir-aderencia.sh` mede a fonte ATIVA declarada, nao a
+      primeira que existir. Se nenhuma estiver declarada e as duas tiverem
+      grupo, medir as duas e dizer isso na saida — o medidor nao decide
+- [x] 49.3 Sensor de geracao: repo com as duas fontes tem de receber init.sh
+      e medidor que citem `TASKS.md` E `openspec/changes`. Provar por mutacao
+      que voltar o `elif` reprova
+Verificacao: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
+
+## Grupo 50 - Detector deterministico da escolha de fonte
+<!-- Pergunta do usuario: da para testar de forma deterministica que o agente
+     emite a mensagem de escolher entre OpenSpec e TASKS.md?
+
+     Da, em duas camadas de tres. O artefato ter a mensagem ja e coberto
+     (Grupos 47/48). O MODELO emitir a mensagem nao e deterministico por
+     natureza -- e taxa medida em N rodadas, nao gate. A camada do meio, que
+     falta, e deterministica: um detector puro rodando sobre transcripts
+     GRAVADOS. O transcript e fixture; o teste nao chama modelo nenhum.
+
+     A ARMADILHA, ja paga neste repo: o detector do nivel E nao acende nem no
+     teste de sanidade (Grupo 25.5). Detector sem golden NEGATIVO mede zero e
+     parece saudavel. Por isso o par positivo/negativo e requisito, nao
+     capricho -- um golden que o detector tem de aceitar e um que ele tem de
+     recusar. -->
+- [ ] 50.1 Detector como funcao pura: recebe o texto de uma resposta do
+      agente e devolve quais sinais estao presentes — recomendou uma fonte,
+      deu o porque, ofereceu a alternativa, pediu a decisao ao usuario,
+      registrou a escolha no SESSION_STATE.md
+- [ ] 50.2 Dois transcripts golden em `tests/fixtures/`: um POSITIVO (resposta
+      que cumpre o protocolo) e um NEGATIVO (resposta que so escolhe e sai
+      implementando). Ambos gravados de saida real, nao escritos a mao para
+      agradar o detector — se nao houver rodada real disponivel, declarar isso
+      no cabecalho do arquivo
+- [ ] 50.3 Teste deterministico sobre os dois goldens: o detector acende no
+      positivo e fica apagado no negativo. Sem o segundo, o teste nao vale
+- [ ] 50.4 Bateria nao deterministica separada, FORA da DoD, que roda o pedido
+      de funcionalidade com `claude -p` N vezes no repo alvo e reporta a taxa
+      usando O MESMO detector. Requer autorizacao do usuario para sessao
+      aninhada (o classificador do auto mode bloqueou na sessao do Grupo 48)
+Verificacao: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`

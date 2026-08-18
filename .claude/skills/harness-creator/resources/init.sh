@@ -36,12 +36,23 @@ echo "=== [3/4] Baseline de testes (estado REAL antes de trabalhar) ==="
 echo "=== [4/4] Estado persistido ==="
 [ -f SESSION_STATE.md ] && cat SESSION_STATE.md || echo "(sem SESSION_STATE.md — sessão limpa)"
 echo "---"
-# Fonte de trabalho ativa (precedência do AGENTS.md):
+# Fontes de trabalho: mostrar as DUAS sempre que existirem. Esconder uma
+# atrás de `elif` fazia o plano dela sumir do único passo que o agente lê em
+# toda sessão — um TASKS.md com grupo aberto ficava invisível só porque havia
+# um diretório openspec/. Quem declara qual está ATIVA é o SESSION_STATE.md
+# (AGENTS.md, "Fontes de trabalho"); este script mostra, não decide.
+ATIVO=$(sed -n 's|^- Change/plano ativo:[[:space:]]*||p' SESSION_STATE.md 2>/dev/null | head -1)
+echo "Plano ativo (SESSION_STATE.md): ${ATIVO:-(nenhum declarado — declare antes de abrir grupo)}"
 if [ -d openspec/changes ]; then
-  echo "Changes OpenSpec ativas:"
-  ls openspec/changes | grep -v archive || true
-elif [ -f TASKS.md ]; then
+  echo "-- Changes OpenSpec:"
+  ls openspec/changes | grep -v archive || echo "   (nenhuma)"
+fi
+if [ -f TASKS.md ]; then
+  echo "-- TASKS.md:"
   head -40 TASKS.md
+fi
+if [ ! -d openspec/changes ] && [ ! -f TASKS.md ]; then
+  echo "(sem fonte de trabalho — nem openspec/changes/ nem TASKS.md)"
 fi
 echo "---"
 # `set -e` no topo derruba o script inteiro se isto falhar — e um repo pode
