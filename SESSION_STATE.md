@@ -3,16 +3,17 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `2b552c9` na `feature/duas-fontes-de-plano` — Grupo 50.
-  **Branch NÃO publicada e NÃO mergeada na `main`.** Junto vêm `72edff4`
-  (47), `ee98942` (48), `47b723e` (49) e os handoffs.
-- Testes: 915/915 + 4 skips explícitos (+6 no grupo); ruff e mypy strict
-  limpos (16 arquivos); check-arch 7/7.
+- Commit verificado: `d4922cb` na `main` — merge `--no-ff` da
+  `feature/duas-fontes-de-plano` (Grupos 47 a 50), publicado. CI verde na
+  branch antes do merge (run 32200669119).
+- Testes: 915/915 + 4 skips explícitos; ruff e mypy strict limpos (16
+  arquivos); check-arch 7/7.
 - Change/plano ativo: `TASKS.md` na raiz — só o Grupo 26 aberto, e BLOQUEADO
   (ver pendências). Grupos 25, 27 a 50 concluídos.
 - Em andamento: nada — fronteira limpa.
-- Próxima ação: publicar a branch e mergear com `--no-ff` na `main` (quatro
-  grupos acumulados).
+- Próxima ação: nada pendente do trabalho das duas fontes. A pendência do
+  `/opsx:propose` Claude-específico (abaixo) é a primeira candidata a virar
+  grupo.
 
 ## O que mudou nesta sessão (Grupo 50)
 `eval/escolha-de-fonte/detecta.py`: função pura que lê o texto de UMA resposta
