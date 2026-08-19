@@ -1293,7 +1293,7 @@ Verificação: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
       que voltar o `elif` reprova
 Verificacao: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
 
-## Grupo 50 - Detector deterministico da escolha de fonte
+## Grupo 50 - Detector deterministico da escolha de fonte ✅
 <!-- Pergunta do usuario: da para testar de forma deterministica que o agente
      emite a mensagem de escolher entre OpenSpec e TASKS.md?
 
@@ -1308,18 +1308,18 @@ Verificacao: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
      parece saudavel. Por isso o par positivo/negativo e requisito, nao
      capricho -- um golden que o detector tem de aceitar e um que ele tem de
      recusar. -->
-- [ ] 50.1 Detector como funcao pura: recebe o texto de uma resposta do
+- [x] 50.1 Detector como funcao pura: recebe o texto de uma resposta do
       agente e devolve quais sinais estao presentes — recomendou uma fonte,
       deu o porque, ofereceu a alternativa, pediu a decisao ao usuario,
       registrou a escolha no SESSION_STATE.md
-- [ ] 50.2 Dois transcripts golden em `tests/fixtures/`: um POSITIVO (resposta
+- [x] 50.2 Dois transcripts golden em `tests/fixtures/`: um POSITIVO (resposta
       que cumpre o protocolo) e um NEGATIVO (resposta que so escolhe e sai
       implementando). Ambos gravados de saida real, nao escritos a mao para
       agradar o detector — se nao houver rodada real disponivel, declarar isso
       no cabecalho do arquivo
-- [ ] 50.3 Teste deterministico sobre os dois goldens: o detector acende no
+- [x] 50.3 Teste deterministico sobre os dois goldens: o detector acende no
       positivo e fica apagado no negativo. Sem o segundo, o teste nao vale
-- [ ] 50.4 Bateria nao deterministica separada, FORA da DoD, que roda o pedido
+- [x] 50.4 Bateria nao deterministica separada, FORA da DoD, que roda o pedido
       de funcionalidade com `claude -p` N vezes no repo alvo e reporta a taxa
       usando O MESMO detector. Requer autorizacao do usuario para sessao
       aninhada (o classificador do auto mode bloqueou na sessao do Grupo 48)
