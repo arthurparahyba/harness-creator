@@ -25,7 +25,15 @@ repositório alvo.
 | init.sh | `/init.sh` (chmod +x) | sempre |
 | SESSION_STATE.md | `/SESSION_STATE.md` | sempre |
 | openspec-config.yaml | `/openspec/config.yaml` | somente se `openspec/` existir |
-| TASKS.md | `/TASKS.md` | somente se `openspec/` NÃO existir |
+| TASKS.md | `/TASKS.md` | sempre |
+
+As duas fontes de plano **coexistem de propósito**: o `TASKS.md` vai sempre,
+e o `openspec/config.yaml` se soma a ele onde há OpenSpec. Nem toda mudança
+paga uma proposal com specs, e um repositório que só tem OpenSpec empurra
+para a cerimônia até o grupo de duas tasks. O risco de duas fontes é o
+agente abrir grupo numa enquanto o humano atualiza a outra — coberto pelo
+plano ativo único declarado no `SESSION_STATE.md`, não por esconder uma
+delas.
 
 O `CLAUDE.md` é o mesmo template nos dois destinos e não tem placeholder:
 só a linha `@AGENTS.md`. Existe porque o Claude Code carrega `CLAUDE.md` e

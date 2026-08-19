@@ -346,10 +346,12 @@ def gerar(nome: str, destino: Path) -> Stack:
     stack = STACKS[nome]
     shutil.copytree(FIXTURES / nome, destino, dirs_exist_ok=True)
 
-    # Condicao do catalogo (`arquivos-gerados.md`): `openspec/config.yaml`
-    # somente se `openspec/` existir; `TASKS.md` somente se NAO existir. Sao
-    # exclusivos — duas fontes de trabalho no mesmo repo e o agente escolhendo
-    # a errada em metade das sessoes.
+    # Condicao do catalogo (`arquivos-gerados.md`): `TASKS.md` sempre;
+    # `openspec/config.yaml` se soma a ele onde `openspec/` existir. As duas
+    # fontes coexistem de proposito — nem toda mudanca paga uma proposal com
+    # specs. O risco de duas fontes (agente abrindo grupo numa enquanto o
+    # humano atualiza a outra) e coberto pelo plano ativo unico declarado no
+    # SESSION_STATE.md, nao por esconder uma delas.
     usa_openspec = (destino / "openspec").is_dir()
 
     _grava(
@@ -365,14 +367,44 @@ def gerar(nome: str, destino: Path) -> Stack:
                 "<branch-base>": "main",
                 # A variante depende do repo: mandar usar `/opsx:propose` num
                 # repo sem OpenSpec instrui o agente a chamar um comando que
-                # nao existe, e a sessao morre no primeiro pedido novo.
+                # nao existe, e a sessao morre no primeiro pedido novo. Onde
+                # as duas fontes existem, o AGENTS.md tem de dizer COMO
+                # escolher — senao a escolha vira ordem de arquivo.
                 "<como-propor-mudanca-de-plano>": (
-                    "Para criar ou modificar planos (proposals, specs, tasks), use os\n"
-                    "comandos OpenSpec (`/opsx:propose`, `/opsx:apply`) — nunca edite\n"
-                    "artefatos de `openspec/` manualmente."
+                    "Para criar ou modificar o plano, RECOMENDE uma fonte e deixe a escolha\n"
+                    "com o usuário:\n"
+                    "- Muda contrato, comportamento observável ou exige migração → OpenSpec\n"
+                    "  (`/opsx:propose`, `/opsx:apply`); nunca edite artefatos de `openspec/`\n"
+                    "  manualmente.\n"
+                    "- Qualquer outra mudança → acrescente o grupo ao `TASKS.md` no formato\n"
+                    "  descrito abaixo.\n"
+                    "\n"
+                    "|  | OpenSpec | TASKS.md |\n"
+                    "|---|---|---|\n"
+                    "| Custa | proposal, specs e design antes do código "
+                    "| escrever o grupo e começar |\n"
+                    "| Dá | requisito versionado, e `openspec validate` como sensor "
+                    "| plano que cabe numa leitura |\n"
+                    "| Perde | cerimônia que não se paga em mudança pequena "
+                    "| nada registra POR QUE a mudança existe |\n"
+                    "\n"
+                    "Diga a recomendação em UMA linha, com o porquê, e a alternativa em\n"
+                    "outra: a tabela acima já está no contexto e não se repete a cada\n"
+                    "pedido. Registre a escolha no `SESSION_STATE.md` — ela vale para a\n"
+                    "funcionalidade inteira, não por grupo. Confirme antes de executar.\n"
+                    "\n"
+                    # A SKILL tem o mesmo nome nos tres agentes-alvo; o COMANDO
+                    # muda de forma em cada um (`/opsx:explore`, `opsx-explore`,
+                    # `.devin/workflows/opsx-explore.md`). Nomear o comando de um
+                    # so agente vira instrucao morta nos outros dois.
+                    "Para o estudo que o passo 3 exige, use a skill `openspec-explore`\n"
+                    "(no Claude Code também como `/opsx:explore`): é modo de exploração e\n"
+                    "não escreve código. Estudar não é propor — a proposta vem depois."
                     if usa_openspec
                     else "Para criar ou modificar o plano, acrescente o grupo ao `TASKS.md` no\n"
-                    "formato descrito abaixo e confirme com o usuário antes de executá-lo."
+                    "formato descrito abaixo e confirme com o usuário antes de executá-lo.\n"
+                    "Antes de propor, estude o repositório (passo 3) e apresente o achado\n"
+                    "junto do grupo — a fase de estudo não depende de ferramenta nenhuma."
                 ),
                 # Fixtures não têm histórico git: o prefixo cai no default
                 # declarado e a política pede a decisão ao usuário, que é o
@@ -493,7 +525,7 @@ def gerar(nome: str, destino: Path) -> Stack:
     )
     for origem, alvo in [
         ("SESSION_STATE.md", "SESSION_STATE.md"),
-        *(() if usa_openspec else (("TASKS.md", "TASKS.md"),)),
+        ("TASKS.md", "TASKS.md"),
         ("editorconfig-base", ".editorconfig"),
         ("hooks/gate-destructive.sh", ".claude/hooks/gate-destructive.sh"),
         # Vai SEMPRE, inclusive onde o `format-on-edit.sh` não vai: observar

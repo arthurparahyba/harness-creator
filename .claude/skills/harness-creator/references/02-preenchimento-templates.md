@@ -90,22 +90,58 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
   NÃO ENCONTRADO (repo sem git, sem remoto), preencher com
   `# TODO: definir branch base` e registrar como pendência — nunca chutar.
 - `<como-propor-mudanca-de-plano>`: depende da fonte de trabalho detectada
-  no item 8 da Fase 1, e as duas variantes são mutuamente exclusivas.
-  - **Com `openspec/`**, transcrever:
+  no item 8 da Fase 1.
+  - **Com `openspec/`** — o repositório tem as DUAS fontes, porque o
+    `TASKS.md` é gerado sempre —, transcrever:
     ```
-    Para criar ou modificar planos (proposals, specs, tasks), use os comandos
-    OpenSpec (`/opsx:propose`, `/opsx:apply`) — nunca edite artefatos de
-    `openspec/` manualmente.
+    Para criar ou modificar o plano, RECOMENDE uma fonte e deixe a escolha
+    com o usuário:
+    - Muda contrato, comportamento observável ou exige migração → OpenSpec
+      (`/opsx:propose`, `/opsx:apply`); nunca edite artefatos de `openspec/`
+      manualmente.
+    - Qualquer outra mudança → acrescente o grupo ao `TASKS.md` no formato
+      descrito abaixo.
+
+    |  | OpenSpec | TASKS.md |
+    |---|---|---|
+    | Custa | proposal, specs e design antes do código | escrever o grupo e começar |
+    | Dá | requisito versionado, e `openspec validate` como sensor | plano que cabe numa leitura |
+    | Perde | cerimônia que não se paga em mudança pequena | nada registra POR QUE a mudança existe |
+
+    Diga a recomendação em UMA linha, com o porquê, e a alternativa em
+    outra: a tabela acima já está no contexto e não se repete a cada
+    pedido. Registre a escolha no `SESSION_STATE.md` — ela vale para a
+    funcionalidade inteira, não por grupo. Confirme antes de executar.
+
+    Para o estudo que o passo 3 exige, use a skill `openspec-explore`
+    (no Claude Code também como `/opsx:explore`): é modo de exploração e
+    não escreve código. Estudar não é propor — a proposta vem depois.
     ```
-  - **Sem `openspec/`** (o repo recebeu `TASKS.md`), transcrever:
+  - **Sem `openspec/`** (o repo só tem o `TASKS.md`), transcrever:
     ```
     Para criar ou modificar o plano, acrescente o grupo ao `TASKS.md` no
     formato descrito abaixo e confirme com o usuário antes de executá-lo.
+    Antes de propor, estude o repositório (passo 3) e apresente o achado
+    junto do grupo — a fase de estudo não depende de ferramenta nenhuma.
     ```
   Mandar usar `/opsx:propose` num repo sem OpenSpec é instruir o agente a
   chamar um comando que não existe: ele para no meio do fluxo ou inventa
   um caminho. A skill `executar-grupo` já resolve essa bifurcação em tempo
   de execução; o AGENTS.md tem de concordar com ela.
+  **Nomeie a SKILL, não o comando, ao citar o explore.** Verificado com o
+  CLI 1.9.0: `openspec init` grava a skill com o mesmo nome nos três
+  agentes-alvo (`.claude/skills/openspec-explore/`,
+  `.cursor/skills/openspec-explore/`, `.devin/skills/openspec-explore/`),
+  enquanto o comando muda de forma em cada um (`/opsx:explore`,
+  `opsx-explore`, `.devin/workflows/opsx-explore.md`). O harness gerado vale
+  nos três; nome de comando de um só agente vira instrução morta nos outros
+  dois. E `explore` **não** é subcomando do CLI — `openspec explore` não
+  existe.
+  **Com as duas fontes o risco troca de lugar**: deixa de ser comando
+  inexistente e passa a ser o agente abrir grupo numa fonte enquanto o
+  humano atualiza a outra. Quem impede isso é o plano ativo declarado no
+  `SESSION_STATE.md` (seção "Fontes de trabalho" do AGENTS.md), não a ordem
+  em que os arquivos aparecem no disco.
 - **Comandos do init.sh invocam a ferramenta pelo interpretador, não pelo
   executável solto**: `python3 -m pip`, `python3 -m pytest`, `npx tsc`.
   Em muitas instalações `pip` e `pytest` não existem no PATH, e como o

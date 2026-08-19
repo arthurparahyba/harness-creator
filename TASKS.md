@@ -1184,3 +1184,143 @@ Duas decisoes tomadas na execucao, e nenhuma e cosmetica:
   cujo detector nao acende no teste de sanidade (Grupo 25.5). O README diz
   as duas coisas: o que foi medido e que a medicao esta em aberto.
 
+
+## Grupo 47 - As duas fontes de plano, e quem escolhe ✅
+<!-- Pedido do usuário. Hoje as variantes são MUTUAMENTE EXCLUSIVAS por
+     detecção: `02-preenchimento-templates.md:92-108` e
+     `arquivos-gerados.md:27-28` fazem a presença do diretório `openspec/`
+     escolher pelo agente — ele nunca decide. O usuário quer as duas
+     disponíveis, com o agente induzindo e ele decidindo.
+
+     TRÊS FATOS APURADOS CONTRA O CLI 1.9.0, e cada um muda uma task:
+     1. `openspec init --tools claude,cursor,devin` é não interativo. SEM
+        `--tools` o init abre prompts e `confirm()` — rodar assim trava a
+        sessão do agente esperando input que nunca chega.
+     2. Detectar o CLI por `npx` não detecta nada: `npx -y` INSTALA o pacote,
+        então o teste sempre dá positivo e vira instalação silenciosa no repo
+        do usuário. A detecção honesta é `command -v openspec`.
+     3. O `init` escreve bastante coisa de terceiro no repo (`openspec/`,
+        skills `openspec-*`, comandos `/opsx:*`, arquivos de instrução por
+        ferramenta). Decisão do usuário: PROPOR na FASE 4 com o comando
+        exato, rodar só com o ok — não rodar automático.
+
+     O RISCO QUE GOVERNA O GRUPO é a precedência. Com as duas fontes
+     presentes, a regra atual ("1. openspec/changes/<ativa>/tasks.md, 2.
+     TASKS.md") torna INVISÍVEL um grupo planejado no TASKS.md sempre que
+     houver change ativa. Sem 47.4, habilitar as duas fontes cria um modo de
+     falha que não existia. -->
+- [x] 47.1 Fase 1: a descoberta passa a distinguir DIRETÓRIO `openspec/`
+      presente de CLI instalado. Detecção por `command -v openspec`, com a
+      razão escrita (nunca `npx`, que instala). Relatório de Descoberta ganha
+      a linha "OpenSpec CLI: instalado/ausente"
+- [x] 47.2 Fase 4: CLI presente e `openspec/` ausente → propor
+      `openspec init --tools claude,cursor,devin` com a lista do que ele
+      escreve, e rodar só com o ok. `--tools` é obrigatório: sem ele o init é
+      interativo e trava. Repo com `project.md` legado continua indo para
+      `openspec update` (já coberto na Fase 1)
+- [x] 47.3 AGENTS.md gerado: `<como-propor-mudanca-de-plano>` deixa de ser
+      variante exclusiva quando as duas fontes existem. O agente RECOMENDA
+      pela natureza da mudança (contrato, comportamento observável ou
+      migração → OpenSpec; o resto → TASKS.md) em UMA linha, dá a alternativa
+      em outra, e o usuário decide. Os prós/contras ficam escritos uma vez no
+      AGENTS.md, não são reemitidos a cada pedido
+- [x] 47.4 Escolha registrada no `SESSION_STATE.md` e válida para a
+      funcionalidade inteira — perguntar uma vez por funcionalidade, não por
+      grupo. "Fontes de trabalho" passa de ordem fixa para "um plano ativo
+      por vez", declarado no SESSION_STATE.md (WIP=1 já implica)
+- [x] 47.5 Sensor: reprova AGENTS.md gerado que mande usar `/opsx:*` num repo
+      sem OpenSpec (garantia atual, não pode regredir); reprova o par de
+      fontes habilitado sem critério de escolha nem plano ativo declarado; e
+      reprova detecção de CLI por `npx`
+Verificação: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
+
+## Grupo 48 - Estudar antes de propor ✅
+<!-- Depende do Grupo 47: o texto da variante OpenSpec só existe depois dele.
+
+     O ALVO É A SKILL, não um subcomando. Conferido no 1.9.0: `explore` não
+     está entre os comandos do CLI (init/update/list/view/change/archive/spec/
+     config/schema/store/doctor/context/workset/validate/show/status/
+     instructions/templates/schemas/new) — é um workflow que o `init` INSTALA
+     como skill: nome `openspec-explore`, "Enter explore mode… you must NEVER
+     write code". Duas consequências para a implementação: a skill só existe
+     se o init tiver rodado (Grupo 47), e o direcionamento tem de morar no
+     AGENTS.md gerado — não é chamada de shell. Transcrever o nome do que o
+     init grava na versão corrente, não de memória: mandar invocar algo
+     inexistente é o erro que `02-preenchimento:105` já documenta.
+
+     O gatilho "pedido sem detalhes" é fuzzy demais para o agente aplicar.
+     Ancorar no passo 3 do "Início de nova funcionalidade", que já diz "se não
+     estiver coberto, pare e proponha": vira "antes de propor, estude". -->
+- [x] 48.1 Passo 3 do AGENTS.md gerado: antes de propor um plano para pedido
+      não coberto pela fonte ativa, estudar o repositório e apresentar o
+      achado junto da proposta. Exigência vale nas DUAS variantes
+- [x] 48.2 Variante OpenSpec nomeia o modo explore, com o nome exato
+      verificado contra o que o `openspec init` instala na versão corrente
+- [x] 48.3 Variante TASKS.md: mesma exigência de estudar antes, sem depender
+      do OpenSpec — a fase de estudo não é privilégio de quem tem o CLI
+- [x] 48.4 Sensor: reprova AGENTS.md gerado cujo passo 3 permita propor sem
+      estudo prévio, nas duas variantes
+Verificação: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
+
+## Grupo 49 - A precedencia que sobrou nos scripts (lacuna do Grupo 47) ✅
+<!-- ACHADO AO RODAR A SKILL NO SPRING-PETCLINIC (88e37c1), com as duas
+     fontes presentes. O Grupo 47 trocou a precedencia fixa por "um plano
+     ativo por vez" no AGENTS.md, no SESSION_STATE.md e na skill
+     executar-grupo -- e deixou de fora os DOIS scripts que decidem a mesma
+     coisa em shell:
+
+     - `resources/init.sh:39-45`: `if [ -d openspec/changes ] ... elif
+       [ -f TASKS.md ]`. Com as duas presentes, o init imprime "Changes
+       OpenSpec ativas:" e uma lista vazia. O TASKS.md com o plano fica
+       INVISIVEL na primeira coisa que o agente roda em toda sessao.
+       Reproduzido no petclinic, saida colada acima no relatorio.
+     - `resources/medir-aderencia.sh:226-237`: mesma precedencia. Grupos
+       fechados no TASKS.md contam zero quando existe change ativa, e o
+       diagnostico de aderencia mente para baixo.
+
+     Isto NAO e escopo novo: e a lacuna do Grupo 47, achada por execucao.
+     O sensor daquele grupo olhou texto (AGENTS.md, SESSION_STATE.md,
+     SKILL.md) e nao olhou os scripts -- e foi por isso que passou verde. -->
+- [x] 49.1 `resources/init.sh` mostra as DUAS fontes quando as duas existem,
+      marcando qual esta ativa segundo o campo "Change/plano ativo" do
+      SESSION_STATE.md. Sem `elif`: fonte escondida no passo [4/4] e um plano
+      que o agente nao sabe que existe
+- [x] 49.2 `resources/medir-aderencia.sh` mede a fonte ATIVA declarada, nao a
+      primeira que existir. Se nenhuma estiver declarada e as duas tiverem
+      grupo, medir as duas e dizer isso na saida — o medidor nao decide
+- [x] 49.3 Sensor de geracao: repo com as duas fontes tem de receber init.sh
+      e medidor que citem `TASKS.md` E `openspec/changes`. Provar por mutacao
+      que voltar o `elif` reprova
+Verificacao: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
+
+## Grupo 50 - Detector deterministico da escolha de fonte ✅
+<!-- Pergunta do usuario: da para testar de forma deterministica que o agente
+     emite a mensagem de escolher entre OpenSpec e TASKS.md?
+
+     Da, em duas camadas de tres. O artefato ter a mensagem ja e coberto
+     (Grupos 47/48). O MODELO emitir a mensagem nao e deterministico por
+     natureza -- e taxa medida em N rodadas, nao gate. A camada do meio, que
+     falta, e deterministica: um detector puro rodando sobre transcripts
+     GRAVADOS. O transcript e fixture; o teste nao chama modelo nenhum.
+
+     A ARMADILHA, ja paga neste repo: o detector do nivel E nao acende nem no
+     teste de sanidade (Grupo 25.5). Detector sem golden NEGATIVO mede zero e
+     parece saudavel. Por isso o par positivo/negativo e requisito, nao
+     capricho -- um golden que o detector tem de aceitar e um que ele tem de
+     recusar. -->
+- [x] 50.1 Detector como funcao pura: recebe o texto de uma resposta do
+      agente e devolve quais sinais estao presentes — recomendou uma fonte,
+      deu o porque, ofereceu a alternativa, pediu a decisao ao usuario,
+      registrou a escolha no SESSION_STATE.md
+- [x] 50.2 Dois transcripts golden em `tests/fixtures/`: um POSITIVO (resposta
+      que cumpre o protocolo) e um NEGATIVO (resposta que so escolhe e sai
+      implementando). Ambos gravados de saida real, nao escritos a mao para
+      agradar o detector — se nao houver rodada real disponivel, declarar isso
+      no cabecalho do arquivo
+- [x] 50.3 Teste deterministico sobre os dois goldens: o detector acende no
+      positivo e fica apagado no negativo. Sem o segundo, o teste nao vale
+- [x] 50.4 Bateria nao deterministica separada, FORA da DoD, que roda o pedido
+      de funcionalidade com `claude -p` N vezes no repo alvo e reporta a taxa
+      usando O MESMO detector. Requer autorizacao do usuario para sessao
+      aninhada (o classificador do auto mode bloqueou na sessao do Grupo 48)
+Verificacao: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`

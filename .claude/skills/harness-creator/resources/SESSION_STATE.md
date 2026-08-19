@@ -5,7 +5,8 @@
 
 - Commit verificado: <hash> 
 - Testes: <X/Y passando> (<falhas pré-existentes, se houver, e onde>)
-- Change/plano ativo: <nome da change OpenSpec ou TASKS.md>
+- Change/plano ativo: <a ÚNICA fonte em uso agora: nome da change OpenSpec
+  ou TASKS.md; se as duas existem, dizer quem escolheu e por quê>
 - Em andamento: <Grupo N — % e o que falta, OU "nada — fronteira limpa">
 - Não commitado: <arquivos com mudança parcial, OU "nada">
 - Bloqueios / pendências fora de escopo:

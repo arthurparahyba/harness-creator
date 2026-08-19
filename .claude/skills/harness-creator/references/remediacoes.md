@@ -99,6 +99,35 @@ que valide o repositório inteiro — e a DoD precisa de um. Recomendar o
 script raiz que delega: `npm test --workspaces`, `turbo test`,
 `nx run-many -t test`, `pnpm -r test`, ou o agregador equivalente.
 
+### OpenSpec disponível, repositório só com `TASKS.md`
+
+O CLI está no PATH e não existe `openspec/` (item 8 da FASE 1). O
+repositório pode passar a ter as duas fontes de plano: `TASKS.md` para o
+que cabe num grupo, OpenSpec para o que muda contrato ou exige migração.
+
+Recomendar `openspec init --tools claude,cursor,devin`. **O `--tools` não é
+opcional**: sem ele o `init` abre prompts interativos e a sessão do agente
+trava esperando um input que não vai chegar. A lista é a dos agentes-alvo
+do harness — ajustar se a FASE 1 encontrou outro.
+
+Declarar o que a aceitação escreve, porque é ferramenta de terceiro mexendo
+no repositório do usuário: cria `openspec/`, instala as skills `openspec-*`
+e os comandos `/opsx:*` de cada ferramenta escolhida, e altera os arquivos
+de instrução dela. A skill não reverte nada disso.
+
+O que a aceitação **ganha**, além da segunda fonte de plano: a skill
+`openspec-explore`, que é o modo de estudo antes de propor exigido pelo
+passo 3 do protocolo. Sem o `init`, ela não existe — e o estudo continua
+obrigatório, só que sem ferramenta.
+
+Aceito o item, `openspec/` passa a existir: gerar o `openspec/config.yaml`
+(condição do catálogo) e usar a variante de duas fontes em
+`<como-propor-mudanca-de-plano>` — mesma regra do "aceitou sensores, refaz
+a DoD".
+
+**Nunca rodar o `init` antes da decisão.** É item do Plano, não efeito
+colateral da descoberta.
+
 ### Lockfile ausente
 
 Sem lockfile, `init.sh` instala versões diferentes a cada execução e o

@@ -626,25 +626,50 @@ def test_formatter_de_modulo_inteiro_nao_vira_hook_de_edicao() -> None:
     assert "gate-destructive" in (destino / ".claude/settings.json").read_text()
 
 
-def test_fonte_de_trabalho_e_exclusiva(repo: tuple[Path, Stack, str]) -> None:
-    """`openspec/config.yaml` e `TASKS.md` não coexistem.
+def test_as_duas_fontes_de_plano_coexistem(repo: tuple[Path, Stack, str]) -> None:
+    """`TASKS.md` sempre; `openspec/config.yaml` se soma onde há OpenSpec.
 
-    O catálogo (`arquivos-gerados.md`) declara os dois como exclusivos, e a
-    razão é operacional: duas fontes de trabalho no mesmo repositório fazem o
-    agente escolher a errada em metade das sessões, e o plano que ele lê não
-    é o que o humano atualiza.
+    Eram exclusivos, e a exclusividade tirava a escolha do usuário: o
+    repositório com `openspec/` empurrava para proposal+specs até no grupo de
+    duas tasks. O risco que a exclusividade evitava — o agente abrir grupo
+    numa fonte enquanto o humano atualiza a outra — passa a ser coberto pelo
+    plano ativo único do `SESSION_STATE.md`, testado logo abaixo.
     """
     destino, _, nome = repo
     tem_openspec = (destino / "openspec").is_dir()
     config = destino / "openspec/config.yaml"
-    tasks = destino / "TASKS.md"
 
+    assert (destino / "TASKS.md").is_file(), f"{nome}: sem TASKS.md — repo sem plano simples"
     if tem_openspec:
         assert config.is_file(), f"{nome}: tem openspec/ e não recebeu config.yaml"
-        assert not tasks.exists(), f"{nome}: recebeu TASKS.md tendo openspec/"
     else:
-        assert tasks.is_file(), f"{nome}: sem openspec/ e sem TASKS.md — sem plano"
         assert not config.exists(), f"{nome}: config.yaml sem openspec/"
+
+
+def test_plano_ativo_unico_em_vez_de_precedencia_fixa(repo: tuple[Path, Stack, str]) -> None:
+    """Com duas fontes, ordem fixa esconde plano.
+
+    A regra antiga ("use a primeira que existir") tornava invisível qualquer
+    grupo do `TASKS.md` enquanto houvesse change ativa. Agora vale um plano
+    ativo por vez, declarado no `SESSION_STATE.md` — e o AGENTS.md, o
+    SESSION_STATE.md e a skill de execução têm de dizer a MESMA coisa, senão
+    o agente segue a que ler primeiro.
+    """
+    destino, _, nome = repo
+    agents = (destino / "AGENTS.md").read_text()
+    estado = (destino / "SESSION_STATE.md").read_text()
+    skill = (destino / ".claude/skills/executar-grupo/SKILL.md").read_text()
+
+    assert "ordem de precedência" not in agents, f"{nome}: AGENTS.md mantém precedência fixa"
+    assert "use o primeiro que existir" not in agents, f"{nome}: AGENTS.md escolhe por ordem"
+    assert "MÁXIMO UM plano ativo" in agents, f"{nome}: AGENTS.md não declara plano ativo único"
+    assert "Change/plano ativo" in agents and "Change/plano ativo" in estado, (
+        f"{nome}: o campo que declara o plano ativo não é citado dos dois lados"
+    )
+    assert "use a primeira que\n   existir" not in skill, (
+        f"{nome}: a skill executar-grupo ainda escolhe a fonte por ordem de arquivo"
+    )
+    assert "PERGUNTE" in skill, f"{nome}: a skill não manda perguntar com as duas fontes abertas"
 
 
 def test_config_do_openspec_nao_tem_placeholder_em_prosa() -> None:
@@ -680,10 +705,76 @@ def test_agents_md_manda_o_comando_de_plano_certo(repo: tuple[Path, Stack, str])
     """
     destino, _, nome = repo
     agents = (destino / "AGENTS.md").read_text()
+    assert "TASKS.md" in agents, f"{nome}: AGENTS.md não cita o TASKS.md, que vai sempre"
     if (destino / "openspec").is_dir():
         assert "/opsx:propose" in agents, f"{nome}: tem OpenSpec e não o usa"
+        # Duas fontes sem critério é escolha por ordem de arquivo — o que o
+        # plano ativo único proíbe. O critério e o registro da escolha andam
+        # juntos: sem registrar, o agente reabre a decisão a cada grupo.
+        assert "RECOMENDE uma fonte" in agents, (
+            f"{nome}: duas fontes disponíveis e nenhum critério de escolha"
+        )
+        assert "Muda contrato" in agents, f"{nome}: critério de escolha sem a natureza da mudança"
+        assert "Registre a escolha no `SESSION_STATE.md`" in agents, (
+            f"{nome}: a escolha da fonte não é registrada — vira decisão por grupo"
+        )
     else:
         assert "/opsx:propose" not in agents, (
             f"{nome}: manda usar /opsx:propose sem openspec/ — comando inexistente"
         )
-        assert "TASKS.md" in agents
+
+
+def test_protocolo_gerado_exige_estudo_antes_de_propor(repo: tuple[Path, Stack, str]) -> None:
+    """Pedido fora do plano para no passo 3 — e é ali que o estudo entra.
+
+    Sem a exigência, o agente que recebe "implementa X" sem detalhe escreve o
+    plano de memória: o grupo sai plausível e erra onde a mudança encosta. A
+    forma de estudar depende da fonte, a obrigação não.
+    """
+    destino, _, nome = repo
+    agents = (destino / "AGENTS.md").read_text()
+    assert "Estude\n   antes de propor" in agents, f"{nome}: passo 3 permite propor sem estudo"
+
+    if (destino / "openspec").is_dir():
+        # A SKILL tem o mesmo nome nos três agentes-alvo; o comando não. E
+        # `openspec explore` não existe como subcomando do CLI (1.9.0).
+        assert "skill `openspec-explore`" in agents, (
+            f"{nome}: tem OpenSpec e não direciona para a skill de exploração"
+        )
+        assert "openspec explore" not in agents, (
+            f"{nome}: cita `openspec explore`, que não é subcomando do CLI"
+        )
+    else:
+        assert "openspec-explore" not in agents, (
+            f"{nome}: manda usar a skill do OpenSpec num repo que não a tem"
+        )
+        assert "a fase de estudo não depende de ferramenta nenhuma" in agents, (
+            f"{nome}: sem OpenSpec, o estudo antes de propor sumiu do AGENTS.md"
+        )
+
+
+def test_init_e_medidor_mostram_as_duas_fontes(repo: tuple[Path, Stack, str]) -> None:
+    """Fonte escondida atrás de `elif` é plano que o agente não sabe que existe.
+
+    Achado rodando a skill no spring-petclinic com as duas fontes presentes: o
+    `init.sh` imprimia "Changes OpenSpec ativas:" e uma lista vazia, e o
+    `TASKS.md` com o plano não aparecia no único passo que o agente lê em toda
+    sessão. O sensor do Grupo 47 olhou só os arquivos de texto e passou verde.
+    """
+    destino, _, nome = repo
+    init = (destino / "init.sh").read_text()
+    medidor = (destino / ".claude/medir-aderencia.sh").read_text()
+
+    for arquivo, corpo in (("init.sh", init), ("medir-aderencia.sh", medidor)):
+        assert "TASKS.md" in corpo and "openspec/changes" in corpo, (
+            f"{nome}: {arquivo} não considera as duas fontes"
+        )
+        assert "Change/plano ativo" in corpo, (
+            f"{nome}: {arquivo} não lê o plano ativo declarado no SESSION_STATE.md"
+        )
+    assert "elif [ -f TASKS.md ]" not in init, (
+        f"{nome}: init.sh voltou a esconder o TASKS.md atrás de elif"
+    )
+    assert 'if [ -z "$FONTE" ] && [ -f TASKS.md ]' not in medidor, (
+        f"{nome}: o medidor voltou a medir por precedência fixa"
+    )

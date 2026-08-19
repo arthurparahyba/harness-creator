@@ -3,20 +3,182 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `fce6d58` na `main` — merge do Grupo 46
-  (`feature/instalacao-visivel`), publicado, CI verde na branch antes do
-  merge. Junto foi `c7fc0ae`, a pesquisa de loop engineering que estava
-  solta na árvore e não tem relação com o grupo.
-- Testes: 859/859 + 4 skips explícitos; ruff e mypy strict limpos;
-  check-arch 7/7.
-- Change/plano ativo: `TASKS.md` na raiz — **só o Grupo 26 aberto, e
-  BLOQUEADO** (ver pendências). Grupos 25, 27 a 46 concluídos.
-- Em andamento: nada — fronteira limpa. A sequência de lacunas terminou:
-  1 (Grupo 40), 2 (cancelada — erro de documentação), 3 (Grupo 41), 4
-  (Grupo 42). As lacunas 5 e 6 o usuário decidiu não implementar por ora.
-  O Grupo 43 veio depois, de um defeito achado ao validar no PetClinic.
-- **`feature/sensor-barra-invertida` NÃO publicada.** O Grupo 44 já está
-  mergeado na `main` (`e8211ff`), com CI verde.
+- Commit verificado: `2b552c9` na `feature/duas-fontes-de-plano` — Grupo 50.
+  **Branch NÃO publicada e NÃO mergeada na `main`.** Junto vêm `72edff4`
+  (47), `ee98942` (48), `47b723e` (49) e os handoffs.
+- Testes: 915/915 + 4 skips explícitos (+6 no grupo); ruff e mypy strict
+  limpos (16 arquivos); check-arch 7/7.
+- Change/plano ativo: `TASKS.md` na raiz — só o Grupo 26 aberto, e BLOQUEADO
+  (ver pendências). Grupos 25, 27 a 50 concluídos.
+- Em andamento: nada — fronteira limpa.
+- Próxima ação: publicar a branch e mergear com `--no-ff` na `main` (quatro
+  grupos acumulados).
+
+## O que mudou nesta sessão (Grupo 50)
+`eval/escolha-de-fonte/detecta.py`: função pura que lê o texto de UMA resposta
+e diz quais dos seis movimentos prescritos pelo protocolo estão presentes —
+recomendou fonte, citou as duas, deu o porquê, pediu a decisão, registra no
+`SESSION_STATE.md`, não implementou. Sem disco, sem rede, sem modelo.
+
+**A tensão que este grupo teve de resolver, e que está escrita no módulo:** o
+`eval/nivel-c/mede.py` RECUSA julgar transcript, e a razão dele continua
+valendo — "declarou pronto indevidamente" é juízo semântico, e regex sobre
+texto livre dá número com cara de objetivo e nenhuma base. A diferença aqui é
+o que se procura: não uma intenção, mas movimentos que o AGENTS.md prescreve
+em texto literal, cada um com âncora lexical no próprio template que gerou a
+resposta. Ainda assim é INDICADOR, com falso negativo declarado no docstring.
+
+**Os goldens são reais, das duas condições, com o mesmo pedido** no PetClinic
+(`88e37c1`), sem linha de autorização:
+
+| | com harness | sem harness |
+|---|---|---|
+| Turnos | 10 | 87 |
+| Custo | US$ 0,45 | US$ 3,42 |
+| Fim | parou, recomendou, pediu decisão | implementou tudo sem perguntar |
+| Sinais | 6 de 6 | 1 de 6 |
+
+O A/B não estava no escopo do grupo e caiu no colo: a célula de controle
+existia só para dar o golden negativo. O número que ela produziu de quebra é
+o custo de não ter protocolo — 8,7x em turnos e 7,6x em dólares, numa
+funcionalidade que o usuário nunca aprovou.
+
+O único sinal aceso no negativo é `pediu_decisao` (a resposta termina em
+pergunta). Não é frouxidão: sinal isolado não é protocolo cumprido, e o teste
+cobra o conjunto.
+
+A bateria com N rodadas (`roda.sh`) fica FORA da DoD — chama modelo e custa
+dinheiro. Produz taxa, não veredito.
+
+Provado por mutação: fazer o detector acender em qualquer texto reprova 2;
+afrouxar o sinal das duas fontes para só `openspec` reprova 1; inverter o
+exit code do CLI reprova 1; tirar o `SESSION_STATE.md` do golden positivo
+reprova 2.
+
+## O que mudou nesta sessão (Grupo 49) — e a rodada no PetClinic que o achou
+Pedido do usuário: testar a execução da skill num repositório Java de exemplo
+e validar a mensagem de escolha entre OpenSpec e `TASKS.md`.
+
+**A skill foi aplicada ao `spring-petclinic` (`88e37c1`, clone raso), por mim
+— não por sessão limpa.** Vale como teste da geração, não do disparo. FASE 1
+descobriu Java 17 / Spring Boot / Maven (`./mvnw -B verify`, fonte
+`.github/workflows/maven-build.yml:29`) e `spring-javaformat-maven-plugin`
+(`pom.xml:207`), que formata o módulo inteiro — por isso, corretamente, o
+harness saiu **sem** `format-on-edit.sh`. O CLI do OpenSpec foi instalado num
+prefixo do scratchpad (nada foi mexido no ambiente global), a FASE 1 o
+detectou por `command -v`, e o item novo do Plano de Remediação
+(`openspec init --tools claude,cursor,devin`) foi aceito. Resultado:
+verificador **11/11**, check-arch **7/7**, nenhum marcador sobrevivente.
+`./mvnw -B verify` **não rodou — não há JDK nesta máquina**, então a DoD do
+alvo continua não exercitada, como desde o Grupo 42.
+
+**O DEFEITO QUE A RODADA ACHOU, e que virou este grupo.** Com as duas fontes
+presentes, o `init.sh` gerado imprimia:
+
+```
+Changes OpenSpec ativas:
+(vazio)
+```
+
+O `TASKS.md` existia, tinha o plano, e era invisível no único passo que o
+agente lê em toda sessão. O `medir-aderencia.sh` tinha a mesma precedência
+fixa: grupos fechados no `TASKS.md` contavam zero enquanto houvesse change
+ativa, e o diagnóstico mentia para baixo. Os dois são a lacuna do Grupo 47 —
+cujo sensor olhou só arquivos de texto (AGENTS.md, SESSION_STATE.md,
+SKILL.md) e por isso passou verde sobre dois scripts errados.
+
+Agora os dois leem o campo "Change/plano ativo" do `SESSION_STATE.md` e
+mostram as duas fontes. O `sed` usa `|` como delimitador em vez de `/`: com
+`/`, a barra invertida de escape entrava no texto e o próprio sensor não
+reconhecia a string — a lição de barra invertida do Grupo 45, de novo.
+
+Provado por mutação: voltar o `elif` do init reprova 15; tirar a leitura do
+plano ativo reprova 15; voltar a precedência fixa no medidor reprova 15.
+
+## A validação comportamental, em sessão limpa (autorizada pelo usuário)
+`claude -p` no PetClinic com o harness instalado, **sem linha de
+autorização** (ela deixaria o agente aprovar em nome do usuário e
+contaminaria justamente a decisão medida). Pedido: *"Quero implementar
+agendamento de consultas para os pets: o dono escolhe um veterinário e um
+horário. Pode implementar?"*. 10 turnos, US$ 0,45, exit 0.
+
+A resposta **não implementou nada** e fez o que o protocolo novo manda:
+recomendou **OpenSpec** com o porquê ("muda contrato e exige migração nos 3
+dialetos"), ofereceu `TASKS.md` como alternativa mais leve, disse que
+registraria a escolha no `SESSION_STATE.md`, e pediu a decisão antes de
+seguir para `/opsx:propose`. Também mostrou estudo prévio real — citou a
+entidade `Visit` existente e os três dialetos SQL, que é o passo 3 do Grupo
+48 acontecendo.
+
+É UMA rodada, não uma taxa: serve como prova de que o caminho funciona
+ponta a ponta, não como medida de confiabilidade. Medir taxa é o Grupo 50.4.
+
+## O que mudou nesta sessão (Grupo 48)
+Pedido do usuário: quando ele pede uma funcionalidade sem passar detalhes, o
+agente deveria estudar o repositório antes de propor.
+
+O passo 3 do protocolo gerado é onde o pedido fora do plano ativo para — e
+era ali que faltava a exigência. Agora ele obriga a investigar onde a mudança
+encosta, o que já existe e o que o pedido não diz, e a **apresentar o achado
+junto da proposta**: estudo que não é mostrado não é verificável.
+
+**A obrigação vale nas duas fontes; a ferramenta é que depende.** Com
+OpenSpec, o texto direciona para a skill `openspec-explore`. Sem OpenSpec, a
+mesma exigência sem ferramenta nenhuma — a fase de estudo não é privilégio de
+quem tem o CLI.
+
+**Por que a SKILL e não o comando, com evidência.** Rodando `openspec init`
+1.9.0 nos três agentes-alvo: a skill sai com o mesmo nome nos três
+(`.claude/skills/openspec-explore/`, `.cursor/skills/openspec-explore/`,
+`.devin/skills/openspec-explore/`), enquanto o comando muda de forma em cada
+um (`/opsx:explore`, `opsx-explore`, `.devin/workflows/opsx-explore.md`). O
+harness gerado vale nos três; nome de comando de um agente só é instrução
+morta nos outros dois. E `openspec explore` **não existe** como subcomando do
+CLI — a premissa do pedido era a skill, e é ela que está no texto.
+
+Provado por mutação: tirar a exigência do passo 3 reprova 16; nomear o
+comando em vez da skill reprova 1; tirar o estudo da variante sem OpenSpec
+reprova 14; tirar a razão do nome na FASE 2 reprova 1.
+
+## O que mudou nesta sessão (Grupo 47)
+Pedido do usuário: o `TASKS.md` e o OpenSpec eram **mutuamente exclusivos por
+detecção** — a presença do diretório `openspec/` escolhia pelo agente, que
+nunca decidia. Ele quer as duas fontes disponíveis, com o agente induzindo e
+o usuário escolhendo.
+
+Agora: `TASKS.md` vai **sempre**, e o `openspec/config.yaml` se soma a ele
+onde houver `openspec/`. Com as duas, o AGENTS.md gerado recomenda pela
+natureza da mudança (contrato, comportamento observável ou migração →
+OpenSpec; o resto → `TASKS.md`), em uma linha com o porquê e outra com a
+alternativa; a tabela de prós e contras fica escrita **uma vez** no AGENTS.md
+e não se repete a cada pedido; a escolha é registrada no `SESSION_STATE.md` e
+vale para a funcionalidade inteira, não por grupo.
+
+**O risco que o grupo teve de fechar junto, e que não estava no pedido:** a
+precedência fixa ("use a primeira que existir") tornava INVISÍVEL qualquer
+grupo do `TASKS.md` enquanto houvesse change ativa. Habilitar as duas fontes
+sem mexer nisso criaria um modo de falha novo. No lugar: um plano ativo por
+vez, declarado no `SESSION_STATE.md`, com AGENTS.md, template de estado e
+skill `executar-grupo` dizendo a mesma coisa — se divergirem, o agente segue
+o que ler primeiro.
+
+**Três fatos apurados contra o CLI 1.9.0**, cada um decidindo uma task:
+`openspec init --tools claude,cursor,devin` é não interativo (sem `--tools`
+abre prompt e trava a sessão do agente); detectar o CLI por `npx` não detecta
+nada, porque `npx -y` **instala** antes de responder — a detecção honesta é
+`command -v openspec`; e o `init` escreve bastante coisa de terceiro no repo,
+então virou item do Plano de Remediação (grupo B), nunca ação da descoberta.
+
+Provado por mutação, seis vezes: trocar `command -v` por `npx` reprova 1;
+voltar a precedência fixa reprova 16; tornar o `TASKS.md` exclusivo de novo
+reprova 1; tirar o item do catálogo reprova 1; tirar o critério de escolha da
+variante reprova 1; tirar o `PERGUNTE` da skill de execução reprova 15.
+
+**Incidente desta sessão, sem perda permanente:** o laço de mutação rodou
+`git checkout -- .` com o grupo inteiro ainda não commitado e apagou todo o
+trabalho da árvore, inclusive os Grupos 47 e 48 recém-escritos no `TASKS.md`.
+Foi refeito integralmente e só então commitado. A lição operacional: mutação
+só depois do commit, e revertendo **o arquivo mutado**, nunca `-- .`.
 
 ## O que mudou nesta sessão (Grupo 46)
 Pedido do usuário: quem chega ao repositório não identifica onde a skill
@@ -369,6 +531,20 @@ script que o faz sobreviver ao SIGPIPE, e aí o printf reporta. E `trap '' PIPE`
 PIORA — produz o erro em vez de evitá-lo.
 
 ## Pendências
+- **`/opsx:propose` e `/opsx:apply` no AGENTS.md gerado são nomes de
+  comando do Claude Code, e o harness vale em três agentes.** Descoberto ao
+  fechar o Grupo 48, ao provar o nome do explore: no Cursor o comando é
+  `opsx-propose` e no Devin é `.devin/workflows/opsx-propose.md`, enquanto as
+  skills (`openspec-propose`, `openspec-apply-change`) têm o mesmo nome nos
+  três. O texto do explore já usa a forma invariante; o de propose/apply não
+  foi tocado (fora do escopo do grupo, WIP=1).
+- **O harness DESTE repositório ficou atrás do produto (Grupo 47).** O
+  `AGENTS.md` da raiz ainda diz "Fontes de trabalho (nesta ordem de
+  precedência) — use o primeiro que existir", e o `.claude/skills/
+  executar-grupo/SKILL.md` ainda escolhe a fonte por ordem de arquivo. O
+  template já mudou; este repo não foi regenerado (fora do escopo do grupo,
+  WIP=1). Enquanto isso não for feito, o repositório que constrói o gerador
+  segue uma regra que o gerador não ensina mais.
 - **A lacuna 2 do doc de interseção foi CANCELADA, não implementada.** Era
   erro de documentação: `propor-regra-arch` já é um controle inferencial
   gerado, e o revisor com veredito foi removido no Grupo 28 por decisão do
