@@ -3,17 +3,57 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `47b723e` na `feature/duas-fontes-de-plano` — Grupo 49.
+- Commit verificado: `2b552c9` na `feature/duas-fontes-de-plano` — Grupo 50.
   **Branch NÃO publicada e NÃO mergeada na `main`.** Junto vêm `72edff4`
-  (Grupo 47), `ee98942` (Grupo 48) e os dois handoffs.
-- Testes: 909/909 + 4 skips explícitos (+15 no grupo); ruff e mypy strict
-  limpos; check-arch 7/7.
-- Change/plano ativo: `TASKS.md` na raiz — **Grupo 50 proposto e NÃO
-  executado**, e o Grupo 26 aberto e BLOQUEADO (ver pendências). Grupos 25,
-  27 a 49 concluídos.
+  (47), `ee98942` (48), `47b723e` (49) e os handoffs.
+- Testes: 915/915 + 4 skips explícitos (+6 no grupo); ruff e mypy strict
+  limpos (16 arquivos); check-arch 7/7.
+- Change/plano ativo: `TASKS.md` na raiz — só o Grupo 26 aberto, e BLOQUEADO
+  (ver pendências). Grupos 25, 27 a 50 concluídos.
 - Em andamento: nada — fronteira limpa.
-- Próxima ação: Grupo 50 (detector determinístico), ou publicar a branch e
-  mergear com `--no-ff` na `main`.
+- Próxima ação: publicar a branch e mergear com `--no-ff` na `main` (quatro
+  grupos acumulados).
+
+## O que mudou nesta sessão (Grupo 50)
+`eval/escolha-de-fonte/detecta.py`: função pura que lê o texto de UMA resposta
+e diz quais dos seis movimentos prescritos pelo protocolo estão presentes —
+recomendou fonte, citou as duas, deu o porquê, pediu a decisão, registra no
+`SESSION_STATE.md`, não implementou. Sem disco, sem rede, sem modelo.
+
+**A tensão que este grupo teve de resolver, e que está escrita no módulo:** o
+`eval/nivel-c/mede.py` RECUSA julgar transcript, e a razão dele continua
+valendo — "declarou pronto indevidamente" é juízo semântico, e regex sobre
+texto livre dá número com cara de objetivo e nenhuma base. A diferença aqui é
+o que se procura: não uma intenção, mas movimentos que o AGENTS.md prescreve
+em texto literal, cada um com âncora lexical no próprio template que gerou a
+resposta. Ainda assim é INDICADOR, com falso negativo declarado no docstring.
+
+**Os goldens são reais, das duas condições, com o mesmo pedido** no PetClinic
+(`88e37c1`), sem linha de autorização:
+
+| | com harness | sem harness |
+|---|---|---|
+| Turnos | 10 | 87 |
+| Custo | US$ 0,45 | US$ 3,42 |
+| Fim | parou, recomendou, pediu decisão | implementou tudo sem perguntar |
+| Sinais | 6 de 6 | 1 de 6 |
+
+O A/B não estava no escopo do grupo e caiu no colo: a célula de controle
+existia só para dar o golden negativo. O número que ela produziu de quebra é
+o custo de não ter protocolo — 8,7x em turnos e 7,6x em dólares, numa
+funcionalidade que o usuário nunca aprovou.
+
+O único sinal aceso no negativo é `pediu_decisao` (a resposta termina em
+pergunta). Não é frouxidão: sinal isolado não é protocolo cumprido, e o teste
+cobra o conjunto.
+
+A bateria com N rodadas (`roda.sh`) fica FORA da DoD — chama modelo e custa
+dinheiro. Produz taxa, não veredito.
+
+Provado por mutação: fazer o detector acender em qualquer texto reprova 2;
+afrouxar o sinal das duas fontes para só `openspec` reprova 1; inverter o
+exit code do CLI reprova 1; tirar o `SESSION_STATE.md` do golden positivo
+reprova 2.
 
 ## O que mudou nesta sessão (Grupo 49) — e a rodada no PetClinic que o achou
 Pedido do usuário: testar a execução da skill num repositório Java de exemplo
