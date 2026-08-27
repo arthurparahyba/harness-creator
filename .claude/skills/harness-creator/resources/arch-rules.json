@@ -58,11 +58,11 @@
   },
   {
     "id": "A05",
-    "description": "A fonte de trabalho existe e nao esta vazia",
-    "check": "test -s TASKS.md || test -d openspec/changes",
+    "description": "Ha onde registrar o plano de trabalho",
+    "check": "test -d openspec/changes || ls tasks/*/tasks.md >/dev/null 2>&1 || test -s tasks/README.md || test -s TASKS.md",
     "expect": "exit-0",
-    "what": "Nao ha TASKS.md com conteudo nem openspec/changes/",
+    "what": "Nao ha pasta tasks/, nem TASKS.md com conteudo, nem openspec/changes/",
     "why": "Sem fonte de trabalho o agente inventa tarefas, que e exatamente o que o protocolo do AGENTS.md proibe — e nao ha onde registrar o proximo grupo",
-    "fix": "Crie TASKS.md com ao menos um grupo no formato '## Grupo N - <objetivo>' seguido de tasks e da linha 'Verificacao:'"
+    "fix": "Crie tasks/<funcionalidade>/tasks.md com ao menos um grupo no formato '## Grupo N - <objetivo>' seguido de tasks e da linha 'Verificacao:'. TASKS.md na raiz continua aceito em repositorio com harness antigo"
   }
 ]

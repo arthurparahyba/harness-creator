@@ -346,8 +346,8 @@ def gerar(nome: str, destino: Path) -> Stack:
     stack = STACKS[nome]
     shutil.copytree(FIXTURES / nome, destino, dirs_exist_ok=True)
 
-    # Condicao do catalogo (`arquivos-gerados.md`): `TASKS.md` sempre;
-    # `openspec/config.yaml` se soma a ele onde `openspec/` existir. As duas
+    # Condicao do catalogo (`arquivos-gerados.md`): a pasta `tasks/` sempre;
+    # `openspec/config.yaml` se soma a ela onde `openspec/` existir. As duas
     # fontes coexistem de proposito — nem toda mudanca paga uma proposal com
     # specs. O risco de duas fontes (agente abrindo grupo numa enquanto o
     # humano atualiza a outra) e coberto pelo plano ativo unico declarado no
@@ -376,10 +376,11 @@ def gerar(nome: str, destino: Path) -> Stack:
                     "- Muda contrato, comportamento observável ou exige migração → OpenSpec\n"
                     "  (skills `openspec-propose` e `openspec-apply-change`); nunca edite\n"
                     "  artefatos de `openspec/` manualmente.\n"
-                    "- Qualquer outra mudança → acrescente o grupo ao `TASKS.md` no formato\n"
-                    "  descrito abaixo.\n"
+                    "- Qualquer outra mudança → acrescente o grupo ao\n"
+                    "  `tasks/<funcionalidade>/tasks.md`, criando a pasta se a funcionalidade\n"
+                    "  for nova, no formato descrito abaixo.\n"
                     "\n"
-                    "|  | OpenSpec | TASKS.md |\n"
+                    "|  | OpenSpec | `tasks/` |\n"
                     "|---|---|---|\n"
                     "| Custa | proposal, specs e design antes do código "
                     "| escrever o grupo e começar |\n"
@@ -403,10 +404,13 @@ def gerar(nome: str, destino: Path) -> Stack:
                     "modo de exploração e não escreve código. Estudar não é propor — a\n"
                     "proposta vem depois."
                     if usa_openspec
-                    else "Para criar ou modificar o plano, acrescente o grupo ao `TASKS.md` no\n"
-                    "formato descrito abaixo e confirme com o usuário antes de executá-lo.\n"
-                    "Antes de propor, estude o repositório (passo 3) e apresente o achado\n"
-                    "junto do grupo — a fase de estudo não depende de ferramenta nenhuma."
+                    else "Para criar ou modificar o plano, acrescente o grupo ao\n"
+                    "`tasks/<funcionalidade>/tasks.md` — uma pasta por funcionalidade,"
+                    " criada na\n"
+                    "primeira vez —, no formato descrito abaixo, e confirme com o usuário"
+                    " antes de\n"
+                    "executá-lo. Antes de propor, estude o repositório (passo 3) e apresente o\n"
+                    "achado junto do grupo — a fase de estudo não depende de ferramenta nenhuma."
                 ),
                 # Fixtures não têm histórico git: o prefixo cai no default
                 # declarado e a política pede a decisão ao usuário, que é o
@@ -527,7 +531,7 @@ def gerar(nome: str, destino: Path) -> Stack:
     )
     for origem, alvo in [
         ("SESSION_STATE.md", "SESSION_STATE.md"),
-        ("TASKS.md", "TASKS.md"),
+        ("tasks-README.md", "tasks/README.md"),
         ("editorconfig-base", ".editorconfig"),
         ("hooks/gate-destructive.sh", ".claude/hooks/gate-destructive.sh"),
         # Vai SEMPRE, inclusive onde o `format-on-edit.sh` não vai: observar

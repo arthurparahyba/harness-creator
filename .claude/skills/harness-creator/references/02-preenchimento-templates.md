@@ -92,17 +92,18 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
 - `<como-propor-mudanca-de-plano>`: depende da fonte de trabalho detectada
   no item 8 da Fase 1.
   - **Com `openspec/`** — o repositório tem as DUAS fontes, porque o
-    `TASKS.md` é gerado sempre —, transcrever:
+    pasta `tasks/` é gerada sempre —, transcrever:
     ```
     Para criar ou modificar o plano, RECOMENDE uma fonte e deixe a escolha
     com o usuário:
     - Muda contrato, comportamento observável ou exige migração → OpenSpec
       (skills `openspec-propose` e `openspec-apply-change`); nunca edite
       artefatos de `openspec/` manualmente.
-    - Qualquer outra mudança → acrescente o grupo ao `TASKS.md` no formato
-      descrito abaixo.
+    - Qualquer outra mudança → acrescente o grupo ao
+      `tasks/<funcionalidade>/tasks.md`, criando a pasta se a funcionalidade
+      for nova, no formato descrito abaixo.
 
-    |  | OpenSpec | TASKS.md |
+    |  | OpenSpec | `tasks/` |
     |---|---|---|
     | Custa | proposal, specs e design antes do código | escrever o grupo e começar |
     | Dá | requisito versionado, e `openspec validate` como sensor | plano que cabe numa leitura |
@@ -117,12 +118,13 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
     modo de exploração e não escreve código. Estudar não é propor — a
     proposta vem depois.
     ```
-  - **Sem `openspec/`** (o repo só tem o `TASKS.md`), transcrever:
+  - **Sem `openspec/`** (o repo só tem a pasta `tasks/`), transcrever:
     ```
-    Para criar ou modificar o plano, acrescente o grupo ao `TASKS.md` no
-    formato descrito abaixo e confirme com o usuário antes de executá-lo.
-    Antes de propor, estude o repositório (passo 3) e apresente o achado
-    junto do grupo — a fase de estudo não depende de ferramenta nenhuma.
+    Para criar ou modificar o plano, acrescente o grupo ao
+    `tasks/<funcionalidade>/tasks.md` — uma pasta por funcionalidade, criada na
+    primeira vez —, no formato descrito abaixo, e confirme com o usuário antes de
+    executá-lo. Antes de propor, estude o repositório (passo 3) e apresente o
+    achado junto do grupo — a fase de estudo não depende de ferramenta nenhuma.
     ```
   Mandar usar o fluxo do OpenSpec num repo que não o tem é instruir o
   agente a chamar o que não existe: ele para no meio do fluxo ou inventa

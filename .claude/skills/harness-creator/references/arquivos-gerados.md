@@ -25,10 +25,23 @@ repositório alvo.
 | init.sh | `/init.sh` (chmod +x) | sempre |
 | SESSION_STATE.md | `/SESSION_STATE.md` | sempre |
 | openspec-config.yaml | `/openspec/config.yaml` | somente se `openspec/` existir |
-| TASKS.md | `/TASKS.md` | sempre |
+| tasks-README.md | `/tasks/README.md` | sempre |
 
-As duas fontes de plano **coexistem de propósito**: o `TASKS.md` vai sempre,
-e o `openspec/config.yaml` se soma a ele onde há OpenSpec. Nem toda mudança
+As duas fontes de plano **coexistem de propósito**: a pasta `tasks/` vai
+sempre, e o `openspec/config.yaml` se soma a ela onde há OpenSpec.
+
+O que a geração cria é a pasta e o `README.md` que declara a convenção — um
+plano por funcionalidade, em `tasks/<funcionalidade>/tasks.md`. O primeiro
+`tasks.md` nasce quando a primeira funcionalidade é proposta, não na
+geração: plano de mentira ocupa o lugar do plano de verdade, e o agente que
+lê `<task atômica>` como task aprende que o formato aceita qualquer coisa.
+A forma é a mesma do OpenSpec (`openspec/changes/<change>/tasks.md`) de
+propósito — as duas fontes se resolvem do mesmo jeito, e a bifurcação vira
+"ache o `tasks.md` ativo".
+
+Repositório com harness antigo tem o plano num `TASKS.md` único na raiz.
+Ele continua sendo fonte válida em todo o protocolo e em todos os sensores;
+o que muda é onde o PRÓXIMO plano nasce. Nem toda mudança
 paga uma proposal com specs, e um repositório que só tem OpenSpec empurra
 para a cerimônia até o grupo de duas tasks. O risco de duas fontes é o
 agente abrir grupo numa enquanto o humano atualiza a outra — coberto pelo

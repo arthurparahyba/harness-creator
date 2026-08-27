@@ -14,8 +14,9 @@ harness gerado.
 - **"PARE após o commit do grupo"**: devolve o controle ao humano/
   orquestrador para reset deliberado de contexto em ponto limpo,
   evitando context anxiety e fronteiras de sessão em lugar ruim.
-- **Degradação graciosa**: o harness não depende do OpenSpec. Fonte de
-  trabalho com precedência (tasks.md da change ativa → TASKS.md raiz);
+- **Degradação graciosa**: o harness não depende do OpenSpec. A fonte
+  ativa é a que o `SESSION_STATE.md` declara, e as duas têm a mesma forma —
+  `openspec/changes/<change>/tasks.md` e `tasks/<funcionalidade>/tasks.md`;
   removido o OpenSpec, tudo continua operando.
 - **DoD como evidência**: "concluído" = comandos passando, nunca
   julgamento subjetivo do agente.

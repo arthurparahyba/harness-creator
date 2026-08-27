@@ -22,18 +22,23 @@ este arquivo é só a sequência de execução.
    não commitado, é ele que você termina — antes de qualquer pedido novo.
 3. **Escolher o grupo**: primeiro grupo desmarcado na fonte de trabalho
    ativa — a que o `SESSION_STATE.md` declara em "Change/plano ativo".
-   As fontes possíveis são `openspec/changes/<change>/tasks.md` e o
-   `TASKS.md` da raiz; havendo grupo desmarcado nas duas e nenhuma
-   declarada, PERGUNTE qual seguir em vez de decidir por ordem de arquivo.
+   As fontes possíveis são `openspec/changes/<change>/tasks.md` e
+   `tasks/<funcionalidade>/tasks.md` — uma pasta por funcionalidade nas
+   duas. Repositório com harness antigo pode ter o plano num `TASKS.md`
+   único na raiz: continua fonte válida. Havendo grupo desmarcado em mais
+   de uma e nenhuma declarada, PERGUNTE qual seguir em vez de decidir por
+   ordem de arquivo.
 
    Se o pedido do usuário não estiver coberto por nenhum grupo, PARE e
    proponha antes de editar qualquer arquivo. **Como propor depende da
    fonte escolhida**: em OpenSpec, use a skill `openspec-propose` — nunca
    edite arquivos de `openspec/` à mão, porque são artefatos gerenciados
-   pela ferramenta. No `TASKS.md`, acrescente o grupo e confirme com o usuário
-   antes de executá-lo. Com as duas disponíveis, recomende uma (contrato,
-   comportamento observável ou migração → OpenSpec; o resto → `TASKS.md`),
-   deixe a escolha com o usuário e registre-a no `SESSION_STATE.md`.
+   pela ferramenta. Em `tasks/`, acrescente o grupo ao
+   `tasks/<funcionalidade>/tasks.md` — criando a pasta se a funcionalidade
+   for nova — e confirme com o usuário antes de executá-lo. Com as duas
+   disponíveis, recomende uma (contrato, comportamento observável ou
+   migração → OpenSpec; o resto → `tasks/`), deixe a escolha com o usuário
+   e registre-a no `SESSION_STATE.md`.
 4. **Implementar**: só as tasks deste grupo. Problema fora do escopo vira
    pendência no `SESSION_STATE.md`, não conserto agora.
 5. **Verificar**: rode a linha `Verificação:` do grupo e depois a

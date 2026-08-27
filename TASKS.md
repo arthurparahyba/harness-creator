@@ -1365,7 +1365,7 @@ Verificacao: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
       `test_agents_md_manda_o_comando_de_plano_certo` muda de contrato junto
 Verificacao: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
 
-## Grupo 52 - Um plano por funcionalidade, em pasta
+## Grupo 52 - Um plano por funcionalidade, em pasta ✅
 <!-- Pedido do usuario. Hoje o `TASKS.md` da raiz acumula a vida inteira do
      repositorio -- este aqui esta com 51 grupos e 1364 linhas, prova viva do
      problema. O caminho OpenSpec nunca teve isso, porque la e uma pasta por
@@ -1391,17 +1391,17 @@ Verificacao: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
 
      LEGADO CONTINUA VERDE: repos ja gerados tem `TASKS.md` na raiz. A05
      passa a aceitar as duas formas; a geracao nova produz so a pasta. -->
-- [ ] 52.1 `resources/AGENTS.md` e `resources/TASKS.md`: a fonte passa a ser
+- [x] 52.1 `resources/AGENTS.md` e `resources/TASKS.md`: a fonte passa a ser
       `tasks/<funcionalidade>/tasks.md`, uma pasta por funcionalidade; o
       SESSION_STATE segue declarando qual esta ativo
-- [ ] 52.2 Sensores: A05 aceita `tasks/*/tasks.md` OU `TASKS.md` na raiz
+- [x] 52.2 Sensores: A05 aceita `tasks/*/tasks.md` OU `TASKS.md` na raiz
       (legado) OU `openspec/changes/`; `init.sh` mostra o plano ATIVO em vez
       de `head -40 TASKS.md`
-- [ ] 52.3 `resources/skills/executar-grupo/SKILL.md:23-35`: resolver a fonte
+- [x] 52.3 `resources/skills/executar-grupo/SKILL.md:23-35`: resolver a fonte
       pela nova forma, mantendo a leitura do legado
-- [ ] 52.4 `references/arquivos-gerados.md` e `references/atualizacao.md`: o
+- [x] 52.4 `references/arquivos-gerados.md` e `references/atualizacao.md`: o
       que a geracao nova cria, e como um harness ja instalado migra do arquivo
       unico para a pasta sem perder historico de grupo
-- [ ] 52.5 Testes: geracao nova cria a pasta e nao o arquivo unico; repo
+- [x] 52.5 Testes: geracao nova cria a pasta e nao o arquivo unico; repo
       legado com `TASKS.md` na raiz continua verde nos sensores
 Verificacao: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
