@@ -1154,23 +1154,37 @@ def test_agents_md_gerado_tem_um_plano_ativo_por_vez() -> None:
     )
 
 
-def test_explore_e_nomeado_pela_skill_e_nao_pelo_comando() -> None:
+def test_fluxo_openspec_e_nomeado_pela_skill_e_nao_pelo_comando() -> None:
     """Comando de um agente só é instrução morta nos outros dois.
 
-    Verificado com o CLI 1.9.0: o `openspec init` grava a skill com o MESMO
-    nome nos três agentes-alvo, enquanto o comando muda de forma em cada um.
-    O harness gerado vale nos três — o texto tem de nomear o invariante.
+    Verificado contra `@fission-ai/openspec` 1.11.0: o `init` grava cada skill
+    com o MESMO nome nos três agentes-alvo, enquanto o comando muda de forma
+    em cada um. O harness gerado vale nos três — o texto tem de nomear o
+    invariante.
+
+    A regra vale para os TRÊS irmãos, não só para o explore. Citar um pela
+    skill e outro pelo comando, no mesmo parágrafo, ensina que as duas formas
+    servem — que foi o achado dos Grupos 44 e 45 sobre divergência de estilo
+    dentro de um mesmo arquivo.
     """
     fase2 = (REFERENCES / "02-preenchimento-templates.md").read_text()
-    assert "skill `openspec-explore`" in fase2, "a FASE 2 não nomeia a skill de exploração"
+    for skill in ("openspec-explore", "openspec-propose", "openspec-apply-change"):
+        assert f"`{skill}`" in fase2, f"a FASE 2 não nomeia a skill `{skill}`"
     assert "Nomeie a SKILL, não o comando" in fase2, (
         "a FASE 2 não registra por que o nome citado é o da skill"
     )
-    for caminho in (".cursor/skills/openspec-explore/", ".devin/skills/openspec-explore/"):
+    for caminho in (".claude/skills/", ".cursor/skills/", ".devin/skills/"):
         assert caminho in fase2, f"a evidência de que a skill é a mesma nos três omite {caminho}"
-    assert "`openspec explore` não\n  existe" in fase2, (
-        "nada impede citar `openspec explore`, que não é subcomando do CLI"
+    assert "`openspec propose` não existe" in fase2, (
+        "nada impede citar `openspec propose`, que não é subcomando do CLI"
     )
+    # O texto TRANSCRITO no AGENTS.md do usuário não pode carregar sintaxe de
+    # um agente só. A prosa explicativa em volta cita `/opsx:` como evidência
+    # do problema — por isso a checagem é sobre os blocos transcritos.
+    for bloco in re.findall(r"^    ```\n(.*?)^    ```", fase2, re.MULTILINE | re.DOTALL):
+        assert "/opsx:" not in bloco, (
+            "bloco transcrito para o AGENTS.md cita comando do Claude Code"
+        )
 
 
 def test_protocolo_exige_estudo_antes_da_proposta() -> None:

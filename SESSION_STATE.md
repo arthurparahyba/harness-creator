@@ -545,7 +545,7 @@ PIORA — produz o erro em vez de evitá-lo.
   executar-grupo/SKILL.md` ainda escolhe a fonte por ordem de arquivo. O
   template já mudou; este repo não foi regenerado (fora do escopo do grupo,
   WIP=1). Enquanto isso não for feito, o repositório que constrói o gerador
-  segue uma regra que o gerador não ensina mais.
+  segue uma regra que o gerador não ensina mais. Reconfirmado em 2026-08-27 ao planejar o Grupo 52: as duas cópias divergem no passo 3 — a deste repo escolhe por ordem de arquivo, o template pergunta quando as duas fontes têm grupo aberto. Como o 52.3 mexe nesse mesmo passo, é o momento natural de regenerar.
 - **A lacuna 2 do doc de interseção foi CANCELADA, não implementada.** Era
   erro de documentação: `propor-regra-arch` já é um controle inferencial
   gerado, e o revisor com veredito foi removido no Grupo 28 por decisão do

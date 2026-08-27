@@ -28,9 +28,9 @@ este arquivo é só a sequência de execução.
 
    Se o pedido do usuário não estiver coberto por nenhum grupo, PARE e
    proponha antes de editar qualquer arquivo. **Como propor depende da
-   fonte escolhida**: em OpenSpec, use `/opsx:propose` — nunca edite
-   arquivos de `openspec/` à mão, porque são artefatos gerenciados pela
-   ferramenta. No `TASKS.md`, acrescente o grupo e confirme com o usuário
+   fonte escolhida**: em OpenSpec, use a skill `openspec-propose` — nunca
+   edite arquivos de `openspec/` à mão, porque são artefatos gerenciados
+   pela ferramenta. No `TASKS.md`, acrescente o grupo e confirme com o usuário
    antes de executá-lo. Com as duas disponíveis, recomende uma (contrato,
    comportamento observável ou migração → OpenSpec; o resto → `TASKS.md`),
    deixe a escolha com o usuário e registre-a no `SESSION_STATE.md`.

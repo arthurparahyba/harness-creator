@@ -697,17 +697,30 @@ def test_config_do_openspec_nao_tem_placeholder_em_prosa() -> None:
 
 
 def test_agents_md_manda_o_comando_de_plano_certo(repo: tuple[Path, Stack, str]) -> None:
-    """Com OpenSpec, `/opsx:propose`; sem, editar o `TASKS.md`.
+    """Com OpenSpec, o NOME DA SKILL; sem, editar o `TASKS.md`.
 
-    Instrução trocada manda o agente chamar um comando que não existe, e a
-    sessão morre no primeiro pedido fora do plano — que é exatamente o momento
-    em que o protocolo mais importa.
+    Instrução trocada manda o agente chamar o que não existe, e a sessão morre
+    no primeiro pedido fora do plano — que é exatamente o momento em que o
+    protocolo mais importa.
+
+    A forma importa tanto quanto o conteúdo. O `openspec init` grava a skill
+    com o mesmo nome nos três agentes-alvo (`.claude/skills/`, `.cursor/skills/`
+    e `.devin/skills/`), enquanto o comando muda em cada um — `/opsx:propose`
+    no Claude Code, `opsx-propose` no Cursor, um caminho de arquivo no Devin.
+    O harness gerado vale nos três: citar o comando é instrução morta em dois
+    deles. Verificado contra `@fission-ai/openspec` 1.11.0.
     """
     destino, _, nome = repo
     agents = (destino / "AGENTS.md").read_text()
     assert "TASKS.md" in agents, f"{nome}: AGENTS.md não cita o TASKS.md, que vai sempre"
+    assert "/opsx:" not in agents, (
+        f"{nome}: cita comando do Claude Code (`/opsx:`) — morto no Cursor e no Devin"
+    )
     if (destino / "openspec").is_dir():
-        assert "/opsx:propose" in agents, f"{nome}: tem OpenSpec e não o usa"
+        assert "openspec-propose" in agents, f"{nome}: tem OpenSpec e não usa a skill de propor"
+        assert "openspec-apply-change" in agents, (
+            f"{nome}: tem OpenSpec e não usa a skill de aplicar a mudança"
+        )
         # Duas fontes sem critério é escolha por ordem de arquivo — o que o
         # plano ativo único proíbe. O critério e o registro da escolha andam
         # juntos: sem registrar, o agente reabre a decisão a cada grupo.
@@ -719,8 +732,15 @@ def test_agents_md_manda_o_comando_de_plano_certo(repo: tuple[Path, Stack, str])
             f"{nome}: a escolha da fonte não é registrada — vira decisão por grupo"
         )
     else:
-        assert "/opsx:propose" not in agents, (
-            f"{nome}: manda usar /opsx:propose sem openspec/ — comando inexistente"
+        # A seção "Fontes de trabalho" nomeia as duas fontes possíveis em todo
+        # repo — é o contrato do protocolo, não instrução de uso. O que não
+        # pode aparecer sem `openspec/` é o FLUXO: mandar propor por uma skill
+        # que o repo não tem é a mesma falha do comando inexistente.
+        assert "openspec-propose" not in agents, (
+            f"{nome}: manda propor pelo OpenSpec sem `openspec/` — skill inexistente ali"
+        )
+        assert "openspec-apply-change" not in agents, (
+            f"{nome}: manda aplicar pelo OpenSpec sem `openspec/` — skill inexistente ali"
         )
 
 

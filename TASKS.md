@@ -1324,3 +1324,84 @@ Verificacao: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
       usando O MESMO detector. Requer autorizacao do usuario para sessao
       aninhada (o classificador do auto mode bloqueou na sessao do Grupo 48)
 Verificacao: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
+
+## Grupo 51 - Nomear a skill, nao o comando do agente ✅
+<!-- Pendencia registrada no fim do Grupo 48 e decidida pelo usuario agora.
+
+     O PROBLEMA. O AGENTS.md gerado manda usar `/opsx:propose` e
+     `/opsx:apply`. Isso e sintaxe do Claude Code. Rodando `openspec init`
+     nos tres agentes-alvo (1.9.0), o mesmo fluxo chega com tres nomes de
+     comando -- `/opsx:propose`, `opsx-propose`,
+     `.devin/workflows/opsx-propose.md` -- enquanto a SKILL tem nome unico
+     nos tres: `.claude/skills/openspec-propose/`,
+     `.cursor/skills/openspec-propose/`, `.devin/skills/openspec-propose/`.
+     O harness gerado vale nos tres agentes; um agente no Cursor le a
+     instrucao e chama algo que nao existe ali. E o mesmo modo de falha que
+     `02-preenchimento:105` ja documenta para o caso oposto.
+
+     DECISAO DO USUARIO: usar a forma generica entre agentes. Entre as duas
+     formas genericas possiveis, ele escolheu NOMEAR A SKILL em vez de prosa
+     solta ("execute o propose do openspec"), porque prosa solta deixa aberto
+     o caminho de tentar `openspec propose` -- que NAO existe como subcomando
+     do CLI (verificado em 1.9.0).
+
+     SIMETRIA E REQUISITO, NAO ACABAMENTO. O explore ja saiu na forma da
+     skill no Grupo 48. Se propose e apply ficarem em outra forma, dois
+     irmaos no mesmo arquivo divergem em estilo -- que foi exatamente o
+     achado dos Grupos 44 e 45. Por isso a mesma decisao vale para os tres, e
+     a mencao Claude-especifica do explore ("tambem como `/opsx:explore`")
+     sai junto: ela e o residuo da forma antiga. -->
+- [x] 51.1 Variante com OpenSpec de `<como-propor-mudanca-de-plano>`: trocar
+      `/opsx:propose` e `/opsx:apply` pelas skills `openspec-propose` e
+      `openspec-apply-change`, com os nomes verificados contra o que o
+      `openspec init` instala na versao corrente -- nao de memoria
+- [x] 51.2 Mesma troca nos outros lugares que citam o comando: a skill
+      `executar-grupo` gerada, o texto da FASE 2, o README da skill e o
+      MUDANCAS-NO-REPOSITORIO.md. Tirar do explore a mencao
+      Claude-especifica, para os tres irmaos ficarem na mesma forma
+- [x] 51.3 Sensor: reprova AGENTS.md gerado que cite `/opsx:` como instrucao,
+      cobra os nomes de skill nos repos com `openspec/`, e mantem a garantia
+      atual de nao citar OpenSpec nenhum onde nao ha `openspec/`. O teste
+      `test_agents_md_manda_o_comando_de_plano_certo` muda de contrato junto
+Verificacao: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
+
+## Grupo 52 - Um plano por funcionalidade, em pasta
+<!-- Pedido do usuario. Hoje o `TASKS.md` da raiz acumula a vida inteira do
+     repositorio -- este aqui esta com 51 grupos e 1364 linhas, prova viva do
+     problema. O caminho OpenSpec nunca teve isso, porque la e uma pasta por
+     change: `openspec/changes/<change>/tasks.md`.
+
+     ENTAO A MUDANCA E SIMETRIA, nao gosto: `tasks/<funcionalidade>/tasks.md`
+     deixa as duas fontes com a MESMA forma, e a bifurcacao da `executar-grupo`
+     vira "ache o tasks.md ativo". Quem declara o ativo continua sendo o campo
+     "Change/plano ativo" do SESSION_STATE.md, que os Grupos 47-50 ja
+     construiram -- nada de mecanismo novo.
+
+     UM ARQUIVO POR FUNCIONALIDADE, com os grupos dentro; NAO um por grupo. O
+     mattpocock quebra em um arquivo por ticket porque os tickets dele vao
+     para um tracker de verdade, com link nativo de bloqueio. Sem tracker,
+     espalhar grupos em arquivos perde a ordem de dependencia de relance sem
+     ganhar nada.
+
+     RAIO DE IMPACTO MEDIDO: regra A05 do arch-rules, `init.sh:50-55`,
+     `verificar-harness.sh`, a skill `executar-grupo`, `arquivos-gerados.md`,
+     `atualizacao.md` e 5 arquivos de teste. O detector
+     `eval/escolha-de-fonte/detecta.py` SOBREVIVE sem mudanca -- ele casa
+     `tasks\.md` sobre texto passado por `casefold()`, verificado na linha 96.
+
+     LEGADO CONTINUA VERDE: repos ja gerados tem `TASKS.md` na raiz. A05
+     passa a aceitar as duas formas; a geracao nova produz so a pasta. -->
+- [ ] 52.1 `resources/AGENTS.md` e `resources/TASKS.md`: a fonte passa a ser
+      `tasks/<funcionalidade>/tasks.md`, uma pasta por funcionalidade; o
+      SESSION_STATE segue declarando qual esta ativo
+- [ ] 52.2 Sensores: A05 aceita `tasks/*/tasks.md` OU `TASKS.md` na raiz
+      (legado) OU `openspec/changes/`; `init.sh` mostra o plano ATIVO em vez
+      de `head -40 TASKS.md`
+- [ ] 52.3 `resources/skills/executar-grupo/SKILL.md:23-35`: resolver a fonte
+      pela nova forma, mantendo a leitura do legado
+- [ ] 52.4 `references/arquivos-gerados.md` e `references/atualizacao.md`: o
+      que a geracao nova cria, e como um harness ja instalado migra do arquivo
+      unico para a pasta sem perder historico de grupo
+- [ ] 52.5 Testes: geracao nova cria a pasta e nao o arquivo unico; repo
+      legado com `TASKS.md` na raiz continua verde nos sensores
+Verificacao: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`

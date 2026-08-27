@@ -97,8 +97,8 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
     Para criar ou modificar o plano, RECOMENDE uma fonte e deixe a escolha
     com o usuário:
     - Muda contrato, comportamento observável ou exige migração → OpenSpec
-      (`/opsx:propose`, `/opsx:apply`); nunca edite artefatos de `openspec/`
-      manualmente.
+      (skills `openspec-propose` e `openspec-apply-change`); nunca edite
+      artefatos de `openspec/` manualmente.
     - Qualquer outra mudança → acrescente o grupo ao `TASKS.md` no formato
       descrito abaixo.
 
@@ -113,9 +113,9 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
     pedido. Registre a escolha no `SESSION_STATE.md` — ela vale para a
     funcionalidade inteira, não por grupo. Confirme antes de executar.
 
-    Para o estudo que o passo 3 exige, use a skill `openspec-explore`
-    (no Claude Code também como `/opsx:explore`): é modo de exploração e
-    não escreve código. Estudar não é propor — a proposta vem depois.
+    Para o estudo que o passo 3 exige, use a skill `openspec-explore`: é
+    modo de exploração e não escreve código. Estudar não é propor — a
+    proposta vem depois.
     ```
   - **Sem `openspec/`** (o repo só tem o `TASKS.md`), transcrever:
     ```
@@ -124,19 +124,21 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
     Antes de propor, estude o repositório (passo 3) e apresente o achado
     junto do grupo — a fase de estudo não depende de ferramenta nenhuma.
     ```
-  Mandar usar `/opsx:propose` num repo sem OpenSpec é instruir o agente a
-  chamar um comando que não existe: ele para no meio do fluxo ou inventa
+  Mandar usar o fluxo do OpenSpec num repo que não o tem é instruir o
+  agente a chamar o que não existe: ele para no meio do fluxo ou inventa
   um caminho. A skill `executar-grupo` já resolve essa bifurcação em tempo
   de execução; o AGENTS.md tem de concordar com ela.
-  **Nomeie a SKILL, não o comando, ao citar o explore.** Verificado com o
-  CLI 1.9.0: `openspec init` grava a skill com o mesmo nome nos três
-  agentes-alvo (`.claude/skills/openspec-explore/`,
-  `.cursor/skills/openspec-explore/`, `.devin/skills/openspec-explore/`),
-  enquanto o comando muda de forma em cada um (`/opsx:explore`,
-  `opsx-explore`, `.devin/workflows/opsx-explore.md`). O harness gerado vale
-  nos três; nome de comando de um só agente vira instrução morta nos outros
-  dois. E `explore` **não** é subcomando do CLI — `openspec explore` não
-  existe.
+  **Nomeie a SKILL, não o comando — nos três: explore, propose e apply.**
+  Verificado contra `@fission-ai/openspec` 1.11.0: o `init` grava as skills
+  com o mesmo nome nos três agentes-alvo (`openspec-explore`,
+  `openspec-propose`, `openspec-apply-change`, cada uma em
+  `.claude/skills/`, `.cursor/skills/` e `.devin/skills/`), enquanto o
+  comando muda de forma em cada um (`/opsx:propose`, `opsx-propose`,
+  `.devin/workflows/opsx-propose.md`). O harness gerado vale nos três; nome
+  de comando de um só agente vira instrução morta nos outros dois. E nenhum
+  dos três é subcomando do CLI — `openspec propose` não existe. Citar um
+  irmão pela skill e outro pelo comando, no mesmo parágrafo, ensina que as
+  duas formas servem: por isso os três saem na mesma forma.
   **Com as duas fontes o risco troca de lugar**: deixa de ser comando
   inexistente e passa a ser o agente abrir grupo numa fonte enquanto o
   humano atualiza a outra. Quem impede isso é o plano ativo declarado no
