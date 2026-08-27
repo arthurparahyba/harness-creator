@@ -3,15 +3,56 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `e3bbe1b` na `feature/contrato-de-fonte-de-plano`
-  (Grupo 51). Branch ainda NÃO publicada, CI ainda não rodou nela.
-- Testes: 915/915 + 4 skips explícitos; ruff e mypy strict limpos (16
+- Commit verificado: `14c5aa0` na `feature/contrato-de-fonte-de-plano`
+  (Grupos 51 e 52). Branch ainda NÃO publicada, CI ainda não rodou nela.
+- Testes: 927/927 + 4 skips explícitos; ruff e mypy strict limpos (16
   arquivos); check-arch 7/7.
-- Change/plano ativo: `TASKS.md` na raiz — Grupo 52 aberto (plano em pasta) e
-  Grupo 26 aberto e BLOQUEADO (ver pendências). Grupos 25, 27 a 51 concluídos.
-- Em andamento: nada — fronteira limpa no 51.
-- Próxima ação: Grupo 52, na mesma branch. Ele reescreve a seção "Fontes de
-  trabalho" e o mesmo parágrafo que o 51 acabou de tocar.
+- Change/plano ativo: `TASKS.md` na raiz — só o Grupo 26 aberto, e BLOQUEADO
+  (ver pendências). Grupos 25, 27 a 52 concluídos. Este repositório continua
+  no layout LEGADO de propósito: migrar o histórico é decisão do usuário, e
+  o próprio `atualizacao.md` proíbe a skill de fazer isso sozinha.
+- Em andamento: nada — fronteira limpa.
+- Próxima ação: publicar a branch, esperar CI verde e fazer o merge `--no-ff`
+  na `main`. Nada foi empurrado ainda.
+
+## O que mudou nesta sessão (Grupo 52)
+A fonte simples deixou de ser um `TASKS.md` único na raiz: passou a ser
+`tasks/<funcionalidade>/tasks.md`, uma pasta por funcionalidade — a MESMA
+forma do OpenSpec. A simetria é o ponto: a bifurcação da `executar-grupo`
+vira "ache o `tasks.md` ativo", e quem declara o ativo continua sendo o
+`SESSION_STATE.md`. Nenhum mecanismo novo.
+
+**A geração cria a pasta e o `tasks/README.md`, não um plano.** O primeiro
+`tasks.md` nasce com a primeira funcionalidade proposta. Gerar um arquivo com
+`<task atômica>` dentro ensina que o formato aceita qualquer coisa — e A05
+sempre passou nesse arquivo de mentira, então a regra já media "há onde
+planejar", não "há plano". O texto dela agora diz isso.
+
+**Uma pasta por FUNCIONALIDADE, não por grupo.** Os grupos declaram
+dependência entre si; ler a sequência inteira de uma vez é o que torna a
+dependência visível.
+
+**O legado ficou verde de propósito, e este repositório é o caso de teste.**
+O `TASKS.md` daqui tem 52 grupos que os commits de checkpoint referenciam.
+`atualizacao.md` passou a PROIBIR a skill de mover ou reescrever esse
+arquivo: o histórico é o que a próxima sessão lê para entender por que o
+código está como está, e migrar é decisão do usuário.
+
+**O achado do grupo foi uma mutação que PASSOU.** Apagar a linha que põe o
+`TASKS.md` na lista de fontes do medidor não reprovou nada — o nome
+sobrevivia em comentário e no `case`, e o sensor casava a STRING, não o
+comportamento. É o defeito do Grupo 47 repetido ("olhou só os arquivos de
+texto e passou verde"). Trocado por
+`test_medidor_encontra_o_plano_nas_duas_formas`, que roda o medidor de
+verdade nos dois layouts. Depois da troca, as duas mutações reprovam.
+
+Provado por mutação: gravar `TASKS.md` na raiz reprova 15; A05 aceitando
+tudo reprova 2; `init.sh` sem `tasks/` reprova 15; medidor sem cada uma das
+duas formas reprova 1 cada.
+
+O `init.sh` mudou de comportamento junto: lista TODOS os planos e despeja só
+o ATIVO. Com uma pasta por funcionalidade, despejar todos cresce sem limite
+e afoga o único passo que o agente executa em toda sessão.
 
 ## O que mudou nesta sessão (Grupo 51)
 O AGENTS.md gerado mandava o agente usar `/opsx:propose` e `/opsx:apply` —
