@@ -3,17 +3,50 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `d4922cb` na `main` — merge `--no-ff` da
-  `feature/duas-fontes-de-plano` (Grupos 47 a 50), publicado. CI verde na
-  branch antes do merge (run 32200669119).
+- Commit verificado: `e3bbe1b` na `feature/contrato-de-fonte-de-plano`
+  (Grupo 51). Branch ainda NÃO publicada, CI ainda não rodou nela.
 - Testes: 915/915 + 4 skips explícitos; ruff e mypy strict limpos (16
   arquivos); check-arch 7/7.
-- Change/plano ativo: `TASKS.md` na raiz — só o Grupo 26 aberto, e BLOQUEADO
-  (ver pendências). Grupos 25, 27 a 50 concluídos.
-- Em andamento: nada — fronteira limpa.
-- Próxima ação: nada pendente do trabalho das duas fontes. A pendência do
-  `/opsx:propose` Claude-específico (abaixo) é a primeira candidata a virar
-  grupo.
+- Change/plano ativo: `TASKS.md` na raiz — Grupo 52 aberto (plano em pasta) e
+  Grupo 26 aberto e BLOQUEADO (ver pendências). Grupos 25, 27 a 51 concluídos.
+- Em andamento: nada — fronteira limpa no 51.
+- Próxima ação: Grupo 52, na mesma branch. Ele reescreve a seção "Fontes de
+  trabalho" e o mesmo parágrafo que o 51 acabou de tocar.
+
+## O que mudou nesta sessão (Grupo 51)
+O AGENTS.md gerado mandava o agente usar `/opsx:propose` e `/opsx:apply` —
+sintaxe do Claude Code, num harness que vale em três agentes. Trocado pelo
+nome das skills, que é o invariante.
+
+**Verificado, não lembrado.** A nota anterior dizia "CLI 1.9.0"; a versão
+corrente é `@fission-ai/openspec` **1.11.0**. Baixado o pacote e lidos os
+identificadores no `dist/`: `openspec-explore`, `openspec-propose` e
+`openspec-apply-change` existem como skill, e `config.js` confirma
+`skillsDir` `.claude`, `.cursor` e `.devin` — o caminho final vem de
+`resolveToolSkillsDir`, que junta `skillsDir + "skills"`.
+
+**Os três irmãos saem na mesma forma.** O parêntese "(no Claude Code também
+como `/opsx:explore`)" era resíduo da correção pela metade do Grupo 48. Um
+irmão citado pela skill e outro pelo comando, no mesmo parágrafo, ensina que
+as duas formas servem — o achado dos Grupos 44 e 45.
+
+**Onde o sensor teve de afrouxar, e por quê.** A primeira versão do teste
+proibia a palavra "openspec" em qualquer AGENTS.md sem a pasta. Reprovou 14:
+a seção "Fontes de trabalho" nomeia as DUAS fontes possíveis em todo repo
+(`resources/AGENTS.md:11`). Isso é o contrato do protocolo, não instrução de
+uso. A garantia ficou no nível certo — o que não pode aparecer sem
+`openspec/` é o FLUXO (`openspec-propose`, `openspec-apply-change`).
+
+O teste do explore virou `test_fluxo_openspec_e_nomeado_pela_skill_e_nao_pelo_comando`
+e passou a checar os blocos TRANSCRITOS, extraídos por regex das cercas de
+código — não o arquivo inteiro. A prosa em volta cita `/opsx:` de propósito,
+como evidência do problema; proibir no arquivo todo seria sensor cego para a
+diferença entre instrução e explicação. Que o regex acha os 2 blocos foi
+conferido à parte, para a checagem não passar por lista vazia.
+
+Provado por mutação: devolver o comando ao bloco reprova 1; devolver o
+parêntese do explore reprova 1; devolver o comando ao `gerar.py` reprova 1;
+mandar propor pelo OpenSpec num repo sem ele reprova 14.
 
 ## O que mudou nesta sessão (Grupo 50)
 `eval/escolha-de-fonte/detecta.py`: função pura que lê o texto de UMA resposta
@@ -532,6 +565,14 @@ script que o faz sobreviver ao SIGPIPE, e aí o printf reporta. E `trap '' PIPE`
 PIORA — produz o erro em vez de evitá-lo.
 
 ## Pendências
+- **A seção "Fontes de trabalho" do AGENTS.md gerado nomeia
+  `openspec/changes/<change-ativa>/tasks.md` mesmo em repo sem `openspec/`.**
+  Achado ao escrever o sensor do Grupo 51 (`resources/AGENTS.md:11`). Não é a
+  falha do comando inexistente — não manda CHAMAR nada, só lista as fontes
+  possíveis do protocolo —, mas nomeia um caminho que não existe ali, e um
+  agente pode criar a pasta achando que é fonte válida. Fora do escopo do 51.
+  O Grupo 52 reescreve exatamente essa seção: é lá que se decide se a lista
+  passa a ser condicional.
 - **`/opsx:propose` e `/opsx:apply` no AGENTS.md gerado são nomes de
   comando do Claude Code, e o harness vale em três agentes.** Descoberto ao
   fechar o Grupo 48, ao provar o nome do explore: no Cursor o comando é
