@@ -44,11 +44,18 @@ este arquivo é só a sequência de execução.
 5. **Verificar**: rode a linha `Verificação:` do grupo e depois a
    Definition of Done completa (comando `/dod`). Saída de comando é a
    evidência; "parece funcionar" não é.
-6. **Commitar**: um commit por grupo — `checkpoint: <nome do grupo>`.
+6. **Catraca (revisão → regra)**: se o trabalho deste grupo revelou um
+   problema que pode se repetir, revise o diff e proponha uma regra para
+   `.harness/arch-rules.json` — assim o `check-arch.sh` passa a barrar aquela
+   classe de erro em toda DoD. No Claude Code, delegue ao subagente
+   `propor-regra-arch` (lê o diff, devolve rascunho; você aceita e adiciona a
+   regra — ele não escreve o arquivo). Nos demais agentes, a revisão é manual.
+   Nada a propor é resposta válida — não invente regra.
+7. **Commitar**: um commit por grupo — `checkpoint: <nome do grupo>`.
    Nunca commite com verificação falhando.
-7. **Handoff**: atualize `SESSION_STATE.md` (hash do commit, testes X/Y,
+8. **Handoff**: atualize `SESSION_STATE.md` (hash do commit, testes X/Y,
    bloqueios, próxima ação).
-8. **PARAR**: informe "Grupo N concluído. Contexto pode ser reiniciado."
+9. **PARAR**: informe "Grupo N concluído. Contexto pode ser reiniciado."
    Não avance para o próximo grupo automaticamente.
 
 ## Falhas comuns

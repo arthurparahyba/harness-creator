@@ -819,6 +819,51 @@ def test_medidor_de_aderencia_e_alcancavel_pelo_agents(tmp_path: Path) -> None:
     )
 
 
+def test_executar_grupo_aciona_o_agente_de_arquitetura() -> None:
+    """O subagente `propor-regra-arch` é gerado, mas antes nada no protocolo o
+    acionava: a sequência de `executar-grupo` ia de Verificar direto a Commitar.
+    Instalado e nunca chamado, ele fica inerte — a catraca que faz cada classe
+    de erro virar regra não gira sozinha."""
+    skill = (RESOURCES / "skills" / "executar-grupo" / "SKILL.md").read_text()
+    assert "propor-regra-arch" in skill, (
+        "executar-grupo não aciona o agente de arquitetura em nenhum passo"
+    )
+
+
+def test_agents_gerado_aponta_o_agente_de_arquitetura(tmp_path: Path) -> None:
+    """O AGENTS.md é o único arquivo lido sempre. Subagente que não é apontado
+    dali é gerado e nunca alcançado — o mesmo modo de falha que o medidor de
+    aderência teve antes de ganhar o ponteiro."""
+    import gerar
+
+    repo = tmp_path / "node"
+    gerar.gerar("node", repo)
+    assert "propor-regra-arch" in (repo / "AGENTS.md").read_text(), (
+        "o agente propositor foi gerado sem ponteiro no AGENTS.md"
+    )
+
+
+def test_agente_de_arquitetura_nao_promete_garantia_de_ferramenta_falsa() -> None:
+    """A prosa dizia "suas ferramentas são de leitura" com `Bash` na lista, e
+    `Bash` escreve (`echo >> arch-rules.json`). Garantia ancorada na lista de
+    ferramentas é falsa; a real é o diff mais o `check-arch.sh` na DoD — a mesma
+    lógica do Grupo 42 sobre o gate. O texto tem de bater com a capacidade."""
+    agente = (RESOURCES / "agents" / "propor-regra-arch.md").read_text()
+    fase2 = (REFERENCES / "02-preenchimento-templates.md").read_text()
+    for texto, onde in ((agente, "propor-regra-arch.md"), (fase2, "FASE 2")):
+        normalizado = " ".join(texto.split())
+        for frase in ("ferramentas são de leitura", "não tem ferramenta de escrita"):
+            assert frase not in normalizado, (
+                f"{onde} afirma '{frase}', mas o `Bash` na lista de tools escreve"
+            )
+    m = re.match(r"^---\n(.*?)\n---", agente, re.S)
+    assert m is not None
+    tools = yaml.safe_load(m.group(1)).get("tools", "")
+    assert "Write" not in tools and "Edit" not in tools, (
+        f"agente propositor ganhou ferramenta de escrita direta: {tools}"
+    )
+
+
 def test_fase_5_manda_nao_executar_o_medidor() -> None:
     """A FASE 5 roda o verificador e o check-arch, e precisa dizer
     explicitamente que o medidor é exceção. Sem isso o agente executa tudo que

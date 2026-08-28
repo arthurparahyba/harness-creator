@@ -159,6 +159,8 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
   aplicam:
   ```
   - Para fechar um grupo do plano: skill `executar-grupo` (passo a passo).
+  - Para transformar um achado de revisão em regra executável: subagente
+    `propor-regra-arch` (só Claude Code; propõe rascunho, você aceita).
   - Para verificar a Definition of Done: comando `/dod`.
   - Hooks de agent loop ativos: gate de comandos destrutivos e formatação
     automática a cada edição.
@@ -348,9 +350,10 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
 - **Agente propositor** (`resources/agents/propor-regra-arch.md` →
   `.claude/agents/propor-regra-arch.md`): preencher `<branch-base>` no comando
   de diff. VERBATIM no resto — inclusive a seção "O que você NÃO faz", que é
-  a trava do desenho: o agente propõe regra, não veredito, e não tem
-  ferramenta de escrita. Agente que pode editar as regras pode enfraquecê-las,
-  e uma catraca que gira para os dois lados não é catraca.
+  a trava do desenho: o agente propõe regra, não veredito. Ele não tem `Write`
+  nem `Edit` (o `Bash` que carrega é só para ler o diff); a trava real não é a
+  lista de ferramentas, e sim a alteração do `arch-rules.json` aparecer no diff
+  e o `check-arch.sh` rodar o registro a cada DoD.
   - Só Claude Code, como `executar-grupo`. Registrar na FASE 4 quando o
     usuário usar Devin ou Cursor: a cobertura de regra arquitetural desses
     dois vem do `check-arch.sh`, que é shell e roda em qualquer lugar.

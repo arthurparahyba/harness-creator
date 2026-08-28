@@ -1405,3 +1405,59 @@ Verificacao: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
 - [x] 52.5 Testes: geracao nova cria a pasta e nao o arquivo unico; repo
       legado com `TASKS.md` na raiz continua verde nos sensores
 Verificacao: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
+
+## Grupo 53 - Acionar o agente de arquitetura (propor-regra-arch) e alinhar a garantia dele ✅
+<!-- Achado da revisao do PetClinic: o subagente propor-regra-arch e gerado
+     mas nada no protocolo o aciona (nem AGENTS.md nem executar-grupo param
+     para propor regra), entao ele fica inerte. E o `tools: Read, Grep, Glob,
+     Bash` contradiz a prosa "suas ferramentas sao de leitura": Bash escreve.
+     A defesa real, como no Grupo 42, e a deteccao na DoD, nao a lista de
+     ferramentas. Mantem validade nos 3 agentes: nomeia o COMPORTAMENTO
+     (revisar o diff -> propor regra) e cita o subagente so como afordancia do
+     Claude Code. Sem delegacao automatica que mexe em codigo (licao do Grupo
+     28). -->
+- [x] 53.1 `resources/skills/executar-grupo/SKILL.md`: passo de catraca
+      (revisao do diff -> propor regra) entre Verificar e Commitar, nomeando o
+      comportamento e o subagente `propor-regra-arch` como afordancia do Claude
+      Code; condicional (so se o grupo revelou algo que pode se repetir)
+- [x] 53.2 `tests/gerar.py` (`<ferramentas-do-harness>`) e
+      `references/02-preenchimento-templates.md`: o AGENTS.md gerado aponta o
+      subagente na secao "Ferramentas deste harness", com a ressalva "so Claude
+      Code"
+- [x] 53.3 `resources/agents/propor-regra-arch.md` e `references/02` (secao
+      "Agente propositor"): trocar a garantia falsa ("ferramentas sao de
+      leitura" / "nao tem ferramenta de escrita") pela honesta -- sem
+      Write/Edit, Bash so para ler o diff, e a trava real e o check-arch na DoD
+      mais a revisao do diff do arch-rules
+- [x] 53.4 Sensores em `tests/test_skill.py`: (a) executar-grupo gerado aciona
+      a catraca; (b) AGENTS.md gerado aponta o propositor; (c) nem o agente nem
+      a FASE 2 afirmam a garantia falsa, e o `tools` nao tem Write/Edit
+Verificacao: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`
+
+## Grupo 54 - Limpar vazamento de contexto de dev para o repo-alvo (depende: Grupo 53)
+<!-- Mesma raiz nos dois defeitos: contexto de autoria da skill viajando
+     verbatim para o repo-alvo. arch-rules.json leva campos nao-padrao que o
+     runner nem le, citando "Grupo 35/45" e `tests/test_arch_rules.py`; os
+     scripts citam numero de grupo nos comentarios; e o pre-commit-config.yaml
+     sai com cabecalho PLACEHOLDER + menu de linguagens cujo exemplo de Java
+     aponta `spotless` (o PetClinic usa spring-javaformat). tasks-README.md usa
+     "## Grupo N" como FORMATO -- legitimo, nao se toca. -->
+- [ ] 54.1 `resources/arch-rules.json`: remover os campos nao-padrao
+      (`por_que_a_exclusao`, `barra_invertida_no_check`,
+      `comando_de_risco_montado_em_partes`) que o `check-arch.sh` nao le
+- [ ] 54.2 `resources/check-arch.sh`, `resources/hooks/gate-destructive.sh`,
+      `resources/hooks/format-on-edit.sh`, `resources/medir-aderencia.sh`:
+      trocar as referencias a "Grupo N"/`tests/test_*` por descricao do
+      comportamento, mantendo o porque
+- [ ] 54.3 `resources/pre-commit-config.yaml`: cabecalho vira texto final (sem
+      "PLACEHOLDER", sem menu de linguagens); o menu de exemplos migra para
+      `references/02`, com o exemplo Java corrigido (`spring-javaformat` via
+      `./mvnw validate`, nao `spotless`)
+- [ ] 54.4 `.claude/skills/harness-creator/AGENTS.md`: MUST NOT novo -- nenhum
+      template em `resources/` cita numero de grupo, PR ou arquivo de teste da
+      skill
+- [ ] 54.5 Sensores em `tests/test_skill.py`: reprova se `resources/` (menos
+      `tasks-README.md`) citar `Grupo [0-9]` ou `tests/test_`; reprova se o
+      `.pre-commit-config.yaml` gerado contiver `PLACEHOLDER` ou o menu de
+      linguagens
+Verificacao: `pytest -q && ruff check . && mypy && bash .claude/check-arch.sh`

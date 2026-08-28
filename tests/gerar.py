@@ -425,6 +425,8 @@ def gerar(nome: str, destino: Path) -> Stack:
                 "<restrição 2>": "alterar o lockfile à mão",
                 "<ferramentas-do-harness>": (
                     "- Para fechar um grupo do plano: skill `executar-grupo` (passo a passo).\n"
+                    "- Para transformar um achado de revisão em regra executável: subagente\n"
+                    "  `propor-regra-arch` (só Claude Code; propõe rascunho, você aceita).\n"
                     "- Para verificar a Definition of Done: comando `/dod`.\n"
                     "- Hooks de agent loop ativos: gate de comandos destrutivos e formatação\n"
                     "  automática a cada edição.\n"
