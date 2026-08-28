@@ -33,9 +33,7 @@
     "expect": "exit-nonzero",
     "what": "Sobrou marcador <...> nao preenchido em AGENTS.md ou em .claude/",
     "why": "Marcador sobrevivente vira texto literal: a DoD deixa de ser um comando executavel e o hook deixa de casar com os arquivos do projeto, ambos sem erro visivel",
-    "fix": "Rode o grep do campo check para achar os arquivos e substitua cada marcador pelo valor real da stack",
-    "por_que_a_exclusao": "Pacote de skill instalado no repositorio tem marcador POR CONSTRUCAO — os templates em resources/ existem para ser preenchidos. O verificar-harness.sh ja ignorava esse caminho desde o Grupo 35; esta regra fazia a mesma varredura e nao ignorava. A correcao tinha sido aplicada a uma das duas checagens irmas e nao a outra, e o defeito so apareceu ao rodar a skill no proprio repositorio dela",
-    "barra_invertida_no_check": "O `\\.` aqui e ponto LITERAL, e ele funciona porque o Grupo 45 deu ao check-arch.sh a paridade que o parser do gate ja tinha: jq passou a usar `join` em vez de `@tsv`, e o fallback em awk passou a desfazer `\\\\`. Antes disso o padrao chegava ao shell como `\\\\.` e a regra passava sempre, sem verificar nada. `tests/test_arch_rules.py` cobre o round-trip pelos dois caminhos"
+    "fix": "Rode o grep do campo check para achar os arquivos e substitua cada marcador pelo valor real da stack"
   },
   {
     "id": "G01",
@@ -44,8 +42,7 @@
     "expect": "exit-0",
     "what": "O gate nao devolveu exit 2 para um comando destrutivo",
     "why": "E a unica defesa contra o agente enfraquecer o proprio enforcement. Os padroes moram em .harness/gate-rules.json e o agente pode edita-lo — como ja podia editar o script. Impedir a edicao ANTES que ela ocorra nao e portatil: o Cursor nao tem evento de pre-edicao de arquivo. Entao a defesa e detectar, e detectar na cadeia da DoD significa a cada grupo, nao so na geracao. Sem esta regra, um gate esvaziado passa despercebido ate alguem rodar um comando destrutivo",
-    "fix": "Compare .harness/gate-rules.json e .claude/hooks/gate-destructive.sh com o que a skill gerou; se uma excecao foi acrescentada sem motivo escrito no campo 'why', ela e a suspeita",
-    "comando_de_risco_montado_em_partes": "O padrao 'rm -rf' escrito por extenso aqui seria barrado pelo gate do proprio repositorio ao rodar a verificacao — o check se auto-bloquearia"
+    "fix": "Compare .harness/gate-rules.json e .claude/hooks/gate-destructive.sh com o que a skill gerou; se uma excecao foi acrescentada sem motivo escrito no campo 'why', ela e a suspeita"
   },
   {
     "id": "G02",

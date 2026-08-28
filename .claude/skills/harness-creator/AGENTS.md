@@ -13,6 +13,7 @@ sessão está no `AGENTS.md` da raiz.
 - MUST NOT: parafrasear o texto dos templates em `resources/` — só os marcadores `<>` mudam
 - MUST NOT: gravar com CRLF — os testes reprovam e o gate hook falha aberto
 - MUST NOT: renomear marcador em `resources/` sem atualizar `references/` — o teste de órfãos reprova
+- MUST NOT: template em `resources/` citar número de grupo, PR ou arquivo de teste da skill — é contexto de dev que viaja verbatim para o repo-alvo, onde não significa nada
 
 ## Convenções deste diretório
 - `references/0N-*.md` é uma fase do fluxo; `references/*.md` sem número é catálogo

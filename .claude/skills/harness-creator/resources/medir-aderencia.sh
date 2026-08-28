@@ -199,7 +199,7 @@ fi
 N_CHECK=$(awk -F'\t' '$2 ~ /^checkpoint:/ {n++} END {print n+0}' "$LOG")
 if [ "$N_COMMITS" -eq 0 ]; then
   # Zero commit na janela nao e indisciplina, e ausencia de dados — e a
-  # medida 5 ja tratava o caso equivalente assim desde o Grupo 41 (sem
+  # medida 5 ja tratava o caso equivalente assim (sem
   # trace, ela imprime "sem trace" e se declara cega). Eram duas medidas do
   # mesmo script tratando a mesma situacao de formas opostas; agora nao sao.
   if [ -n "$INSTALADO_EM" ]; then

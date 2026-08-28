@@ -243,6 +243,15 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
         files: <glob da linguagem>
         stages: [pre-commit]
   ```
+  Exemplos por linguagem — o comando exato sai da FASE 1 / de
+  [ecossistemas.md](ecossistemas.md), que é a fonte única:
+  - Python: `ruff format --check .`, `ruff check .`, `mypy app/`
+  - JS/TS: `npx eslint .`, `npx prettier --check .`, `npx tsc --noEmit`
+  - Go: `gofmt -l .`, `golangci-lint run`
+  - Rust: `cargo fmt --check`, `cargo clippy -- -D warnings`
+  - .NET: `dotnet format SOLUCAO.sln --verify-no-changes`
+  - Java: `mvn spring-javaformat:validate` (ou `mvn checkstyle:check` /
+    `./gradlew checkstyleMain`, conforme o repo) — não presuma `spotless`.
 - **Workflow de CI** (`resources/ci-workflow.yml` →
   `.github/workflows/harness-dod.yml`): gerar SOMENTE se a Fase 1 não
   encontrou nenhuma configuração de CI. Sem CI prévio não há pipeline nem
@@ -333,7 +342,10 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
   `.harness/arch-rules.json`, e `resources/check-arch.sh` →
   `.claude/check-arch.sh`, `chmod +x`): a semente vai VERBATIM, e as regras
   candidatas achadas na FASE 1 entram como itens novos da lista, cada uma com
-  `id`, `description`, `check`, `expect`, `what`, `why` e `fix`.
+  `id`, `description`, `check`, `expect`, `what`, `why` e `fix` — e SÓ esses
+  sete. Campo extra o runner não lê, e ele viaja como ruído para o repo-alvo
+  (número de grupo, nome de teste da skill: contexto de dev que não é do
+  usuário).
   - `check` é um comando de shell; `expect` é `exit-0` (padrão) ou
     `exit-nonzero`, este último para a regra que afirma a AUSÊNCIA de algo.
   - `what`/`why`/`fix` nomeiam arquivo, função ou comando. Um `grep` sozinho

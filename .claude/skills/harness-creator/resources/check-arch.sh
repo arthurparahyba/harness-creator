@@ -55,12 +55,12 @@ fi
 # E o fallback em awk NUNCA TINHA RODADO: usava `exp` como nome de variavel,
 # que e funcao embutida do awk — erro de sintaxe. Em maquina sem jq o runner
 # imprimia "0 regra(s), nenhuma violada" e saia 0. Verde total, zero regras
-# executadas, desde o Grupo 31 que o criou. Ninguem viu porque jq estava
+# executadas. Ninguem viu porque jq estava
 # instalado aqui e no CI: o caminho que existe para quem NAO tem jq era
 # justamente o que nunca era exercitado.
 # O resultado era uma regra que imprimia `[ok]` em toda execucao sem nunca
 # ter verificado nada — pior que regra ausente, porque compra confianca. O
-# parser do gate (`_le_registro`, Grupo 42) ja fazia certo; este, mais
+# parser do gate (`_le_registro`) ja fazia certo; este, mais
 # antigo, nao. Assimetria entre irmaos, de novo.
 _campos() {
   if command -v jq >/dev/null 2>&1; then

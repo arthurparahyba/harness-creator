@@ -575,6 +575,41 @@ def test_marcador_preenchivel_nunca_aparece_em_comentario_de_template() -> None:
     assert culpados == [], f"marcador preenchivel em comentario: {culpados}"
 
 
+def test_templates_nao_citam_contexto_de_dev_da_skill() -> None:
+    """Número de grupo, PR ou nome de teste da skill num template viaja verbatim
+    para o repo-alvo, onde "Grupo 45" e `tests/test_arch_rules.py` não existem —
+    e campo extra do arch-rules.json o runner nem lê. Contexto de autoria da
+    skill não é do usuário; a memória de manutenção vive em `references/`.
+
+    `tasks-README.md` fica de fora: lá "## Grupo N" é o FORMATO do plano."""
+    padrao = re.compile(r"Grupo\s+[0-9]|tests/test_")
+    culpados = []
+    for p in RESOURCES.rglob("*"):
+        if not p.is_file() or p.name == "tasks-README.md" or b"\0" in p.read_bytes()[:8192]:
+            continue
+        for n, linha in enumerate(p.read_text().splitlines(), 1):
+            if padrao.search(linha):
+                culpados.append(f"{p.relative_to(RESOURCES)}:{n}: {linha.strip()[:60]}")
+    assert culpados == [], f"contexto de dev da skill vazando para template: {culpados}"
+
+
+def test_pre_commit_gerado_nao_carrega_placeholder_nem_menu(tmp_path: Path) -> None:
+    """O cabeçalho do template era guia de autoria ("PLACEHOLDER: substitua os
+    hooks" + menu de 6 linguagens, com o exemplo de Java errado) e, transcrito
+    verbatim, caía no repo-alvo por cima do hook já preenchido e correto. Guia
+    de autoria vive em `references/`, não no artefato entregue."""
+    import gerar
+
+    repo = tmp_path / "java-spring"
+    gerar.gerar("java-spring", repo)
+    texto = (repo / ".pre-commit-config.yaml").read_text()
+    for proibido in ("PLACEHOLDER", "Exemplos por linguagem"):
+        assert proibido not in texto, (
+            f".pre-commit-config.yaml gerado carrega guia de autoria: {proibido!r}"
+        )
+    assert "repos:" in texto and "entry:" in texto, "pre-commit gerado sem hook real"
+
+
 def test_format_hook_sobrevive_a_ausencia_de_formatter(tmp_path: Path) -> None:
     """Sem formatter, o hook tem de virar no-op — não morrer.
 
