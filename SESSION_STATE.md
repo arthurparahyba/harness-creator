@@ -3,17 +3,50 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `14c5aa0` na `feature/contrato-de-fonte-de-plano`
-  (Grupos 51 e 52). Branch ainda NÃO publicada, CI ainda não rodou nela.
-- Testes: 927/927 + 4 skips explícitos; ruff e mypy strict limpos (16
-  arquivos); check-arch 7/7.
-- Change/plano ativo: `TASKS.md` na raiz — só o Grupo 26 aberto, e BLOQUEADO
-  (ver pendências). Grupos 25, 27 a 52 concluídos. Este repositório continua
-  no layout LEGADO de propósito: migrar o histórico é decisão do usuário, e
-  o próprio `atualizacao.md` proíbe a skill de fazer isso sozinha.
+- Commit verificado: `ebd327f` na `feature/catraca-e-limpeza-de-template`
+  (Grupos 53 e 54). Branch nova a partir de `14c5aa0`, então traz os Grupos 51
+  e 52 junto; nada publicado.
+- Testes: 932/932 + 4 skips explícitos; ruff e mypy strict limpos; check-arch
+  7/7.
+- Change/plano ativo: `TASKS.md` na raiz. Grupos 25, 27 a 54 concluídos (53 e
+  54 nesta sessão); Grupo 26 aberto e BLOQUEADO (ver pendências). Este
+  repositório continua no layout LEGADO de propósito: migrar o histórico é
+  decisão do usuário, e o próprio `atualizacao.md` proíbe a skill de fazer isso
+  sozinha.
 - Em andamento: nada — fronteira limpa.
-- Próxima ação: publicar a branch, esperar CI verde e fazer o merge `--no-ff`
-  na `main`. Nada foi empurrado ainda.
+- Próxima ação: regenerar o PetClinic com a skill atualizada (pedido do
+  usuário) para validar os consertos dos Grupos 53-54 numa geração limpa.
+  Depois, publicar a branch, CI verde e merge `--no-ff` na `main` (traz 51-54).
+
+## O que mudou nesta sessão (Grupos 53 e 54)
+Achados da revisão do harness gerado no PetClinic (rodada desta sessão), com os
+dois consertos e seus sensores.
+
+**Grupo 53 — a catraca não girava.** O subagente `propor-regra-arch` era gerado
+e nunca acionado: nem o AGENTS.md o listava nas ferramentas, nem o
+`executar-grupo` parava para propor regra (ia de Verificar direto a Commitar).
+Agora o `executar-grupo` tem um passo de catraca (revisão do diff → propor
+regra), condicional, nomeando o COMPORTAMENTO (universal) e o subagente só como
+afordância do Claude Code — validade nos 3 agentes preservada, sem delegação
+automática que mexe em código (lição do Grupo 28). E o `tools: …, Bash`
+contradizia a prosa "suas ferramentas são de leitura": `Bash` escreve. Trocado
+pelo texto honesto (sem Write/Edit; Bash só lê o diff; a trava real é o
+check-arch na DoD + a revisão do diff do arch-rules — o raciocínio do Grupo 42).
+3 sensores.
+
+**Grupo 54 — contexto de dev vazava verbatim para o repo-alvo.** Mesma raiz nos
+dois defeitos. O `arch-rules.json` levava 3 campos não-padrão que o runner nem
+lê, citando "Grupo 35/45" e `tests/test_arch_rules.py`; os comentários dos
+scripts citavam número de grupo; e o `pre-commit-config.yaml` saía com cabeçalho
+PLACEHOLDER + menu de 6 linguagens cujo exemplo de Java apontava `spotless` (o
+PetClinic usa `spring-javaformat`). Campos removidos, comentários sem número de
+grupo, cabeçalho do pre-commit virou texto final e o menu foi para
+`references/02` com o Java corrigido. MUST NOT novo no escopo da skill + 2
+sensores.
+
+NÃO regenerado ainda: o harness DESTE repositório (a pendência do Grupo 47
+segue). Os consertos estão nos templates; a validação por geração limpa é a
+próxima ação (PetClinic).
 
 ## O que mudou nesta sessão (Grupo 52)
 A fonte simples deixou de ser um `TASKS.md` único na raiz: passou a ser
