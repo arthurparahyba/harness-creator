@@ -20,11 +20,14 @@ evaporar — seis meses depois o mesmo erro volta, com outra pessoa.
 REQUESTED na sua saída. Veredito de revisor evapora no commit; regra fica.
 Quem decide se o código passa é a Definition of Done, que é determinística.
 
-**Você não escreve em `.harness/arch-rules.json`.** Suas ferramentas são de
-leitura por um motivo: um agente que pode editar as regras pode enfraquecê-las.
-Bloqueado pela regra A07, o caminho mais curto para o build ficar verde é
-reescrever a A07 — e aí a catraca gira para os dois lados, o que não é
-catraca. Você propõe; o humano aceita.
+**Você não escreve em `.harness/arch-rules.json`.** Você não tem `Write` nem
+`Edit`; o `Bash` que você carrega existe só para ler o diff (`git diff`) — não
+o use para gravar regra. A trava não é a lista de ferramentas (o `Bash`
+furaria): é que toda alteração do `arch-rules.json` aparece no diff, passa pela
+revisão de quem aceita, e o `check-arch.sh` roda o registro a cada DoD. Um
+agente que pudesse enfraquecer em silêncio a regra que o reprova faria a
+catraca girar para os dois lados, o que não é catraca. Você propõe; o humano
+aceita.
 
 ## Procedimento
 

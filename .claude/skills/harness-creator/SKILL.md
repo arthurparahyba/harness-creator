@@ -8,7 +8,7 @@ description: >
   de execucao, ou mencionar harness engineering, checkpoints por grupos de
   tasks, WIP=1 ou continuidade entre sessoes - mesmo que nao use a palavra
   "harness". Gera AGENTS.md com protocolo de sessao, SESSION_STATE.md,
-  TASKS.md, init.sh, hooks de agent loop, pre-commit, comando /dod, regras
+  pasta tasks/, init.sh, hooks de agent loop, pre-commit, comando /dod, regras
   arquiteturais executaveis e verificador do harness, adaptados a stack
   descoberta no repositorio.
 license: MIT
@@ -88,7 +88,8 @@ O harness tem duas camadas, ambas geradas por esta skill:
    AGENTS.md com escopo no diretorio de codigo (restricoes locais),
    CLAUDE.md ao lado de cada um deles importando o irmao (`@AGENTS.md`),
    skill `executar-grupo` (procedimento sob demanda), init.sh,
-   SESSION_STATE.md, config.yaml, TASKS.md. O protocolo fica so na raiz;
+   SESSION_STATE.md, config.yaml, tasks/README.md. O protocolo fica so na
+   raiz;
    escopo e procedimento saem dela para nao pesar o contexto de todo
    request.
 2. **Enforcement** — hooks de agent loop (gate destrutivo + auto-format),

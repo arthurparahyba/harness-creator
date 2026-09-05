@@ -627,7 +627,7 @@ def test_formatter_de_modulo_inteiro_nao_vira_hook_de_edicao() -> None:
 
 
 def test_as_duas_fontes_de_plano_coexistem(repo: tuple[Path, Stack, str]) -> None:
-    """`TASKS.md` sempre; `openspec/config.yaml` se soma onde há OpenSpec.
+    """A pasta `tasks/` sempre; `openspec/config.yaml` se soma onde há OpenSpec.
 
     Eram exclusivos, e a exclusividade tirava a escolha do usuário: o
     repositório com `openspec/` empurrava para proposal+specs até no grupo de
@@ -639,7 +639,18 @@ def test_as_duas_fontes_de_plano_coexistem(repo: tuple[Path, Stack, str]) -> Non
     tem_openspec = (destino / "openspec").is_dir()
     config = destino / "openspec/config.yaml"
 
-    assert (destino / "TASKS.md").is_file(), f"{nome}: sem TASKS.md — repo sem plano simples"
+    # A geração cria a pasta e o README que declara a convenção — não um
+    # plano de mentira. O primeiro `tasks.md` nasce com a primeira
+    # funcionalidade proposta; gerar `<task atômica>` como se fosse task
+    # ensina que o formato aceita qualquer coisa.
+    readme = destino / "tasks/README.md"
+    assert readme.is_file(), f"{nome}: sem tasks/README.md — repo sem plano simples"
+    assert "tasks/<funcionalidade>/tasks.md" in readme.read_text(), (
+        f"{nome}: o README de tasks/ não declara onde o plano mora"
+    )
+    assert not (destino / "TASKS.md").exists(), (
+        f"{nome}: geração nova criou TASKS.md na raiz — a forma antiga"
+    )
     if tem_openspec:
         assert config.is_file(), f"{nome}: tem openspec/ e não recebeu config.yaml"
     else:
@@ -697,17 +708,32 @@ def test_config_do_openspec_nao_tem_placeholder_em_prosa() -> None:
 
 
 def test_agents_md_manda_o_comando_de_plano_certo(repo: tuple[Path, Stack, str]) -> None:
-    """Com OpenSpec, `/opsx:propose`; sem, editar o `TASKS.md`.
+    """Com OpenSpec, o NOME DA SKILL; sem, editar o `TASKS.md`.
 
-    Instrução trocada manda o agente chamar um comando que não existe, e a
-    sessão morre no primeiro pedido fora do plano — que é exatamente o momento
-    em que o protocolo mais importa.
+    Instrução trocada manda o agente chamar o que não existe, e a sessão morre
+    no primeiro pedido fora do plano — que é exatamente o momento em que o
+    protocolo mais importa.
+
+    A forma importa tanto quanto o conteúdo. O `openspec init` grava a skill
+    com o mesmo nome nos três agentes-alvo (`.claude/skills/`, `.cursor/skills/`
+    e `.devin/skills/`), enquanto o comando muda em cada um — `/opsx:propose`
+    no Claude Code, `opsx-propose` no Cursor, um caminho de arquivo no Devin.
+    O harness gerado vale nos três: citar o comando é instrução morta em dois
+    deles. Verificado contra `@fission-ai/openspec` 1.11.0.
     """
     destino, _, nome = repo
     agents = (destino / "AGENTS.md").read_text()
-    assert "TASKS.md" in agents, f"{nome}: AGENTS.md não cita o TASKS.md, que vai sempre"
+    assert "tasks/<funcionalidade" in agents, (
+        f"{nome}: AGENTS.md não cita a pasta de planos, que vai sempre"
+    )
+    assert "/opsx:" not in agents, (
+        f"{nome}: cita comando do Claude Code (`/opsx:`) — morto no Cursor e no Devin"
+    )
     if (destino / "openspec").is_dir():
-        assert "/opsx:propose" in agents, f"{nome}: tem OpenSpec e não o usa"
+        assert "openspec-propose" in agents, f"{nome}: tem OpenSpec e não usa a skill de propor"
+        assert "openspec-apply-change" in agents, (
+            f"{nome}: tem OpenSpec e não usa a skill de aplicar a mudança"
+        )
         # Duas fontes sem critério é escolha por ordem de arquivo — o que o
         # plano ativo único proíbe. O critério e o registro da escolha andam
         # juntos: sem registrar, o agente reabre a decisão a cada grupo.
@@ -719,8 +745,15 @@ def test_agents_md_manda_o_comando_de_plano_certo(repo: tuple[Path, Stack, str])
             f"{nome}: a escolha da fonte não é registrada — vira decisão por grupo"
         )
     else:
-        assert "/opsx:propose" not in agents, (
-            f"{nome}: manda usar /opsx:propose sem openspec/ — comando inexistente"
+        # A seção "Fontes de trabalho" nomeia as duas fontes possíveis em todo
+        # repo — é o contrato do protocolo, não instrução de uso. O que não
+        # pode aparecer sem `openspec/` é o FLUXO: mandar propor por uma skill
+        # que o repo não tem é a mesma falha do comando inexistente.
+        assert "openspec-propose" not in agents, (
+            f"{nome}: manda propor pelo OpenSpec sem `openspec/` — skill inexistente ali"
+        )
+        assert "openspec-apply-change" not in agents, (
+            f"{nome}: manda aplicar pelo OpenSpec sem `openspec/` — skill inexistente ali"
         )
 
 
@@ -766,8 +799,15 @@ def test_init_e_medidor_mostram_as_duas_fontes(repo: tuple[Path, Stack, str]) ->
     medidor = (destino / ".claude/medir-aderencia.sh").read_text()
 
     for arquivo, corpo in (("init.sh", init), ("medir-aderencia.sh", medidor)):
-        assert "TASKS.md" in corpo and "openspec/changes" in corpo, (
+        assert "tasks/*/" in corpo and "openspec/changes" in corpo, (
             f"{nome}: {arquivo} não considera as duas fontes"
+        )
+        # Legado: quem gerou o harness antes tem o plano num TASKS.md único.
+        # Deixar de lê-lo faria o plano REAL do repositório sumir do passo
+        # que o agente executa em toda sessão — a mesma falha do `elif`,
+        # por outro caminho.
+        assert "TASKS.md" in corpo, (
+            f"{nome}: {arquivo} deixou de ler o TASKS.md de harness antigo"
         )
         assert "Change/plano ativo" in corpo, (
             f"{nome}: {arquivo} não lê o plano ativo declarado no SESSION_STATE.md"
@@ -777,4 +817,50 @@ def test_init_e_medidor_mostram_as_duas_fontes(repo: tuple[Path, Stack, str]) ->
     )
     assert 'if [ -z "$FONTE" ] && [ -f TASKS.md ]' not in medidor, (
         f"{nome}: o medidor voltou a medir por precedência fixa"
+    )
+
+
+@pytest.mark.parametrize("layout", ["pasta", "legado"])
+def test_medidor_encontra_o_plano_nas_duas_formas(tmp_path: Path, layout: str) -> None:
+    """Checar a STRING `TASKS.md` no script não prova que ele lê o arquivo.
+
+    Este teste nasceu de uma mutação que passou: apagar a linha que põe o
+    `TASKS.md` na lista de fontes não reprovou nada, porque o nome continuava
+    aparecendo em comentário e no `case`. Sensor que casa texto no lugar de
+    comportamento é o defeito do Grupo 47 outra vez — ele "olhou só os
+    arquivos de texto e passou verde".
+
+    As duas formas têm de ser medidas: a nova (`tasks/<funcionalidade>/`) e a
+    de quem gerou o harness antes (`TASKS.md` na raiz), cujo plano é real e
+    não pode sumir do diagnóstico por causa de mudança de layout.
+    """
+    destino = tmp_path / "node"
+    gerar("node", destino)
+    grupo = "## Grupo 1 - objetivo\n- [x] 1.1 feito\nVerificacao: echo ok\n"
+    if layout == "legado":
+        shutil.rmtree(destino / "tasks")
+        (destino / "TASKS.md").write_text(grupo, newline="\n")
+    else:
+        (destino / "tasks" / "login").mkdir(parents=True)
+        (destino / "tasks" / "login" / "tasks.md").write_text(grupo, newline="\n")
+
+    for cmd in (
+        ["git", "init", "-q"],
+        ["git", "add", "-A"],
+        ["git", "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "checkpoint: x"],
+    ):
+        subprocess.run(cmd, cwd=destino, check=True, capture_output=True)
+
+    r = subprocess.run(
+        ["bash", ".claude/medir-aderencia.sh"],
+        cwd=destino,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert "sem fonte de trabalho" not in r.stdout, (
+        f"{layout}: o medidor não achou o plano:\n{r.stdout}"
+    )
+    assert "1 concluido(s), 1 checkpoint(s)" in r.stdout, (
+        f"{layout}: o medidor não contou o grupo concluído:\n{r.stdout}"
     )

@@ -199,7 +199,7 @@ fi
 N_CHECK=$(awk -F'\t' '$2 ~ /^checkpoint:/ {n++} END {print n+0}' "$LOG")
 if [ "$N_COMMITS" -eq 0 ]; then
   # Zero commit na janela nao e indisciplina, e ausencia de dados — e a
-  # medida 5 ja tratava o caso equivalente assim desde o Grupo 41 (sem
+  # medida 5 ja tratava o caso equivalente assim (sem
   # trace, ela imprime "sem trace" e se declara cega). Eram duas medidas do
   # mesmo script tratando a mesma situacao de formas opostas; agora nao sao.
   if [ -n "$INSTALADO_EM" ]; then
@@ -237,6 +237,12 @@ if [ -d openspec/changes ]; then
     [ -f "$d/tasks.md" ] && TODAS="$TODAS $d/tasks.md"
   done
 fi
+if [ -d tasks ]; then
+  for d in tasks/*/; do
+    [ -f "$d/tasks.md" ] && TODAS="$TODAS $d/tasks.md"
+  done
+fi
+# Legado: harness antigo gravava um TASKS.md unico na raiz.
 [ -f TASKS.md ] && TODAS="$TODAS TASKS.md"
 
 FONTE=""
@@ -253,9 +259,9 @@ if [ -z "$FONTE" ]; then FONTE="$TODAS"; fi
 
 if [ -z "$FONTE" ]; then
   medida "Grupos concluidos com checkpoint" 1 "sem fonte de trabalho" \
-    "nao ha TASKS.md nem change ativa em openspec/changes/" \
+    "nao ha plano em tasks/, nem TASKS.md, nem change ativa em openspec/changes/" \
     "sem fonte de trabalho o agente inventa tarefas, que e o que o protocolo proibe — e nao ha o que comparar com o historico" \
-    "crie TASKS.md com ao menos um grupo no formato '## Grupo N - <objetivo>'" \
+    "crie tasks/<funcionalidade>/tasks.md com ao menos um grupo no formato '## Grupo N - <objetivo>'" \
     "plano que vive fora do repositorio (issue tracker, documento)"
 else
   # Um grupo esta concluido quando TODAS as suas tasks estao marcadas. E a

@@ -346,8 +346,8 @@ def gerar(nome: str, destino: Path) -> Stack:
     stack = STACKS[nome]
     shutil.copytree(FIXTURES / nome, destino, dirs_exist_ok=True)
 
-    # Condicao do catalogo (`arquivos-gerados.md`): `TASKS.md` sempre;
-    # `openspec/config.yaml` se soma a ele onde `openspec/` existir. As duas
+    # Condicao do catalogo (`arquivos-gerados.md`): a pasta `tasks/` sempre;
+    # `openspec/config.yaml` se soma a ela onde `openspec/` existir. As duas
     # fontes coexistem de proposito — nem toda mudanca paga uma proposal com
     # specs. O risco de duas fontes (agente abrindo grupo numa enquanto o
     # humano atualiza a outra) e coberto pelo plano ativo unico declarado no
@@ -365,21 +365,22 @@ def gerar(nome: str, destino: Path) -> Stack:
                 "<comandos reais do repo, encadeados com &&, "
                 "priorizando o que o CI exige>": stack.dod_gerada,
                 "<branch-base>": "main",
-                # A variante depende do repo: mandar usar `/opsx:propose` num
-                # repo sem OpenSpec instrui o agente a chamar um comando que
-                # nao existe, e a sessao morre no primeiro pedido novo. Onde
+                # A variante depende do repo: mandar usar o fluxo do OpenSpec
+                # num repo que nao o tem instrui o agente a chamar o que nao
+                # existe, e a sessao morre no primeiro pedido novo. Onde
                 # as duas fontes existem, o AGENTS.md tem de dizer COMO
                 # escolher — senao a escolha vira ordem de arquivo.
                 "<como-propor-mudanca-de-plano>": (
                     "Para criar ou modificar o plano, RECOMENDE uma fonte e deixe a escolha\n"
                     "com o usuário:\n"
                     "- Muda contrato, comportamento observável ou exige migração → OpenSpec\n"
-                    "  (`/opsx:propose`, `/opsx:apply`); nunca edite artefatos de `openspec/`\n"
-                    "  manualmente.\n"
-                    "- Qualquer outra mudança → acrescente o grupo ao `TASKS.md` no formato\n"
-                    "  descrito abaixo.\n"
+                    "  (skills `openspec-propose` e `openspec-apply-change`); nunca edite\n"
+                    "  artefatos de `openspec/` manualmente.\n"
+                    "- Qualquer outra mudança → acrescente o grupo ao\n"
+                    "  `tasks/<funcionalidade>/tasks.md`, criando a pasta se a funcionalidade\n"
+                    "  for nova, no formato descrito abaixo.\n"
                     "\n"
-                    "|  | OpenSpec | TASKS.md |\n"
+                    "|  | OpenSpec | `tasks/` |\n"
                     "|---|---|---|\n"
                     "| Custa | proposal, specs e design antes do código "
                     "| escrever o grupo e começar |\n"
@@ -394,17 +395,22 @@ def gerar(nome: str, destino: Path) -> Stack:
                     "funcionalidade inteira, não por grupo. Confirme antes de executar.\n"
                     "\n"
                     # A SKILL tem o mesmo nome nos tres agentes-alvo; o COMANDO
-                    # muda de forma em cada um (`/opsx:explore`, `opsx-explore`,
-                    # `.devin/workflows/opsx-explore.md`). Nomear o comando de um
-                    # so agente vira instrucao morta nos outros dois.
-                    "Para o estudo que o passo 3 exige, use a skill `openspec-explore`\n"
-                    "(no Claude Code também como `/opsx:explore`): é modo de exploração e\n"
-                    "não escreve código. Estudar não é propor — a proposta vem depois."
+                    # muda de forma em cada um (`/opsx:propose`, `opsx-propose`,
+                    # `.devin/workflows/opsx-propose.md`). Nomear o comando de um
+                    # so agente vira instrucao morta nos outros dois — e citar
+                    # um irmao pela skill e outro pelo comando ensina que as
+                    # duas formas servem. Verificado em @fission-ai/openspec 1.11.0.
+                    "Para o estudo que o passo 3 exige, use a skill `openspec-explore`: é\n"
+                    "modo de exploração e não escreve código. Estudar não é propor — a\n"
+                    "proposta vem depois."
                     if usa_openspec
-                    else "Para criar ou modificar o plano, acrescente o grupo ao `TASKS.md` no\n"
-                    "formato descrito abaixo e confirme com o usuário antes de executá-lo.\n"
-                    "Antes de propor, estude o repositório (passo 3) e apresente o achado\n"
-                    "junto do grupo — a fase de estudo não depende de ferramenta nenhuma."
+                    else "Para criar ou modificar o plano, acrescente o grupo ao\n"
+                    "`tasks/<funcionalidade>/tasks.md` — uma pasta por funcionalidade,"
+                    " criada na\n"
+                    "primeira vez —, no formato descrito abaixo, e confirme com o usuário"
+                    " antes de\n"
+                    "executá-lo. Antes de propor, estude o repositório (passo 3) e apresente o\n"
+                    "achado junto do grupo — a fase de estudo não depende de ferramenta nenhuma."
                 ),
                 # Fixtures não têm histórico git: o prefixo cai no default
                 # declarado e a política pede a decisão ao usuário, que é o
@@ -419,6 +425,8 @@ def gerar(nome: str, destino: Path) -> Stack:
                 "<restrição 2>": "alterar o lockfile à mão",
                 "<ferramentas-do-harness>": (
                     "- Para fechar um grupo do plano: skill `executar-grupo` (passo a passo).\n"
+                    "- Para transformar um achado de revisão em regra executável: subagente\n"
+                    "  `propor-regra-arch` (só Claude Code; propõe rascunho, você aceita).\n"
                     "- Para verificar a Definition of Done: comando `/dod`.\n"
                     "- Hooks de agent loop ativos: gate de comandos destrutivos e formatação\n"
                     "  automática a cada edição.\n"
@@ -525,7 +533,7 @@ def gerar(nome: str, destino: Path) -> Stack:
     )
     for origem, alvo in [
         ("SESSION_STATE.md", "SESSION_STATE.md"),
-        ("TASKS.md", "TASKS.md"),
+        ("tasks-README.md", "tasks/README.md"),
         ("editorconfig-base", ".editorconfig"),
         ("hooks/gate-destructive.sh", ".claude/hooks/gate-destructive.sh"),
         # Vai SEMPRE, inclusive onde o `format-on-edit.sh` não vai: observar

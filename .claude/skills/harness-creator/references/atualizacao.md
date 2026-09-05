@@ -71,7 +71,21 @@ template preenchido para hoje — é a única evidência disponível:
 | Não listado em `arquivos` | É do usuário. Regra normal da [FASE 3](03-resolucao-conflitos.md) |
 | Listado em `arquivos` e ausente do disco | Foi removido. Perguntar antes de recriar — remoção pode ter sido deliberada |
 
-A terceira linha é a que exige cuidado. Um `AGENTS.md` que a skill gerou e o
+### Caso especial: `TASKS.md` na raiz, de harness anterior
+
+Versões antigas geravam um `TASKS.md` único na raiz; hoje a fonte é
+`tasks/<funcionalidade>/tasks.md`. **Não mova nem reescreva o arquivo.** O
+`TASKS.md` de um repositório em uso carrega o histórico de grupos fechados,
+e o histórico é o que a próxima sessão lê para entender por que o código
+está como está — reorganizá-lo em pastas por conta própria destrói a ordem
+que os commits de checkpoint referenciam.
+
+O que fazer: gerar a pasta `tasks/` com o `README.md`, deixar o `TASKS.md`
+onde está, e dizer ao usuário, na FASE 4, que ele continua sendo fonte
+válida e que o próximo plano nasce em `tasks/`. Todos os sensores aceitam as
+duas formas. Migrar o histórico é decisão do usuário, não da skill.
+
+A terceira linha da tabela acima é a que exige cuidado. Um `AGENTS.md` que a skill gerou e o
 time depois enriqueceu com convenções reais é mais valioso que o template:
 sobrescrevê-lo destrói trabalho humano para instalar texto genérico.
 

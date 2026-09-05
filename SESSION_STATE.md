@@ -3,17 +3,124 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `d4922cb` na `main` — merge `--no-ff` da
-  `feature/duas-fontes-de-plano` (Grupos 47 a 50), publicado. CI verde na
-  branch antes do merge (run 32200669119).
-- Testes: 915/915 + 4 skips explícitos; ruff e mypy strict limpos (16
-  arquivos); check-arch 7/7.
-- Change/plano ativo: `TASKS.md` na raiz — só o Grupo 26 aberto, e BLOQUEADO
-  (ver pendências). Grupos 25, 27 a 50 concluídos.
+- Commit verificado: `ebd327f` na `feature/catraca-e-limpeza-de-template`
+  (Grupos 53 e 54). Branch nova a partir de `14c5aa0`, então traz os Grupos 51
+  e 52 junto; nada publicado.
+- Testes: 932/932 + 4 skips explícitos; ruff e mypy strict limpos; check-arch
+  7/7.
+- Change/plano ativo: `TASKS.md` na raiz. Grupos 25, 27 a 54 concluídos (53 e
+  54 nesta sessão); Grupo 26 aberto e BLOQUEADO (ver pendências). Este
+  repositório continua no layout LEGADO de propósito: migrar o histórico é
+  decisão do usuário, e o próprio `atualizacao.md` proíbe a skill de fazer isso
+  sozinha.
 - Em andamento: nada — fronteira limpa.
-- Próxima ação: nada pendente do trabalho das duas fontes. A pendência do
-  `/opsx:propose` Claude-específico (abaixo) é a primeira candidata a virar
-  grupo.
+- Próxima ação: regenerar o PetClinic com a skill atualizada (pedido do
+  usuário) para validar os consertos dos Grupos 53-54 numa geração limpa.
+  Depois, publicar a branch, CI verde e merge `--no-ff` na `main` (traz 51-54).
+
+## O que mudou nesta sessão (Grupos 53 e 54)
+Achados da revisão do harness gerado no PetClinic (rodada desta sessão), com os
+dois consertos e seus sensores.
+
+**Grupo 53 — a catraca não girava.** O subagente `propor-regra-arch` era gerado
+e nunca acionado: nem o AGENTS.md o listava nas ferramentas, nem o
+`executar-grupo` parava para propor regra (ia de Verificar direto a Commitar).
+Agora o `executar-grupo` tem um passo de catraca (revisão do diff → propor
+regra), condicional, nomeando o COMPORTAMENTO (universal) e o subagente só como
+afordância do Claude Code — validade nos 3 agentes preservada, sem delegação
+automática que mexe em código (lição do Grupo 28). E o `tools: …, Bash`
+contradizia a prosa "suas ferramentas são de leitura": `Bash` escreve. Trocado
+pelo texto honesto (sem Write/Edit; Bash só lê o diff; a trava real é o
+check-arch na DoD + a revisão do diff do arch-rules — o raciocínio do Grupo 42).
+3 sensores.
+
+**Grupo 54 — contexto de dev vazava verbatim para o repo-alvo.** Mesma raiz nos
+dois defeitos. O `arch-rules.json` levava 3 campos não-padrão que o runner nem
+lê, citando "Grupo 35/45" e `tests/test_arch_rules.py`; os comentários dos
+scripts citavam número de grupo; e o `pre-commit-config.yaml` saía com cabeçalho
+PLACEHOLDER + menu de 6 linguagens cujo exemplo de Java apontava `spotless` (o
+PetClinic usa `spring-javaformat`). Campos removidos, comentários sem número de
+grupo, cabeçalho do pre-commit virou texto final e o menu foi para
+`references/02` com o Java corrigido. MUST NOT novo no escopo da skill + 2
+sensores.
+
+NÃO regenerado ainda: o harness DESTE repositório (a pendência do Grupo 47
+segue). Os consertos estão nos templates; a validação por geração limpa é a
+próxima ação (PetClinic).
+
+## O que mudou nesta sessão (Grupo 52)
+A fonte simples deixou de ser um `TASKS.md` único na raiz: passou a ser
+`tasks/<funcionalidade>/tasks.md`, uma pasta por funcionalidade — a MESMA
+forma do OpenSpec. A simetria é o ponto: a bifurcação da `executar-grupo`
+vira "ache o `tasks.md` ativo", e quem declara o ativo continua sendo o
+`SESSION_STATE.md`. Nenhum mecanismo novo.
+
+**A geração cria a pasta e o `tasks/README.md`, não um plano.** O primeiro
+`tasks.md` nasce com a primeira funcionalidade proposta. Gerar um arquivo com
+`<task atômica>` dentro ensina que o formato aceita qualquer coisa — e A05
+sempre passou nesse arquivo de mentira, então a regra já media "há onde
+planejar", não "há plano". O texto dela agora diz isso.
+
+**Uma pasta por FUNCIONALIDADE, não por grupo.** Os grupos declaram
+dependência entre si; ler a sequência inteira de uma vez é o que torna a
+dependência visível.
+
+**O legado ficou verde de propósito, e este repositório é o caso de teste.**
+O `TASKS.md` daqui tem 52 grupos que os commits de checkpoint referenciam.
+`atualizacao.md` passou a PROIBIR a skill de mover ou reescrever esse
+arquivo: o histórico é o que a próxima sessão lê para entender por que o
+código está como está, e migrar é decisão do usuário.
+
+**O achado do grupo foi uma mutação que PASSOU.** Apagar a linha que põe o
+`TASKS.md` na lista de fontes do medidor não reprovou nada — o nome
+sobrevivia em comentário e no `case`, e o sensor casava a STRING, não o
+comportamento. É o defeito do Grupo 47 repetido ("olhou só os arquivos de
+texto e passou verde"). Trocado por
+`test_medidor_encontra_o_plano_nas_duas_formas`, que roda o medidor de
+verdade nos dois layouts. Depois da troca, as duas mutações reprovam.
+
+Provado por mutação: gravar `TASKS.md` na raiz reprova 15; A05 aceitando
+tudo reprova 2; `init.sh` sem `tasks/` reprova 15; medidor sem cada uma das
+duas formas reprova 1 cada.
+
+O `init.sh` mudou de comportamento junto: lista TODOS os planos e despeja só
+o ATIVO. Com uma pasta por funcionalidade, despejar todos cresce sem limite
+e afoga o único passo que o agente executa em toda sessão.
+
+## O que mudou nesta sessão (Grupo 51)
+O AGENTS.md gerado mandava o agente usar `/opsx:propose` e `/opsx:apply` —
+sintaxe do Claude Code, num harness que vale em três agentes. Trocado pelo
+nome das skills, que é o invariante.
+
+**Verificado, não lembrado.** A nota anterior dizia "CLI 1.9.0"; a versão
+corrente é `@fission-ai/openspec` **1.11.0**. Baixado o pacote e lidos os
+identificadores no `dist/`: `openspec-explore`, `openspec-propose` e
+`openspec-apply-change` existem como skill, e `config.js` confirma
+`skillsDir` `.claude`, `.cursor` e `.devin` — o caminho final vem de
+`resolveToolSkillsDir`, que junta `skillsDir + "skills"`.
+
+**Os três irmãos saem na mesma forma.** O parêntese "(no Claude Code também
+como `/opsx:explore`)" era resíduo da correção pela metade do Grupo 48. Um
+irmão citado pela skill e outro pelo comando, no mesmo parágrafo, ensina que
+as duas formas servem — o achado dos Grupos 44 e 45.
+
+**Onde o sensor teve de afrouxar, e por quê.** A primeira versão do teste
+proibia a palavra "openspec" em qualquer AGENTS.md sem a pasta. Reprovou 14:
+a seção "Fontes de trabalho" nomeia as DUAS fontes possíveis em todo repo
+(`resources/AGENTS.md:11`). Isso é o contrato do protocolo, não instrução de
+uso. A garantia ficou no nível certo — o que não pode aparecer sem
+`openspec/` é o FLUXO (`openspec-propose`, `openspec-apply-change`).
+
+O teste do explore virou `test_fluxo_openspec_e_nomeado_pela_skill_e_nao_pelo_comando`
+e passou a checar os blocos TRANSCRITOS, extraídos por regex das cercas de
+código — não o arquivo inteiro. A prosa em volta cita `/opsx:` de propósito,
+como evidência do problema; proibir no arquivo todo seria sensor cego para a
+diferença entre instrução e explicação. Que o regex acha os 2 blocos foi
+conferido à parte, para a checagem não passar por lista vazia.
+
+Provado por mutação: devolver o comando ao bloco reprova 1; devolver o
+parêntese do explore reprova 1; devolver o comando ao `gerar.py` reprova 1;
+mandar propor pelo OpenSpec num repo sem ele reprova 14.
 
 ## O que mudou nesta sessão (Grupo 50)
 `eval/escolha-de-fonte/detecta.py`: função pura que lê o texto de UMA resposta
@@ -532,6 +639,14 @@ script que o faz sobreviver ao SIGPIPE, e aí o printf reporta. E `trap '' PIPE`
 PIORA — produz o erro em vez de evitá-lo.
 
 ## Pendências
+- **A seção "Fontes de trabalho" do AGENTS.md gerado nomeia
+  `openspec/changes/<change-ativa>/tasks.md` mesmo em repo sem `openspec/`.**
+  Achado ao escrever o sensor do Grupo 51 (`resources/AGENTS.md:11`). Não é a
+  falha do comando inexistente — não manda CHAMAR nada, só lista as fontes
+  possíveis do protocolo —, mas nomeia um caminho que não existe ali, e um
+  agente pode criar a pasta achando que é fonte válida. Fora do escopo do 51.
+  O Grupo 52 reescreve exatamente essa seção: é lá que se decide se a lista
+  passa a ser condicional.
 - **`/opsx:propose` e `/opsx:apply` no AGENTS.md gerado são nomes de
   comando do Claude Code, e o harness vale em três agentes.** Descoberto ao
   fechar o Grupo 48, ao provar o nome do explore: no Cursor o comando é
@@ -545,7 +660,7 @@ PIORA — produz o erro em vez de evitá-lo.
   executar-grupo/SKILL.md` ainda escolhe a fonte por ordem de arquivo. O
   template já mudou; este repo não foi regenerado (fora do escopo do grupo,
   WIP=1). Enquanto isso não for feito, o repositório que constrói o gerador
-  segue uma regra que o gerador não ensina mais.
+  segue uma regra que o gerador não ensina mais. Reconfirmado em 2026-08-27 ao planejar o Grupo 52: as duas cópias divergem no passo 3 — a deste repo escolhe por ordem de arquivo, o template pergunta quando as duas fontes têm grupo aberto. Como o 52.3 mexe nesse mesmo passo, é o momento natural de regenerar.
 - **A lacuna 2 do doc de interseção foi CANCELADA, não implementada.** Era
   erro de documentação: `propor-regra-arch` já é um controle inferencial
   gerado, e o revisor com veredito foi removido no Grupo 28 por decisão do

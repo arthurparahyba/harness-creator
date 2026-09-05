@@ -9,7 +9,12 @@ Existe no MÁXIMO UM plano ativo por vez (WIP=1), e o `SESSION_STATE.md`
 declara qual, no campo "Change/plano ativo". Enquanto ele estiver ativo é a
 única fonte: não abra grupo na outra. As fontes possíveis são:
 - `openspec/changes/<change-ativa>/tasks.md`
-- `TASKS.md` na raiz do repositório
+- `tasks/<funcionalidade-ativa>/tasks.md`
+
+Uma pasta por funcionalidade nas duas, e por isso a mesma forma: o plano
+nasce, vive e fica na pasta dela. Repositório com harness antigo pode ter o
+plano num `TASKS.md` único na raiz — continua válido como fonte; o próximo
+plano é que vai para `tasks/`.
 
 Se o `SESSION_STATE.md` não declarar nenhum e as duas tiverem grupo
 desmarcado, PERGUNTE qual seguir — ordem de arquivo não é decisão.
@@ -43,8 +48,9 @@ Nunca invente tarefas fora da fonte de trabalho ativa.
 5. Identifique o próximo grupo desmarcado na fonte de trabalho ativa
 
 ## Estrutura do plano de trabalho
-Cada change/funcionalidade tem seu próprio `tasks.md`. Independente de
-onde vive, o plano segue este formato:
+Cada change/funcionalidade tem seu próprio `tasks.md`, na pasta dela —
+`tasks/<funcionalidade>/tasks.md` ou `openspec/changes/<change>/tasks.md`.
+Independente de onde vive, o plano segue este formato:
 - Um grupo é um checkpoint DENTRO da funcionalidade em implementação —
   não a funcionalidade inteira. Tasks organizadas em GRUPOS coesos de
   2-5 tasks (`## Grupo N - <objetivo>`), todos pertencentes à mesma

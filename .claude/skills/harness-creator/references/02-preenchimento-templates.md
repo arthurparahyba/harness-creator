@@ -92,17 +92,18 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
 - `<como-propor-mudanca-de-plano>`: depende da fonte de trabalho detectada
   no item 8 da Fase 1.
   - **Com `openspec/`** — o repositório tem as DUAS fontes, porque o
-    `TASKS.md` é gerado sempre —, transcrever:
+    pasta `tasks/` é gerada sempre —, transcrever:
     ```
     Para criar ou modificar o plano, RECOMENDE uma fonte e deixe a escolha
     com o usuário:
     - Muda contrato, comportamento observável ou exige migração → OpenSpec
-      (`/opsx:propose`, `/opsx:apply`); nunca edite artefatos de `openspec/`
-      manualmente.
-    - Qualquer outra mudança → acrescente o grupo ao `TASKS.md` no formato
-      descrito abaixo.
+      (skills `openspec-propose` e `openspec-apply-change`); nunca edite
+      artefatos de `openspec/` manualmente.
+    - Qualquer outra mudança → acrescente o grupo ao
+      `tasks/<funcionalidade>/tasks.md`, criando a pasta se a funcionalidade
+      for nova, no formato descrito abaixo.
 
-    |  | OpenSpec | TASKS.md |
+    |  | OpenSpec | `tasks/` |
     |---|---|---|
     | Custa | proposal, specs e design antes do código | escrever o grupo e começar |
     | Dá | requisito versionado, e `openspec validate` como sensor | plano que cabe numa leitura |
@@ -113,30 +114,33 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
     pedido. Registre a escolha no `SESSION_STATE.md` — ela vale para a
     funcionalidade inteira, não por grupo. Confirme antes de executar.
 
-    Para o estudo que o passo 3 exige, use a skill `openspec-explore`
-    (no Claude Code também como `/opsx:explore`): é modo de exploração e
-    não escreve código. Estudar não é propor — a proposta vem depois.
+    Para o estudo que o passo 3 exige, use a skill `openspec-explore`: é
+    modo de exploração e não escreve código. Estudar não é propor — a
+    proposta vem depois.
     ```
-  - **Sem `openspec/`** (o repo só tem o `TASKS.md`), transcrever:
+  - **Sem `openspec/`** (o repo só tem a pasta `tasks/`), transcrever:
     ```
-    Para criar ou modificar o plano, acrescente o grupo ao `TASKS.md` no
-    formato descrito abaixo e confirme com o usuário antes de executá-lo.
-    Antes de propor, estude o repositório (passo 3) e apresente o achado
-    junto do grupo — a fase de estudo não depende de ferramenta nenhuma.
+    Para criar ou modificar o plano, acrescente o grupo ao
+    `tasks/<funcionalidade>/tasks.md` — uma pasta por funcionalidade, criada na
+    primeira vez —, no formato descrito abaixo, e confirme com o usuário antes de
+    executá-lo. Antes de propor, estude o repositório (passo 3) e apresente o
+    achado junto do grupo — a fase de estudo não depende de ferramenta nenhuma.
     ```
-  Mandar usar `/opsx:propose` num repo sem OpenSpec é instruir o agente a
-  chamar um comando que não existe: ele para no meio do fluxo ou inventa
+  Mandar usar o fluxo do OpenSpec num repo que não o tem é instruir o
+  agente a chamar o que não existe: ele para no meio do fluxo ou inventa
   um caminho. A skill `executar-grupo` já resolve essa bifurcação em tempo
   de execução; o AGENTS.md tem de concordar com ela.
-  **Nomeie a SKILL, não o comando, ao citar o explore.** Verificado com o
-  CLI 1.9.0: `openspec init` grava a skill com o mesmo nome nos três
-  agentes-alvo (`.claude/skills/openspec-explore/`,
-  `.cursor/skills/openspec-explore/`, `.devin/skills/openspec-explore/`),
-  enquanto o comando muda de forma em cada um (`/opsx:explore`,
-  `opsx-explore`, `.devin/workflows/opsx-explore.md`). O harness gerado vale
-  nos três; nome de comando de um só agente vira instrução morta nos outros
-  dois. E `explore` **não** é subcomando do CLI — `openspec explore` não
-  existe.
+  **Nomeie a SKILL, não o comando — nos três: explore, propose e apply.**
+  Verificado contra `@fission-ai/openspec` 1.11.0: o `init` grava as skills
+  com o mesmo nome nos três agentes-alvo (`openspec-explore`,
+  `openspec-propose`, `openspec-apply-change`, cada uma em
+  `.claude/skills/`, `.cursor/skills/` e `.devin/skills/`), enquanto o
+  comando muda de forma em cada um (`/opsx:propose`, `opsx-propose`,
+  `.devin/workflows/opsx-propose.md`). O harness gerado vale nos três; nome
+  de comando de um só agente vira instrução morta nos outros dois. E nenhum
+  dos três é subcomando do CLI — `openspec propose` não existe. Citar um
+  irmão pela skill e outro pelo comando, no mesmo parágrafo, ensina que as
+  duas formas servem: por isso os três saem na mesma forma.
   **Com as duas fontes o risco troca de lugar**: deixa de ser comando
   inexistente e passa a ser o agente abrir grupo numa fonte enquanto o
   humano atualiza a outra. Quem impede isso é o plano ativo declarado no
@@ -155,6 +159,8 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
   aplicam:
   ```
   - Para fechar um grupo do plano: skill `executar-grupo` (passo a passo).
+  - Para transformar um achado de revisão em regra executável: subagente
+    `propor-regra-arch` (só Claude Code; propõe rascunho, você aceita).
   - Para verificar a Definition of Done: comando `/dod`.
   - Hooks de agent loop ativos: gate de comandos destrutivos e formatação
     automática a cada edição.
@@ -237,6 +243,15 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
         files: <glob da linguagem>
         stages: [pre-commit]
   ```
+  Exemplos por linguagem — o comando exato sai da FASE 1 / de
+  [ecossistemas.md](ecossistemas.md), que é a fonte única:
+  - Python: `ruff format --check .`, `ruff check .`, `mypy app/`
+  - JS/TS: `npx eslint .`, `npx prettier --check .`, `npx tsc --noEmit`
+  - Go: `gofmt -l .`, `golangci-lint run`
+  - Rust: `cargo fmt --check`, `cargo clippy -- -D warnings`
+  - .NET: `dotnet format SOLUCAO.sln --verify-no-changes`
+  - Java: `mvn spring-javaformat:validate` (ou `mvn checkstyle:check` /
+    `./gradlew checkstyleMain`, conforme o repo) — não presuma `spotless`.
 - **Workflow de CI** (`resources/ci-workflow.yml` →
   `.github/workflows/harness-dod.yml`): gerar SOMENTE se a Fase 1 não
   encontrou nenhuma configuração de CI. Sem CI prévio não há pipeline nem
@@ -327,7 +342,10 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
   `.harness/arch-rules.json`, e `resources/check-arch.sh` →
   `.claude/check-arch.sh`, `chmod +x`): a semente vai VERBATIM, e as regras
   candidatas achadas na FASE 1 entram como itens novos da lista, cada uma com
-  `id`, `description`, `check`, `expect`, `what`, `why` e `fix`.
+  `id`, `description`, `check`, `expect`, `what`, `why` e `fix` — e SÓ esses
+  sete. Campo extra o runner não lê, e ele viaja como ruído para o repo-alvo
+  (número de grupo, nome de teste da skill: contexto de dev que não é do
+  usuário).
   - `check` é um comando de shell; `expect` é `exit-0` (padrão) ou
     `exit-nonzero`, este último para a regra que afirma a AUSÊNCIA de algo.
   - `what`/`why`/`fix` nomeiam arquivo, função ou comando. Um `grep` sozinho
@@ -344,9 +362,10 @@ os arquivos gerados têm de obedecer o que eles próprios prescrevem.
 - **Agente propositor** (`resources/agents/propor-regra-arch.md` →
   `.claude/agents/propor-regra-arch.md`): preencher `<branch-base>` no comando
   de diff. VERBATIM no resto — inclusive a seção "O que você NÃO faz", que é
-  a trava do desenho: o agente propõe regra, não veredito, e não tem
-  ferramenta de escrita. Agente que pode editar as regras pode enfraquecê-las,
-  e uma catraca que gira para os dois lados não é catraca.
+  a trava do desenho: o agente propõe regra, não veredito. Ele não tem `Write`
+  nem `Edit` (o `Bash` que carrega é só para ler o diff); a trava real não é a
+  lista de ferramentas, e sim a alteração do `arch-rules.json` aparecer no diff
+  e o `check-arch.sh` rodar o registro a cada DoD.
   - Só Claude Code, como `executar-grupo`. Registrar na FASE 4 quando o
     usuário usar Devin ou Cursor: a cobertura de regra arquitetural desses
     dois vem do `check-arch.sh`, que é shell e roda em qualquer lugar.

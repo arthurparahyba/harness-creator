@@ -95,7 +95,7 @@ OpenSpec ele se soma como segunda fonte — não como substituto. Vale no
 máximo UM plano ativo por vez, declarado no `SESSION_STATE.md`; o agente
 recomenda a fonte pela natureza da mudança (contrato, comportamento
 observável ou migração → OpenSpec; o resto → `TASKS.md`) e quem escolhe é
-você. Com OpenSpec, ele propõe pelo `/opsx:propose` e nunca edita
+você. Com OpenSpec, ele propõe pela skill `openspec-propose` e nunca edita
 `openspec/` à mão. Se você remover o OpenSpec do repositório, tudo continua
 funcionando.
 
