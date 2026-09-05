@@ -1,7 +1,7 @@
 # .editorconfig — config base universal de estilo e formatação.
 # Funciona em qualquer linguagem que suporte .editorconfig.
-# O scanner harness-score detecta este arquivo; ferramentas como
-# dotnet format, eslint, prettier, editorconfig-checker, etc. o usam.
+# Ferramentas como dotnet format, eslint, prettier e editorconfig-checker
+# leem este arquivo como fonte de estilo do projeto.
 #
 # PLACEHOLDER: ajustar as regras abaixo conforme convenções do repo.
 # Se o repo já tem .editorconfig, NÃO sobrescrever — mesclar.

@@ -7,10 +7,12 @@
   empurrado. CI Harness DoD verde.
 - Testes: 932/932 + 4 skips explícitos; ruff e mypy strict limpos; check-arch
   7/7.
-- Change/plano ativo: `TASKS.md` na raiz. Grupos 25, 27 a 54 concluídos e NA
-  `main`; Grupo 26 aberto e BLOQUEADO (ver pendências). Este repositório
-  continua no layout LEGADO de propósito: migrar o histórico é decisão do
-  usuário, e o próprio `atualizacao.md` proíbe a skill de fazer isso sozinha.
+- Change/plano ativo: `tasks/regenerar-harness/tasks.md`
+- Regeneração do harness deste repo (dívida do Grupo 47) em andamento na branch
+  `feature/regenerar-harness-deste-repo`. Os 54 grupos do `TASKS.md` legado da
+  raiz serão arquivados em `tasks/historico/tasks.md` no Grupo 2 (decisão do
+  usuário: migrar para o formato de pastas, ordem intacta). Grupo 26 segue
+  aberto e BLOQUEADO (ver pendências).
 - Em andamento: nada — fronteira limpa, branch dos Grupos 51-54 mergeada.
 - Próxima ação: sem pendência de entrega. Candidatos: regenerar o harness
   DESTE repo (Grupo 47, para ele passar a dogfoodar a catraca — hoje o

@@ -19,7 +19,7 @@ INPUT="$(cat)"
 # Duplicado de proposito: um `source` de arquivo irmao introduz uma falha nova
 # — lib ausente faz o script morrer com exit 1, que em PreToolUse significa
 # "erro nao-bloqueante" e deixa o comando destrutivo passar. Hook e arquivo
-# autocontido. `tests/test_skill.py` exige que as duas copias sejam iguais.
+# autocontido. A duplicacao e proposital; as duas copias tem de ficar iguais.
 detect_python() {
   for cand in python3.12 python3 python; do
     p=$(command -v "$cand" 2>/dev/null || true)
