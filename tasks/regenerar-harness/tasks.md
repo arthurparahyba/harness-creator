@@ -41,10 +41,13 @@ Verificação: pytest -q && ruff check . && mypy && bash .claude/check-arch.sh
      mover o TASKS.md legado para o formato de pastas, arquivando os 54 grupos
      verbatim numa pasta só — ordem intacta, que é o que os commits checkpoint:
      referenciam. -->
-- [ ] 2.1 Mover `TASKS.md` → `tasks/historico/tasks.md` verbatim; remover
-      `TASKS.md` da raiz.
-- [ ] 2.2 Reescrever o manifesto (`.claude/harness.json`): data nova, lista com
-      `tasks/` e sem `TASKS.md` na raiz, `recusados` mantidos.
-- [ ] 2.3 Rodar `./init.sh` e `medir-aderencia.sh`: confirmar que enxergam o
-      histórico e o plano ativo declarado no `SESSION_STATE.md`.
+- [x] 2.1 Mover `TASKS.md` → `tasks/historico/tasks.md` verbatim (via `git mv`,
+      rename rastreado); remover `TASKS.md` da raiz.
+- [x] 2.2 Reescrever o manifesto (`.claude/harness.json`): data nova, lista com
+      `tasks/README.md` e sem `TASKS.md` na raiz, `recusados` mantidos. Os
+      arquivos de plano (`tasks/*/tasks.md`) ficam FORA — não listá-los é o que
+      protege o histórico de um update futuro.
+- [x] 2.3 Rodar `./init.sh` e `medir-aderencia.sh`: confirmam que enxergam as
+      duas pastas (`tasks/historico`, `tasks/regenerar-harness`) e o plano
+      ativo declarado no `SESSION_STATE.md`.
 Verificação: pytest -q && ruff check . && mypy && bash .claude/check-arch.sh
