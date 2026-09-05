@@ -3,20 +3,20 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `ebd327f` na `feature/catraca-e-limpeza-de-template`
-  (Grupos 53 e 54). Branch nova a partir de `14c5aa0`, então traz os Grupos 51
-  e 52 junto; nada publicado.
+- Commit verificado: `ccc3114` (merge `--no-ff` dos Grupos 51-54) na `main`,
+  empurrado. CI Harness DoD verde.
 - Testes: 932/932 + 4 skips explícitos; ruff e mypy strict limpos; check-arch
   7/7.
-- Change/plano ativo: `TASKS.md` na raiz. Grupos 25, 27 a 54 concluídos (53 e
-  54 nesta sessão); Grupo 26 aberto e BLOQUEADO (ver pendências). Este
-  repositório continua no layout LEGADO de propósito: migrar o histórico é
-  decisão do usuário, e o próprio `atualizacao.md` proíbe a skill de fazer isso
-  sozinha.
-- Em andamento: nada — fronteira limpa.
-- Próxima ação: regenerar o PetClinic com a skill atualizada (pedido do
-  usuário) para validar os consertos dos Grupos 53-54 numa geração limpa.
-  Depois, publicar a branch, CI verde e merge `--no-ff` na `main` (traz 51-54).
+- Change/plano ativo: `TASKS.md` na raiz. Grupos 25, 27 a 54 concluídos e NA
+  `main`; Grupo 26 aberto e BLOQUEADO (ver pendências). Este repositório
+  continua no layout LEGADO de propósito: migrar o histórico é decisão do
+  usuário, e o próprio `atualizacao.md` proíbe a skill de fazer isso sozinha.
+- Em andamento: nada — fronteira limpa, branch dos Grupos 51-54 mergeada.
+- Próxima ação: sem pendência de entrega. Candidatos: regenerar o harness
+  DESTE repo (Grupo 47, para ele passar a dogfoodar a catraca — hoje o
+  `executar-grupo` instalado não tem o passo 6) e desbloquear o Grupo 26
+  (instrumento do nível E). A validação da catraca no PetClinic, com uma
+  feature de teste, fica a critério do usuário.
 
 ## O que mudou nesta sessão (Grupos 53 e 54)
 Achados da revisão do harness gerado no PetClinic (rodada desta sessão), com os
