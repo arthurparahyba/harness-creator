@@ -3,17 +3,17 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `0580104` (Grupo 3 de `memoria-do-harness`) na branch
-  `feature/memoria-do-harness`. NÃO empurrado.
+- Commit verificado: `fdddae5` (Grupo 4 de `memoria-do-harness`) na branch
+  `feature/memoria-do-harness`. NÃO empurrado. Funcionalidade COMPLETA (G1–4).
 - Testes: 945/945 + 4 skips explícitos; ruff e mypy strict limpos; check-arch
   7/7. (`verificar-harness.sh` dá 9/11 aqui por design — ver Grupo 44.)
-- Change/plano ativo: `tasks/memoria-do-harness/tasks.md` (Grupos 1–3
-  concluídos; Grupo 4 — validação no PetClinic — a seguir). Sistema de memória
-  de 3 camadas no harness gerado (memlog + `knowledge/` + catraca-curadoria). A
-  jornada mora em `tasks/memoria-do-harness/memlog.md` (dogfooding); aqui é só o
-  estado.
-- Em andamento: nada — Grupo 3 commitado. Grupo 4 (validação no PetClinic) por
-  começar.
+- Change/plano ativo: `tasks/memoria-do-harness/tasks.md` (Grupos 1–4
+  concluídos). Sistema de memória de 3 camadas no harness gerado (memlog +
+  `knowledge/` + catraca-curadoria), validado ponta a ponta no PetClinic — reuso
+  provado em sessão headless limpa. Jornada em
+  `tasks/memoria-do-harness/memlog.md` (24 entradas).
+- Em andamento: nada — funcionalidade completa e commitada. Falta só a ENTREGA
+  (push + merge `--no-ff` na `main`), aguardando o usuário.
 - Bloqueios / pendências fora de escopo:
   - o gate casa padrão destrutivo passado como DADO (falso positivo — barrou um
     `append` cujo TEXTO mencionava um comando); heurística do gate, não do
@@ -21,9 +21,8 @@
   - disciplina de versão (`metadata.version` travada em 2.5)
   - arch-rule candidato "plano ativo declarado resolve para arquivo existente"
   - Grupo 26 (instrumento do nível E) bloqueado
-- Próxima ação: Grupo 4 — validação no PetClinic: gerar o harness novo num
-  clone, Tarefa A (investigar → `knowledge/`), Tarefa B (reuso). Ressalva: sem
-  JDK a build não roda.
+- Próxima ação: entregar (push da branch + CI verde + merge `--no-ff` na
+  `main`), aguardando o usuário.
 
 ## O que mudou nesta sessão (Grupo 2 de regenerar-harness)
 Migração da fonte de trabalho do `TASKS.md` único para o formato de pastas
