@@ -3,22 +3,23 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `72d0c07` (Grupo 1) + o checkpoint do Grupo 2 a seguir
-  nesta mesma branch `feature/regenerar-harness-deste-repo`. NÃO empurrado.
+- Commit verificado: `7ab85dc` (merge `--no-ff` de `regenerar-harness`,
+  Grupos 1-2) na `main`, empurrado. CI Harness DoD verde.
 - Testes: 932/932 + 4 skips explícitos; ruff e mypy strict limpos; check-arch
   7/7. (`verificar-harness.sh` dá 9/11 aqui por design — cego para o repo da
   skill; ver Grupo 44.)
 - Change/plano ativo: `tasks/regenerar-harness/tasks.md` (Grupos 1 e 2
-  concluídos). O histórico dos 54 grupos foi arquivado em
+  concluídos e NA `main`). O histórico dos 54 grupos foi arquivado em
   `tasks/historico/tasks.md` (verbatim, via `git mv`); não há mais `TASKS.md`
   na raiz. Grupo 26 segue aberto e BLOQUEADO (ver pendências).
-- Em andamento: nada — os dois grupos de `regenerar-harness` estão commitados.
-  Falta só a ENTREGA (push + merge `--no-ff` na `main`), aguardando o usuário.
-- Próxima ação: entregar (push da branch + CI verde + merge `--no-ff` na
-  `main`). Pendências: disciplina de versão (`metadata.version` travada em 2.5
-  apesar do drift dos Grupos 45–54); candidato a arch-rule "o plano ativo
-  declarado no SESSION_STATE resolve para um arquivo existente" (parsing de
-  campo livre é frágil — avaliar antes de virar regra).
+- Em andamento: nada — fronteira limpa, `regenerar-harness` entregue na `main`.
+- Próxima ação: sem pendência de entrega. O harness deste repo agora está nos
+  templates atuais e dogfooda a catraca (`executar-grupo` com o passo 6). O
+  próximo plano nasce em `tasks/<funcionalidade>/`. Pendências: disciplina de
+  versão (`metadata.version` travada em 2.5 apesar do drift dos Grupos 45–54);
+  candidato a arch-rule "o plano ativo declarado no SESSION_STATE resolve para
+  um arquivo existente" (parsing de campo livre é frágil); desbloquear o Grupo
+  26 (instrumento do nível E).
 
 ## O que mudou nesta sessão (Grupo 2 de regenerar-harness)
 Migração da fonte de trabalho do `TASKS.md` único para o formato de pastas
