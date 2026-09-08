@@ -3,20 +3,78 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `ccc3114` (merge `--no-ff` dos Grupos 51-54) na `main`,
-  empurrado. CI Harness DoD verde.
+- Commit verificado: `72d0c07` (Grupo 1) + o checkpoint do Grupo 2 a seguir
+  nesta mesma branch `feature/regenerar-harness-deste-repo`. NÃO empurrado.
 - Testes: 932/932 + 4 skips explícitos; ruff e mypy strict limpos; check-arch
-  7/7.
-- Change/plano ativo: `TASKS.md` na raiz. Grupos 25, 27 a 54 concluídos e NA
-  `main`; Grupo 26 aberto e BLOQUEADO (ver pendências). Este repositório
-  continua no layout LEGADO de propósito: migrar o histórico é decisão do
-  usuário, e o próprio `atualizacao.md` proíbe a skill de fazer isso sozinha.
-- Em andamento: nada — fronteira limpa, branch dos Grupos 51-54 mergeada.
-- Próxima ação: sem pendência de entrega. Candidatos: regenerar o harness
-  DESTE repo (Grupo 47, para ele passar a dogfoodar a catraca — hoje o
-  `executar-grupo` instalado não tem o passo 6) e desbloquear o Grupo 26
-  (instrumento do nível E). A validação da catraca no PetClinic, com uma
-  feature de teste, fica a critério do usuário.
+  7/7. (`verificar-harness.sh` dá 9/11 aqui por design — cego para o repo da
+  skill; ver Grupo 44.)
+- Change/plano ativo: `tasks/regenerar-harness/tasks.md` (Grupos 1 e 2
+  concluídos). O histórico dos 54 grupos foi arquivado em
+  `tasks/historico/tasks.md` (verbatim, via `git mv`); não há mais `TASKS.md`
+  na raiz. Grupo 26 segue aberto e BLOQUEADO (ver pendências).
+- Em andamento: nada — os dois grupos de `regenerar-harness` estão commitados.
+  Falta só a ENTREGA (push + merge `--no-ff` na `main`), aguardando o usuário.
+- Próxima ação: entregar (push da branch + CI verde + merge `--no-ff` na
+  `main`). Pendências: disciplina de versão (`metadata.version` travada em 2.5
+  apesar do drift dos Grupos 45–54); candidato a arch-rule "o plano ativo
+  declarado no SESSION_STATE resolve para um arquivo existente" (parsing de
+  campo livre é frágil — avaliar antes de virar regra).
+
+## O que mudou nesta sessão (Grupo 2 de regenerar-harness)
+Migração da fonte de trabalho do `TASKS.md` único para o formato de pastas
+`tasks/<funcionalidade>/tasks.md`, decisão do usuário (o `atualizacao.md`
+proíbe a skill de migrar sozinha e passa a bola pro humano).
+
+- `TASKS.md` → `tasks/historico/tasks.md` via `git mv` (rename rastreado, 1463
+  linhas verbatim, ordem intacta — que é o que os commits `checkpoint:`
+  referenciam). Estratégia ARQUIVAR (não fatiar por tema): zero distorção.
+- Manifesto (`.claude/harness.json`): `gerado_em` 2026-09-05, `TASKS.md` fora,
+  `tasks/README.md` dentro (skill-owned). Os arquivos de plano
+  (`tasks/*/tasks.md`) NÃO entram — não listá-los é o que faz um update futuro
+  tratá-los como conteúdo do usuário e não sobrescrever. `versao` fica 2.5
+  (igual à da skill; o número não foi incrementado — ver pendência).
+- `init.sh` e `medir-aderencia` confirmados: enxergam as duas pastas
+  (`tasks/historico`, `tasks/regenerar-harness`) e o plano ativo (0/6 alertas).
+
+Catraca sobre o diff: considerado o arch-rule "o plano ativo declarado resolve
+para arquivo existente" (o risco que a migração expõe: ponteiro do
+SESSION_STATE órfão). Não virou regra — o campo é texto livre e o parsing é
+frágil (o mesmo best-effort de init/medir), e a A05 já garante que EXISTE uma
+fonte. Registrado como pendência, não inventado como regra.
+
+DoD verde: pytest 932/932 + 4 skips, ruff, mypy, check-arch 7/7.
+
+## O que mudou nesta sessão (Grupo 1 de regenerar-harness)
+Regeneração do harness DESTE repo (dívida do Grupo 47), caminho de ATUALIZAÇÃO
+(`atualizacao.md`): manifesto íntegro (2.5, python-pip). O harness foi gerado
+no Grupo 44 e ficou atrás dos templates dos Grupos 45–54 — o defeito concreto
+era o `executar-grupo` sem o passo da catraca, então o repo que constrói o
+gerador não dogfoodava a própria catraca.
+
+Classificação por conteúdo (a `metadata.version` ficou travada em 2.5, então o
+delta foi medido gerando o harness python num temp com `gerar.py` e comparando
+arquivo a arquivo, não pelo número de versão):
+- **Atualizados (11):** `executar-grupo` (catraca + fontes folder-aware),
+  AGENTS.md (Fontes de trabalho sem precedência, passo 3 "estude antes de
+  propor", ferramenta `propor-regra-arch`), init.sh e `medir-aderencia` (leem o
+  plano ativo do SESSION_STATE), arch-rules.json (A05 folder-aware, sem campos
+  de contexto-dev), check-arch/gate-destructive/format-on-edit/editorconfig
+  (limpeza de contexto-dev do Grupo 54), `propor-regra-arch` (honestidade das
+  ferramentas do Grupo 53).
+- **Preservados de propósito:** `dod-command.md` (o `-q` é valor correto
+  daqui — sobrescrever com a fixture o removeria), o CI `harness-dod.yml` (o
+  gate `harness-score --min-level 4` é só deste repo, e o step check-arch está
+  em `recusados`), `SESSION_STATE.md`, o AGENTS.md de escopo da skill.
+- **Novo:** formato de pastas `tasks/` — `tasks/README.md` e
+  `tasks/regenerar-harness/tasks.md` (este plano). O `TASKS.md` legado continua
+  fonte válida até o Grupo 2 arquivá-lo.
+
+Catraca exercitada sobre o próprio diff: nada a propor. Candidatos a regra
+("harness == templates" não é portátil; "manifest.versao == SKILL.md" não
+pegaria, ambos 2.5) falham o critério de invariante determinístico e portátil.
+A lição é disciplina de versão, registrada como pendência.
+
+DoD verde: pytest 932/932 + 4 skips, ruff, mypy, check-arch 7/7.
 
 ## O que mudou nesta sessão (Grupos 53 e 54)
 Achados da revisão do harness gerado no PetClinic (rodada desta sessão), com os

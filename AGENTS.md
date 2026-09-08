@@ -7,13 +7,26 @@ references/, resources/). Python 3.11+ só para os sensores (pytest, ruff,
 mypy strict). Fonte: pyproject.toml, .claude/skills/harness-creator/SKILL.md.
 
 
-## Fontes de trabalho (nesta ordem de precedência)
-O plano de trabalho vive em UM destes lugares — use o primeiro que existir:
-1. `openspec/changes/<change-ativa>/tasks.md`
-2. `TASKS.md` na raiz do repositório
+## Fontes de trabalho
+Existe no MÁXIMO UM plano ativo por vez (WIP=1), e o `SESSION_STATE.md`
+declara qual, no campo "Change/plano ativo". Enquanto ele estiver ativo é a
+única fonte: não abra grupo na outra. As fontes possíveis são:
+- `openspec/changes/<change-ativa>/tasks.md`
+- `tasks/<funcionalidade-ativa>/tasks.md`
 
-Para criar ou modificar o plano, acrescente o grupo ao `TASKS.md` no
-formato descrito abaixo e confirme com o usuário antes de executá-lo.
+Uma pasta por funcionalidade nas duas, e por isso a mesma forma: o plano
+nasce, vive e fica na pasta dela. Repositório com harness antigo pode ter o
+plano num `TASKS.md` único na raiz — continua válido como fonte; o próximo
+plano é que vai para `tasks/`.
+
+Se o `SESSION_STATE.md` não declarar nenhum e as duas tiverem grupo
+desmarcado, PERGUNTE qual seguir — ordem de arquivo não é decisão.
+
+Para criar ou modificar o plano, acrescente o grupo ao
+`tasks/<funcionalidade>/tasks.md` — uma pasta por funcionalidade, criada na
+primeira vez —, no formato descrito abaixo, e confirme com o usuário antes de
+executá-lo. Antes de propor, estude o repositório (passo 3) e apresente o
+achado junto do grupo — a fase de estudo não depende de ferramenta nenhuma.
 Nunca invente tarefas fora da fonte de trabalho ativa.
 
 ## Início de nova funcionalidade/tarefa (OBRIGATÓRIO, antes de qualquer ação)
@@ -23,9 +36,12 @@ Nunca invente tarefas fora da fonte de trabalho ativa.
    implementação com grupo em andamento (não commitado), termine esse
    grupo antes de qualquer outra coisa, inclusive antes do pedido novo
 3. O pedido está coberto pela fonte de trabalho ativa (grupo já
-   planejado)? Se NÃO estiver, pare — não implemente direto. Proponha
-   antes de editar qualquer arquivo, do jeito descrito em "Fontes de
-   trabalho".
+   planejado)? Se NÃO estiver, pare — não implemente direto. **Estude
+   antes de propor**: onde no repositório a mudança encosta, o que já
+   existe que faça parte disso, e o que o pedido não diz. Apresente o
+   achado junto da proposta — plano sem estudo é chute com formatação de
+   plano, e o custo dele aparece três grupos depois. Proponha antes de
+   editar qualquer arquivo, do jeito descrito em "Fontes de trabalho".
 4. Antes de implementar qualquer coisa nova (primeiro grupo de uma
    funcionalidade nova), crie e mude para uma feature branch atualizada a
    partir de `main`:
@@ -39,8 +55,9 @@ Nunca invente tarefas fora da fonte de trabalho ativa.
 5. Identifique o próximo grupo desmarcado na fonte de trabalho ativa
 
 ## Estrutura do plano de trabalho
-Cada change/funcionalidade tem seu próprio `tasks.md`. Independente de
-onde vive, o plano segue este formato:
+Cada change/funcionalidade tem seu próprio `tasks.md`, na pasta dela —
+`tasks/<funcionalidade>/tasks.md` ou `openspec/changes/<change>/tasks.md`.
+Independente de onde vive, o plano segue este formato:
 - Um grupo é um checkpoint DENTRO da funcionalidade em implementação —
   não a funcionalidade inteira. Tasks organizadas em GRUPOS coesos de
   2-5 tasks (`## Grupo N - <objetivo>`), todos pertencentes à mesma
@@ -73,6 +90,8 @@ Saída de comando é evidência; "parece funcionar" não é.
 
 ## Ferramentas deste harness
 - Para fechar um grupo do plano: skill `executar-grupo` (passo a passo).
+- Para transformar um achado de revisão em regra executável: subagente
+  `propor-regra-arch` (só Claude Code; propõe rascunho, você aceita).
 - Para verificar a Definition of Done: comando `/dod`.
 - Hooks de agent loop ativos: gate de comandos destrutivos, formatação
   automática a cada edição, e registro de sessão.

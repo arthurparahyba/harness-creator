@@ -199,7 +199,7 @@ fi
 N_CHECK=$(awk -F'\t' '$2 ~ /^checkpoint:/ {n++} END {print n+0}' "$LOG")
 if [ "$N_COMMITS" -eq 0 ]; then
   # Zero commit na janela nao e indisciplina, e ausencia de dados — e a
-  # medida 5 ja tratava o caso equivalente assim desde o Grupo 41 (sem
+  # medida 5 ja tratava o caso equivalente assim (sem
   # trace, ela imprime "sem trace" e se declara cega). Eram duas medidas do
   # mesmo script tratando a mesma situacao de formas opostas; agora nao sao.
   if [ -n "$INSTALADO_EM" ]; then
@@ -223,24 +223,45 @@ else
 fi
 
 # ------------------------------- 2. grupo concluido sem commit de checkpoint
-# Fonte de trabalho na precedencia do AGENTS.md: change ativa do OpenSpec
-# primeiro, TASKS.md depois. Medir a fonte errada produziria zero grupos e
-# um falso ok.
-FONTE=""
+# Fonte de trabalho: a ATIVA, declarada no SESSION_STATE.md (AGENTS.md,
+# "Fontes de trabalho"). Precedencia fixa media a fonte errada quando as duas
+# existem — grupos fechados no TASKS.md contavam zero enquanto houvesse change
+# ativa, e o diagnostico mentia para baixo. Sem declaracao, medir TODAS: o
+# medidor mostra, nao decide qual vale.
+ATIVO=$(sed -n 's|^- Change/plano ativo:[[:space:]]*||p' SESSION_STATE.md 2>/dev/null | head -1)
+TODAS=""
 if [ -d openspec/changes ]; then
   for d in openspec/changes/*/; do
     [ -d "$d" ] || continue
     case "$d" in */archive/) continue ;; esac
-    [ -f "$d/tasks.md" ] && FONTE="$FONTE $d/tasks.md"
+    [ -f "$d/tasks.md" ] && TODAS="$TODAS $d/tasks.md"
   done
 fi
-if [ -z "$FONTE" ] && [ -f TASKS.md ]; then FONTE="TASKS.md"; fi
+if [ -d tasks ]; then
+  for d in tasks/*/; do
+    [ -f "$d/tasks.md" ] && TODAS="$TODAS $d/tasks.md"
+  done
+fi
+# Legado: harness antigo gravava um TASKS.md unico na raiz.
+[ -f TASKS.md ] && TODAS="$TODAS TASKS.md"
+
+FONTE=""
+if [ -n "$ATIVO" ]; then
+  for f in $TODAS; do
+    case "$f" in
+      TASKS.md) case "$ATIVO" in *TASKS.md*) FONTE="$f" ;; esac ;;
+      *) _nome=$(basename "$(dirname "$f")")
+         case "$ATIVO" in *"$_nome"*) FONTE="$f" ;; esac ;;
+    esac
+  done
+fi
+if [ -z "$FONTE" ]; then FONTE="$TODAS"; fi
 
 if [ -z "$FONTE" ]; then
   medida "Grupos concluidos com checkpoint" 1 "sem fonte de trabalho" \
-    "nao ha TASKS.md nem change ativa em openspec/changes/" \
+    "nao ha plano em tasks/, nem TASKS.md, nem change ativa em openspec/changes/" \
     "sem fonte de trabalho o agente inventa tarefas, que e o que o protocolo proibe — e nao ha o que comparar com o historico" \
-    "crie TASKS.md com ao menos um grupo no formato '## Grupo N - <objetivo>'" \
+    "crie tasks/<funcionalidade>/tasks.md com ao menos um grupo no formato '## Grupo N - <objetivo>'" \
     "plano que vive fora do repositorio (issue tracker, documento)"
 else
   # Um grupo esta concluido quando TODAS as suas tasks estao marcadas. E a
