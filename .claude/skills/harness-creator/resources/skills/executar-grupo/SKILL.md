@@ -39,18 +39,29 @@ este arquivo é só a sequência de execução.
    disponíveis, recomende uma (contrato, comportamento observável ou
    migração → OpenSpec; o resto → `tasks/`), deixe a escolha com o usuário
    e registre-a no `SESSION_STATE.md`.
-4. **Implementar**: só as tasks deste grupo. Problema fora do escopo vira
-   pendência no `SESSION_STATE.md`, não conserto agora.
+4. **Implementar**: só as tasks deste grupo. Ao longo do trabalho, registre a
+   jornada no memlog da funcionalidade — cada decisão ou achado que importa é
+   uma linha, barata e atômica:
+   `sh .claude/memlog.sh append tasks/<funcionalidade>/memlog.md <tipo> <texto>`.
+   O `SESSION_STATE.md` guarda só o ESTADO atual; a jornada mora no memlog, que
+   não se relê durante a sessão. Problema fora do escopo vira pendência no
+   `SESSION_STATE.md`, não conserto agora.
 5. **Verificar**: rode a linha `Verificação:` do grupo e depois a
    Definition of Done completa (comando `/dod`). Saída de comando é a
    evidência; "parece funcionar" não é.
-6. **Catraca (revisão → regra)**: se o trabalho deste grupo revelou um
-   problema que pode se repetir, revise o diff e proponha uma regra para
-   `.harness/arch-rules.json` — assim o `check-arch.sh` passa a barrar aquela
-   classe de erro em toda DoD. No Claude Code, delegue ao subagente
-   `propor-regra-arch` (lê o diff, devolve rascunho; você aceita e adiciona a
-   regra — ele não escreve o arquivo). Nos demais agentes, a revisão é manual.
-   Nada a propor é resposta válida — não invente regra.
+6. **Curadoria (memlog + diff → conhecimento e regra)**: releia o memlog da
+   funcionalidade e o diff do grupo. Promova cada achado durável ao seu destino,
+   na régua de durabilidade **memlog (efêmero) → `knowledge/` (durável) →
+   arch-rule (verificável)**:
+   - **Classe de erro que pode se repetir** → uma regra em
+     `.harness/arch-rules.json`, para o `check-arch.sh` barrá-la em toda DoD. No
+     Claude Code, delegue ao subagente `propor-regra-arch` (lê o diff, devolve
+     rascunho; você aceita — ele não escreve o arquivo). Nos demais agentes, a
+     revisão é manual.
+   - **Como um componente funciona, descoberto investigando** → um arquivo em
+     `knowledge/`, com a Prova (ver `knowledge/README.md`).
+   O que não for durável fica só no memlog. Nada a promover é resposta válida —
+   não invente regra nem conhecimento.
 7. **Commitar**: um commit por grupo — `checkpoint: <nome do grupo>`.
    Nunca commite com verificação falhando.
 8. **Handoff**: atualize `SESSION_STATE.md` (hash do commit, testes X/Y,
