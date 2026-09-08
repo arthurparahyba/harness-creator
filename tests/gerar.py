@@ -425,6 +425,9 @@ def gerar(nome: str, destino: Path) -> Stack:
                 "<restrição 2>": "alterar o lockfile à mão",
                 "<ferramentas-do-harness>": (
                     "- Para fechar um grupo do plano: skill `executar-grupo` (passo a passo).\n"
+                    "- Para registrar a jornada da funcionalidade (append-only): o memlog,\n"
+                    "  `sh .claude/memlog.sh append "
+                    "tasks/<funcionalidade>/memlog.md <tipo> <texto>`.\n"
                     "- Para transformar um achado de revisão em regra executável: subagente\n"
                     "  `propor-regra-arch` (só Claude Code; propõe rascunho, você aceita).\n"
                     "- Para verificar a Definition of Done: comando `/dod`.\n"
@@ -542,6 +545,7 @@ def gerar(nome: str, destino: Path) -> Stack:
         ("hooks/registrar-sessao.sh", ".claude/hooks/registrar-sessao.sh"),
         ("verificar-harness.sh", ".claude/verificar-harness.sh"),
         ("medir-aderencia.sh", ".claude/medir-aderencia.sh"),
+        ("memlog.sh", ".claude/memlog.sh"),
         ("skills/executar-grupo/SKILL.md", ".claude/skills/executar-grupo/SKILL.md"),
         ("CLAUDE.md", "CLAUDE.md"),
         ("CLAUDE.md", f"{stack.dir_escopo}/CLAUDE.md"),
@@ -599,6 +603,7 @@ def gerar(nome: str, destino: Path) -> Stack:
         *((".claude/hooks/format-on-edit.sh",) if stack.escopa_por_arquivo else ()),
         ".claude/verificar-harness.sh",
         ".claude/medir-aderencia.sh",
+        ".claude/memlog.sh",
     )
     for script in scripts:
         (destino / script).chmod(0o755)

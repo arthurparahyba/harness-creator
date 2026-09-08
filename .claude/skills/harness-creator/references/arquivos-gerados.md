@@ -67,6 +67,7 @@ cópia, o conteúdo continua vivendo num lugar só.
 | hooks/registrar-sessao.sh | `.claude/hooks/registrar-sessao.sh` (chmod +x) | sempre (se não existir) |
 | verificar-harness.sh | `.claude/verificar-harness.sh` (chmod +x) | sempre |
 | medir-aderencia.sh | `.claude/medir-aderencia.sh` (chmod +x) | sempre |
+| memlog.sh | `.claude/memlog.sh` (chmod +x) | sempre |
 | pre-commit-config.yaml | `.pre-commit-config.yaml` | se não existir **e houver comandos reais de lint/format/types** |
 | dod-command.md | `.claude/commands/dod.md` | sempre (se não existir) |
 | harness-manifest.json | `.claude/harness.json` | sempre (sobrescrever se já existir) |

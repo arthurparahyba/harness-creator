@@ -97,7 +97,9 @@ Saída de comando é evidência; "parece funcionar" não é.
 Não existe um evento de "fim de sessão" que o agente consiga detectar —
 por isso todo commit de grupo é tratado como um possível fim de sessão:
 1. Atualize `SESSION_STATE.md`: commit hash, testes (X/Y), bloqueios,
-   próxima ação
+   próxima ação — só o ESTADO. A jornada (o que foi feito e por quê) já está no
+   memlog da funcionalidade (`tasks/<funcionalidade>/memlog.md`), apendada ao
+   longo do trabalho; não a repita aqui.
 2. Se o grupo ficou incompleto (nada commitado ainda), registre o
    estado parcial em SESSION_STATE.md mesmo assim
 3. Após o commit do grupo: PARE e informe "Grupo N concluído.

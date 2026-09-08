@@ -3,23 +3,24 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `7ab85dc` (merge `--no-ff` de `regenerar-harness`,
-  Grupos 1-2) na `main`, empurrado. CI Harness DoD verde.
+- Commit verificado: `61848d6` (handoff pós-merge de `regenerar-harness`) na
+  `main`. `feature/memoria-do-harness` criada a partir dela.
 - Testes: 932/932 + 4 skips explícitos; ruff e mypy strict limpos; check-arch
   7/7. (`verificar-harness.sh` dá 9/11 aqui por design — cego para o repo da
   skill; ver Grupo 44.)
-- Change/plano ativo: `tasks/regenerar-harness/tasks.md` (Grupos 1 e 2
-  concluídos e NA `main`). O histórico dos 54 grupos foi arquivado em
-  `tasks/historico/tasks.md` (verbatim, via `git mv`); não há mais `TASKS.md`
-  na raiz. Grupo 26 segue aberto e BLOQUEADO (ver pendências).
-- Em andamento: nada — fronteira limpa, `regenerar-harness` entregue na `main`.
-- Próxima ação: sem pendência de entrega. O harness deste repo agora está nos
-  templates atuais e dogfooda a catraca (`executar-grupo` com o passo 6). O
-  próximo plano nasce em `tasks/<funcionalidade>/`. Pendências: disciplina de
-  versão (`metadata.version` travada em 2.5 apesar do drift dos Grupos 45–54);
-  candidato a arch-rule "o plano ativo declarado no SESSION_STATE resolve para
-  um arquivo existente" (parsing de campo livre é frágil); desbloquear o Grupo
-  26 (instrumento do nível E).
+- Change/plano ativo: `tasks/memoria-do-harness/tasks.md` (Grupo 1 em
+  andamento). Adiciona ao harness GERADO um sistema de memória de 3 camadas:
+  memlog (jornada, append-only) + `knowledge/` (conhecimento de componente,
+  revisável, com prova) + a catraca lendo o memlog. Reuso: estado (encolhe) e
+  arch-rules. Decisões travadas: memlog commitado, `knowledge/` na raiz, sem
+  how-it-works (investigação tool-agnóstica), estado no SESSION_STATE.
+- Em andamento: Grupo 1 (memlog — script + gerar.py + edits de
+  AGENTS/executar-grupo + sensores). Nada commitado ainda.
+- Bloqueios / pendências fora de escopo:
+  - disciplina de versão (`metadata.version` travada em 2.5)
+  - arch-rule candidato "plano ativo declarado resolve para arquivo existente"
+  - Grupo 26 (instrumento do nível E) bloqueado
+- Próxima ação: terminar o Grupo 1 e rodar a DoD.
 
 ## O que mudou nesta sessão (Grupo 2 de regenerar-harness)
 Migração da fonte de trabalho do `TASKS.md` único para o formato de pastas

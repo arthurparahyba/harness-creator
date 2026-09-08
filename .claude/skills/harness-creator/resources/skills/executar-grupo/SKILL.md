@@ -39,8 +39,13 @@ este arquivo é só a sequência de execução.
    disponíveis, recomende uma (contrato, comportamento observável ou
    migração → OpenSpec; o resto → `tasks/`), deixe a escolha com o usuário
    e registre-a no `SESSION_STATE.md`.
-4. **Implementar**: só as tasks deste grupo. Problema fora do escopo vira
-   pendência no `SESSION_STATE.md`, não conserto agora.
+4. **Implementar**: só as tasks deste grupo. Ao longo do trabalho, registre a
+   jornada no memlog da funcionalidade — cada decisão ou achado que importa é
+   uma linha, barata e atômica:
+   `sh .claude/memlog.sh append tasks/<funcionalidade>/memlog.md <tipo> <texto>`.
+   O `SESSION_STATE.md` guarda só o ESTADO atual; a jornada mora no memlog, que
+   não se relê durante a sessão. Problema fora do escopo vira pendência no
+   `SESSION_STATE.md`, não conserto agora.
 5. **Verificar**: rode a linha `Verificação:` do grupo e depois a
    Definition of Done completa (comando `/dod`). Saída de comando é a
    evidência; "parece funcionar" não é.
