@@ -3,17 +3,15 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `fdddae5` (Grupo 4 de `memoria-do-harness`) na branch
-  `feature/memoria-do-harness`. NÃO empurrado. Funcionalidade COMPLETA (G1–4).
+- Commit verificado: `d5d6453` (merge `--no-ff` de `memoria-do-harness`,
+  Grupos 1-4) na `main`, empurrado. CI Harness DoD verde.
 - Testes: 945/945 + 4 skips explícitos; ruff e mypy strict limpos; check-arch
   7/7. (`verificar-harness.sh` dá 9/11 aqui por design — ver Grupo 44.)
-- Change/plano ativo: `tasks/memoria-do-harness/tasks.md` (Grupos 1–4
-  concluídos). Sistema de memória de 3 camadas no harness gerado (memlog +
-  `knowledge/` + catraca-curadoria), validado ponta a ponta no PetClinic — reuso
-  provado em sessão headless limpa. Jornada em
-  `tasks/memoria-do-harness/memlog.md` (24 entradas).
-- Em andamento: nada — funcionalidade completa e commitada. Falta só a ENTREGA
-  (push + merge `--no-ff` na `main`), aguardando o usuário.
+- Change/plano ativo: nenhum — `memoria-do-harness` entregue na `main`. O
+  harness gerado agora tem o sistema de memória de 3 camadas (memlog +
+  `knowledge/` + catraca-curadoria), validado no PetClinic (reuso provado em
+  sessão headless). O próximo plano nasce em `tasks/<funcionalidade>/`.
+- Em andamento: nada — fronteira limpa, `memoria-do-harness` entregue.
 - Bloqueios / pendências fora de escopo:
   - o gate casa padrão destrutivo passado como DADO (falso positivo — barrou um
     `append` cujo TEXTO mencionava um comando); heurística do gate, não do
@@ -21,8 +19,9 @@
   - disciplina de versão (`metadata.version` travada em 2.5)
   - arch-rule candidato "plano ativo declarado resolve para arquivo existente"
   - Grupo 26 (instrumento do nível E) bloqueado
-- Próxima ação: entregar (push da branch + CI verde + merge `--no-ff` na
-  `main`), aguardando o usuário.
+- Próxima ação: sem pendência de entrega. Candidato natural: regenerar ESTE
+  repo com o novo template, para ele passar a dogfoodar o memlog + `knowledge/`
+  de verdade (hoje só o template os tem). Depois, desbloquear o Grupo 26.
 
 ## O que mudou nesta sessão (Grupo 2 de regenerar-harness)
 Migração da fonte de trabalho do `TASKS.md` único para o formato de pastas
