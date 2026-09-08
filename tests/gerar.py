@@ -537,6 +537,7 @@ def gerar(nome: str, destino: Path) -> Stack:
     for origem, alvo in [
         ("SESSION_STATE.md", "SESSION_STATE.md"),
         ("tasks-README.md", "tasks/README.md"),
+        ("knowledge-README.md", "knowledge/README.md"),
         ("editorconfig-base", ".editorconfig"),
         ("hooks/gate-destructive.sh", ".claude/hooks/gate-destructive.sh"),
         # Vai SEMPRE, inclusive onde o `format-on-edit.sh` não vai: observar

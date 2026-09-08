@@ -27,12 +27,12 @@ tool-agnóstica); estado no SESSION_STATE.
 Verificação: pytest -q && ruff check . && mypy && bash .claude/check-arch.sh
 
 ## Grupo 2 - Base knowledge/ (método, formato, fontes) + wiring (depende: G1)
-- [ ] 2.1 Templates: `knowledge/README.md` (como investigar + formato + lista
+- [x] 2.1 Templates: `knowledge/README.md` (como investigar + formato + lista
       de fontes) e o frontmatter de proveniência + seção Prova.
-- [ ] 2.2 `AGENTS.md`: ponteiro "Conhecimento do repositório" + passo 3 checa
-      `knowledge/` primeiro; `gerar.py` cria o scaffolding.
-- [ ] 2.3 Sensores: `knowledge/README` existe, o AGENTS aponta (não inline),
-      formato documentado.
+- [x] 2.2 `AGENTS.md`: seção "Conhecimento do repositório" (ponteiro) + passo 3
+      checa `knowledge/` primeiro; `gerar.py` cria o scaffolding.
+- [x] 2.3 Sensores: `knowledge/README` existe, o AGENTS aponta (não inline —
+      `derivado_de` fica no README), formato (proveniência + Prova) documentado.
 Verificação: pytest -q && ruff check . && mypy && bash .claude/check-arch.sh
 
 ## Grupo 3 - Curadoria: catraca lê o memlog + promoção (depende: G2)

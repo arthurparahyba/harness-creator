@@ -3,24 +3,25 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `61848d6` (handoff pós-merge de `regenerar-harness`) na
-  `main`. `feature/memoria-do-harness` criada a partir dela.
-- Testes: 932/932 + 4 skips explícitos; ruff e mypy strict limpos; check-arch
-  7/7. (`verificar-harness.sh` dá 9/11 aqui por design — cego para o repo da
-  skill; ver Grupo 44.)
-- Change/plano ativo: `tasks/memoria-do-harness/tasks.md` (Grupo 1 em
-  andamento). Adiciona ao harness GERADO um sistema de memória de 3 camadas:
-  memlog (jornada, append-only) + `knowledge/` (conhecimento de componente,
-  revisável, com prova) + a catraca lendo o memlog. Reuso: estado (encolhe) e
-  arch-rules. Decisões travadas: memlog commitado, `knowledge/` na raiz, sem
-  how-it-works (investigação tool-agnóstica), estado no SESSION_STATE.
-- Em andamento: Grupo 1 (memlog — script + gerar.py + edits de
-  AGENTS/executar-grupo + sensores). Nada commitado ainda.
+- Commit verificado: `0870110` (Grupo 1 de `memoria-do-harness`) na branch
+  `feature/memoria-do-harness`. NÃO empurrado.
+- Testes: 938/938 + 4 skips explícitos; ruff e mypy strict limpos; check-arch
+  7/7. (`verificar-harness.sh` dá 9/11 aqui por design — ver Grupo 44.)
+- Change/plano ativo: `tasks/memoria-do-harness/tasks.md` (Grupo 1 concluído;
+  Grupo 2 a seguir). Sistema de memória de 3 camadas no harness gerado. A
+  jornada de cada grupo mora em `tasks/memoria-do-harness/memlog.md` (dogfooding
+  do memlog); aqui é só o estado.
+- Em andamento: nada — Grupo 1 commitado. Grupo 2 (base `knowledge/`) por
+  começar.
 - Bloqueios / pendências fora de escopo:
+  - o gate casa padrão destrutivo passado como DADO (falso positivo — barrou um
+    `append` cujo TEXTO mencionava um comando); heurística do gate, não do
+    check-arch
   - disciplina de versão (`metadata.version` travada em 2.5)
   - arch-rule candidato "plano ativo declarado resolve para arquivo existente"
   - Grupo 26 (instrumento do nível E) bloqueado
-- Próxima ação: terminar o Grupo 1 e rodar a DoD.
+- Próxima ação: Grupo 2 — base `knowledge/` (método + formato + fontes) +
+  wiring no AGENTS (passo 3 checa `knowledge/`).
 
 ## O que mudou nesta sessão (Grupo 2 de regenerar-harness)
 Migração da fonte de trabalho do `TASKS.md` único para o formato de pastas

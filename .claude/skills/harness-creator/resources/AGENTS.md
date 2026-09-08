@@ -30,11 +30,14 @@ Nunca invente tarefas fora da fonte de trabalho ativa.
    grupo antes de qualquer outra coisa, inclusive antes do pedido novo
 3. O pedido está coberto pela fonte de trabalho ativa (grupo já
    planejado)? Se NÃO estiver, pare — não implemente direto. **Estude
-   antes de propor**: onde no repositório a mudança encosta, o que já
-   existe que faça parte disso, e o que o pedido não diz. Apresente o
+   antes de propor**: cheque `knowledge/` primeiro (se já está lá e a Prova
+   passa, use); senão investigue onde a mudança encosta, o que já existe que
+   faça parte disso, e o que o pedido não diz, e registre em `knowledge/` o
+   que for durável. Apresente o
    achado junto da proposta — plano sem estudo é chute com formatação de
-   plano, e o custo dele aparece três grupos depois. Proponha antes de
-   editar qualquer arquivo, do jeito descrito em "Fontes de trabalho".
+   plano, e o custo dele aparece três grupos depois.
+   Proponha antes de editar qualquer arquivo, do jeito descrito em "Fontes de
+   trabalho".
 4. Antes de implementar qualquer coisa nova (primeiro grupo de uma
    funcionalidade nova), crie e mude para uma feature branch atualizada a
    partir de `<branch-base>`:
@@ -87,6 +90,12 @@ Saída de comando é evidência; "parece funcionar" não é.
 
 ## Ferramentas deste harness
 <ferramentas-do-harness>
+
+## Conhecimento do repositório
+Conhecimento caro de descobrir (uma solução da empresa, um componente
+não-óbvio) mora em `knowledge/` — não se re-investiga a cada sessão. Antes de
+investigar algo, cheque lá; se faltar ou a Prova estiver velha, investigue e
+registre. Método, formato e canais de investigação: `knowledge/README.md`.
 
 ## Commits
 - Um commit por grupo concluído: `checkpoint: <nome do grupo>`
