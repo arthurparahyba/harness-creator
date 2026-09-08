@@ -3,17 +3,17 @@
      Se a sessão terminou em fronteira limpa (grupo commitado), a maioria
      dos campos fica trivial — esse é o estado ideal. -->
 
-- Commit verificado: `5eb88c9` (Grupo 2 de `memoria-do-harness`) na branch
+- Commit verificado: `0580104` (Grupo 3 de `memoria-do-harness`) na branch
   `feature/memoria-do-harness`. NÃO empurrado.
-- Testes: 942/942 + 4 skips explícitos; ruff e mypy strict limpos; check-arch
+- Testes: 945/945 + 4 skips explícitos; ruff e mypy strict limpos; check-arch
   7/7. (`verificar-harness.sh` dá 9/11 aqui por design — ver Grupo 44.)
-- Change/plano ativo: `tasks/memoria-do-harness/tasks.md` (Grupos 1 e 2
-  concluídos; Grupo 3 a seguir). Sistema de memória de 3 camadas no harness
-  gerado (memlog + `knowledge/`). A jornada mora em
-  `tasks/memoria-do-harness/memlog.md` (dogfooding do memlog); aqui é só o
+- Change/plano ativo: `tasks/memoria-do-harness/tasks.md` (Grupos 1–3
+  concluídos; Grupo 4 — validação no PetClinic — a seguir). Sistema de memória
+  de 3 camadas no harness gerado (memlog + `knowledge/` + catraca-curadoria). A
+  jornada mora em `tasks/memoria-do-harness/memlog.md` (dogfooding); aqui é só o
   estado.
-- Em andamento: nada — Grupo 2 commitado. Grupo 3 (catraca lê o memlog +
-  promoção) por começar.
+- Em andamento: nada — Grupo 3 commitado. Grupo 4 (validação no PetClinic) por
+  começar.
 - Bloqueios / pendências fora de escopo:
   - o gate casa padrão destrutivo passado como DADO (falso positivo — barrou um
     `append` cujo TEXTO mencionava um comando); heurística do gate, não do
@@ -21,8 +21,9 @@
   - disciplina de versão (`metadata.version` travada em 2.5)
   - arch-rule candidato "plano ativo declarado resolve para arquivo existente"
   - Grupo 26 (instrumento do nível E) bloqueado
-- Próxima ação: Grupo 3 — a catraca (`executar-grupo` passo 6) passa a ler o
-  memlog e promove o durável (→ `knowledge/` e/ou `arch-rules`).
+- Próxima ação: Grupo 4 — validação no PetClinic: gerar o harness novo num
+  clone, Tarefa A (investigar → `knowledge/`), Tarefa B (reuso). Ressalva: sem
+  JDK a build não roda.
 
 ## O que mudou nesta sessão (Grupo 2 de regenerar-harness)
 Migração da fonte de trabalho do `TASKS.md` único para o formato de pastas

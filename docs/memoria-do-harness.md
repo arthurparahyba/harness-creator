@@ -118,3 +118,38 @@ conhecimento ainda vale — melhor que comparar datas de arquivo).
 
 Tudo é markdown + shell POSIX + prosa. `memlog.sh` é POSIX (`#!/bin/sh`), sem
 dependência de linguagem do repo alvo. Nenhuma ferramenta específica de agente.
+
+## Validação no PetClinic (Grupo 4)
+
+Prova ponta a ponta do loop **investigar → conhecimento → reuso**, num clone real
+do spring-petclinic (`818c413`, Java/Gradle) com o harness novo instalado.
+
+**Tarefa A** (feita à mão, exercitando o harness): investiguei como o PetClinic
+troca de banco (H2 → MySQL/Postgres via Spring profile — a propriedade
+`database` interpola `db/${database}/schema.sql`), escrevi
+`knowledge/database-profiles.md` com Prova re-rodável, e registrei a jornada com
+o `memlog.sh` **gerado**. A Prova roda: `grep '^database=' application*.properties`
+e `ls db/*/schema.sql`.
+
+**Tarefa B** (sessão headless `claude -p`, limpa, sem memória da A — US$ 0,75,
+19 turnos, 131 s): pedido para adicionar suporte a Oracle. Seguindo o passo 3 do
+AGENTS, ela:
+
+1. **Leu `knowledge/database-profiles.md`** (o reuso).
+2. **Rodou a Prova dele** e confirmou que passa — a Prova serviu de teste de
+   frescor, como projetado.
+3. Declarou: *"não reinvestiguei o mecanismo"* — o ganho de tempo/token.
+4. Leu também o `memlog` da investigação.
+5. **Achou a receita do `knowledge/` INCOMPLETA** ("Nenhum código muda" omite o
+   driver JDBC — sem `ojdbc11` o profile sobe e morre) e propôs **corrigir o
+   próprio `knowledge/database-profiles.md`**: a curadoria acontecendo — o
+   conhecimento melhora a cada reuso.
+
+O conhecimento foi usado, validado pela Prova, poupou re-investigação, e ainda
+disparou a própria melhoria — as quatro coisas que o design promete.
+
+**Ressalvas honestas:** sem JDK, a build do PetClinic não roda (validou-se a
+maquinaria, que é shell/markdown). O harness foi instalado por cópia de
+artefatos (não geração limpa), então o SESSION_STATE saiu em branco e o clone
+ficou sem git — a sessão B apontou os dois corretamente. É n=1: prova que o
+caminho funciona, não uma taxa.

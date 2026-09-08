@@ -45,13 +45,12 @@ Verificação: pytest -q && ruff check . && mypy && bash .claude/check-arch.sh
 Verificação: pytest -q && ruff check . && mypy && bash .claude/check-arch.sh
 
 ## Grupo 4 - Validação no PetClinic (depende: G3)
-- [ ] 4.1 Gerar o harness novo num clone do `spring-petclinic`.
-- [ ] 4.2 Tarefa A (investigar → conhecimento): força investigar algo
-      não-óbvio, gera `knowledge/<x>.md` com prova, registra a jornada no
-      memlog.
-- [ ] 4.3 Tarefa B (reuso), em sessão limpa: outra implementação na mesma área;
-      validar que o `knowledge/` foi consultado e o memlog registrou. Relatório
-      com evidência. Ressalva honesta: sem JDK nesta máquina a build do
-      PetClinic não roda — valida-se a maquinaria (shell/markdown).
-Verificação: relatório + artefatos (`knowledge/<x>.md` e `memlog.md`) presentes
-e prova de que a Tarefa B leu o conhecimento da Tarefa A.
+- [x] 4.1 Gerar o harness novo num clone do `spring-petclinic` (818c413).
+- [x] 4.2 Tarefa A: investiguei a troca de banco (Spring profiles), gerei
+      `knowledge/database-profiles.md` com Prova re-rodável, registrei no memlog
+      GERADO. A Prova roda.
+- [x] 4.3 Tarefa B (headless `claude -p`, sessão limpa): LEU o `knowledge/`,
+      RODOU a Prova, não reinvestigou, leu o memlog, e ainda achou a receita
+      incompleta e propôs corrigir o próprio `knowledge/`. Relatório em
+      `docs/memoria-do-harness.md`. Ressalva: sem JDK a build não roda; n=1.
+Verificação: relatório em docs + artefatos presentes + Tarefa B leu o knowledge (provado no transcript)

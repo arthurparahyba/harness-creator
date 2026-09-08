@@ -23,3 +23,8 @@ updated: 2026-09-08T16:15
 - (decisao) a catraca le o memlog alem do diff e promove aos dois destinos (arch-rules e knowledge/) na regua de durabilidade
 - (decisao) o sensor existente da catraca so exige propor-regra-arch presente; o rewrite manteve, sem afrouxar guard
 - (nota) Grupo 3 DoD verde: pytest 945, ruff, mypy, check-arch 7 de 7
+- (grupo) Grupo 4: validacao no PetClinic
+- (validacao) Tarefa A: knowledge/database-profiles.md + Prova rodavel + memlog GERADO, num clone real (818c413)
+- (validacao) Tarefa B headless (claude -p, 0.75 USD, 19 turnos): LEU o knowledge, RODOU a Prova, nao reinvestigou, LEU o memlog
+- (achado) loop de melhoria sozinho: a Tarefa B achou a receita incompleta (driver JDBC) e propos corrigir o proprio knowledge
+- (nota) ressalva: sem JDK, sem git no clone, SESSION_STATE em branco (setup por copia); n=1
