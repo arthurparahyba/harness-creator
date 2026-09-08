@@ -36,11 +36,12 @@ Verificação: pytest -q && ruff check . && mypy && bash .claude/check-arch.sh
 Verificação: pytest -q && ruff check . && mypy && bash .claude/check-arch.sh
 
 ## Grupo 3 - Curadoria: catraca lê o memlog + promoção (depende: G2)
-- [ ] 3.1 `executar-grupo`: a catraca (passo 6) passa a ler o memlog além do
+- [x] 3.1 `executar-grupo`: a catraca (passo 6) passa a ler o memlog além do
       diff; passo de promoção (durável → `knowledge/`; regra → `arch-rules`).
-- [ ] 3.2 O espectro de durabilidade (memlog → prosa → prova → arch-rule)
-      escrito no protocolo.
-- [ ] 3.3 Sensores.
+- [x] 3.2 O espectro de durabilidade (memlog → prosa/knowledge → arch-rule)
+      escrito no passo 6.
+- [x] 3.3 Sensores: a curadoria lê o memlog, promove aos dois destinos, e nomeia
+      a régua de durabilidade.
 Verificação: pytest -q && ruff check . && mypy && bash .claude/check-arch.sh
 
 ## Grupo 4 - Validação no PetClinic (depende: G3)

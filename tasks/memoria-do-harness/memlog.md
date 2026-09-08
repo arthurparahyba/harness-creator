@@ -19,3 +19,7 @@ updated: 2026-09-08T16:15
 - (decisao) fontes de investigacao numa secao do README, preenchida pelo time; dirige investigacoes futuras
 - (achado) sensor do passo 3 (Grupo 48) checa a quebra de linha exata do texto; meu reflow reprovou. Ajustei o texto, nao o sensor (nao remendar guard)
 - (nota) Grupo 2 DoD verde: pytest 942, ruff, mypy, check-arch 7 de 7
+- (grupo) Grupo 3: catraca virou curadoria
+- (decisao) a catraca le o memlog alem do diff e promove aos dois destinos (arch-rules e knowledge/) na regua de durabilidade
+- (decisao) o sensor existente da catraca so exige propor-regra-arch presente; o rewrite manteve, sem afrouxar guard
+- (nota) Grupo 3 DoD verde: pytest 945, ruff, mypy, check-arch 7 de 7
